@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sleep } from "lucide-react";
+import { Moon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { SleepMetrics } from "@/types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface SleepMetricsCardProps {
   metrics: SleepMetrics;
@@ -24,12 +25,19 @@ const SleepMetricsCard = ({ metrics }: SleepMetricsCardProps) => {
     if (metrics.score >= 60) return "text-orange-500";
     return "text-red-500";
   };
+
+  // Get progress color for the bar
+  const getProgressColor = () => {
+    if (metrics.score >= 80) return "bg-green-500";
+    if (metrics.score >= 60) return "bg-orange-500";
+    return "bg-red-500";
+  };
   
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center">
-          <Sleep size={18} className="mr-2" />
+          <Moon size={18} className="mr-2" />
           Sleep Score
         </CardTitle>
       </CardHeader>
@@ -38,7 +46,7 @@ const SleepMetricsCard = ({ metrics }: SleepMetricsCardProps) => {
           <Tooltip>
             <TooltipTrigger>
               <div className="flex items-center gap-2">
-                <span className={`text-2xl font-semibold ${getScoreColor()}`}>
+                <span className={cn("text-2xl font-semibold", getScoreColor())}>
                   {metrics.score}/100
                 </span>
               </div>
@@ -60,8 +68,7 @@ const SleepMetricsCard = ({ metrics }: SleepMetricsCardProps) => {
         
         <Progress 
           value={metrics.score} 
-          className="h-2" 
-          indicatorClassName={getScoreColor()}
+          className={cn("h-2", getProgressColor())}
         />
         
         <p className="text-sm text-gray-700">

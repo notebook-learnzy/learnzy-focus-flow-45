@@ -1,4 +1,4 @@
-import { Subject, Chapter, Task, Suggestion } from "../types";
+import { Subject, Chapter, Task, Suggestion, SedentaryMetrics, SleepMetrics } from "../types";
 
 export const subjects: Subject[] = [
   {

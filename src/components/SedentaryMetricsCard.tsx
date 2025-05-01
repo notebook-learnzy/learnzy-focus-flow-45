@@ -61,8 +61,7 @@ const SedentaryMetricsCard = ({ metrics }: SedentaryMetricsCardProps) => {
         
         <Progress 
           value={progressPercentage} 
-          className="h-2"
-          indicatorClassName={getProgressColor()}
+          className={cn("h-2", getProgressColor())}
         />
         
         <p className="text-sm text-gray-700">
