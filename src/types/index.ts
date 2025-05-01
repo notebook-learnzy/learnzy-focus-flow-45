@@ -34,3 +34,18 @@ export type Suggestion = {
   applied: boolean;
   date: string;
 };
+
+export type SedentaryMetrics = {
+  totalSittingTime: number; // in minutes
+  lastBreak: string; // ISO date string
+  breakSuggestion: string;
+};
+
+export type SleepMetrics = {
+  score: number; // out of 100
+  duration: number; // in minutes
+  remSleep: number; // in minutes
+  deepSleep: number; // in minutes
+  lightSleep: number; // in minutes
+  date: string; // ISO date string
+};

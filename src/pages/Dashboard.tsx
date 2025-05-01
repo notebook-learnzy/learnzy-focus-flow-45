@@ -2,12 +2,14 @@
 import { useAppContext } from "@/contexts/AppContext";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { subjects, chapters, tasks, suggestions, instituteAssignments, announcements } from "@/data/mockData";
+import { subjects, chapters, tasks, suggestions, instituteAssignments, announcements, sedentaryMetrics, sleepMetrics } from "@/data/mockData";
 import SubjectCard from "@/components/SubjectCard";
 import ChapterCard from "@/components/ChapterCard";
 import CalendarWidget from "@/components/CalendarWidget";
 import SuggestionBanner from "@/components/SuggestionBanner";
 import FocusScoreGauge from "@/components/FocusScoreGauge";
+import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
+import SleepMetricsCard from "@/components/SleepMetricsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, ChevronRight, Clock } from "lucide-react";
 
@@ -68,15 +70,11 @@ const Dashboard = () => {
         
         <div className="space-y-6">
           <CalendarWidget tasks={tasks} />
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Focus Status</CardTitle>
-              <CardDescription>Your current focus level</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <FocusScoreGauge />
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 gap-4">
+            <FocusScoreGauge />
+            <SleepMetricsCard metrics={sleepMetrics} />
+            <SedentaryMetricsCard metrics={sedentaryMetrics} />
+          </div>
         </div>
       </div>
     </div>
@@ -115,17 +113,11 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           <CalendarWidget tasks={tasks} />
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Focus Status</CardTitle>
-              <CardDescription>Your current focus level</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <FocusScoreGauge />
-            </CardContent>
-          </Card>
+          <FocusScoreGauge />
+          <SleepMetricsCard metrics={sleepMetrics} />
+          <SedentaryMetricsCard metrics={sedentaryMetrics} />
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import { Subject, Chapter, Task, Suggestion } from "../types";
 
 export const subjects: Subject[] = [
@@ -295,3 +294,20 @@ export const weeklyAccuracyData = [
   { day: "Sat", accuracy: 80, focus: 75 },
   { day: "Sun", accuracy: 75, focus: 70 },
 ];
+
+// Sedentary metrics data
+export const sedentaryMetrics: SedentaryMetrics = {
+  totalSittingTime: 225, // 3h 45m in minutes
+  lastBreak: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago
+  breakSuggestion: "Consider a 5-min stretch quiz break"
+};
+
+// Sleep metrics data
+export const sleepMetrics: SleepMetrics = {
+  score: 72,
+  duration: 435, // 7h 15m in minutes
+  remSleep: 60, // 1h in minutes
+  deepSleep: 120, // 2h in minutes
+  lightSleep: 255, // 4h 15m in minutes
+  date: new Date().toISOString().split('T')[0]
+};
