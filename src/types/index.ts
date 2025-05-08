@@ -49,3 +49,83 @@ export type SleepMetrics = {
   lightSleep: number; // in minutes
   date: string; // ISO date string
 };
+
+// New question schema
+export type DifficultyLevel = "Easy" | "Medium" | "Hard";
+export type QuestionType = "MCQ" | "Assertion-Reason" | "Fill-in-the-blank" | "Match";
+export type BloomTaxonomy = "Remember" | "Understand" | "Apply" | "Analyze" | "Evaluate" | "Create";
+export type CorrectAnswer = "A" | "B" | "C" | "D";
+
+export type Question = {
+  id: string;
+  question_text: string;
+  figure?: string; // URL/File path
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: CorrectAnswer;
+  subject: string;
+  chapter_name: string;
+  topic: string;
+  subtopic: string;
+  difficulty_level: DifficultyLevel;
+  question_type: QuestionType;
+  bloom_taxonomy: BloomTaxonomy;
+  priority_level: 1 | 2 | 3 | 4 | 5; // 1 = highest
+  time_to_solve: number; // seconds
+  key_concept_tested: string;
+  common_pitfalls?: string;
+  creation_timestamp: string; // ISO date string
+  last_updated_timestamp: string; // ISO date string
+};
+
+export type QuestionSet = {
+  id: string;
+  set_type: "A" | "B" | "C" | "D" | "E";
+  chapter_id: string;
+  questions: Question[];
+  scheduled_date?: string; // ISO date string
+  completed_date?: string; // ISO date string
+  focus_score?: number; // 0-100
+};
+
+export type FocusData = {
+  question_id: string;
+  focus_score: number;
+  time_spent: number; // seconds
+  is_correct: boolean;
+};
+
+export type SessionReport = {
+  id: string;
+  question_set_id: string;
+  date: string; // ISO date string
+  overall_focus_score: number;
+  focus_timeline: FocusData[];
+  meditation_completed: boolean;
+  meditation_skipped: boolean;
+  total_time: number; // seconds
+  correct_answers: number;
+  total_questions: number;
+};
+
+export type BloomSkillProfile = {
+  remember: number; // 0-100 proficiency
+  understand: number;
+  apply: number;
+  analyze: number;
+  evaluate: number;
+  create: number;
+};
+
+export type ActionCard = {
+  id: string;
+  title: string;
+  description: string;
+  action_type: "revision" | "practice" | "wellness";
+  target: string; // topic, chapter, or wellness activity
+  priority: number; // 1-5
+  completed: boolean;
+  created_at: string; // ISO date string
+};

@@ -1,4 +1,4 @@
-import { Subject, Chapter, Task, Suggestion, SedentaryMetrics, SleepMetrics } from "../types";
+import { Subject, Chapter, Task, Suggestion, SedentaryMetrics, SleepMetrics, Question, QuestionSet, BloomSkillProfile, ActionCard } from "../types";
 
 export const subjects: Subject[] = [
   {
@@ -311,3 +311,179 @@ export const sleepMetrics: SleepMetrics = {
   lightSleep: 255, // 4h 15m in minutes
   date: new Date().toISOString().split('T')[0]
 };
+
+// New mock data for weak topics
+export const weakTopicsData = [
+  { topic: "Kinematics", score: 45 },
+  { topic: "Chemical Bonding", score: 55 },
+  { topic: "Cell Division", score: 60 },
+  { topic: "Optics", score: 50 },
+  { topic: "Thermodynamics", score: 70 },
+];
+
+// Bloom's taxonomy skill profile
+export const bloomSkillsProfile: BloomSkillProfile = {
+  remember: 85,
+  understand: 75,
+  apply: 65,
+  analyze: 50,
+  evaluate: 40,
+  create: 30
+};
+
+// Action cards for recommendations
+export const actionCards: ActionCard[] = [
+  {
+    id: "action-1",
+    title: "Review Kinematics Concepts",
+    description: "Your accuracy in Kinematics questions is 45%. Practice 10 more questions.",
+    action_type: "revision",
+    target: "Kinematics",
+    priority: 1,
+    completed: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "action-2",
+    title: "Try a Guided Meditation",
+    description: "Your focus dips after 2 hours of study. A 3-minute meditation may help.",
+    action_type: "wellness",
+    target: "meditation",
+    priority: 3,
+    completed: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "action-3",
+    title: "Complete Thermodynamics Set B",
+    description: "Scheduled for spaced repetition. Due in 2 days.",
+    action_type: "practice",
+    target: "phys-thermodynamics",
+    priority: 2,
+    completed: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "action-4",
+    title: "Take a Study Break",
+    description: "You've been studying for 3+ hours. Schedule a 15-minute break.",
+    action_type: "wellness",
+    target: "break",
+    priority: 4,
+    completed: true,
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+  }
+];
+
+// Questions for the mechanics chapter
+const mechanicsQuestions: Question[] = [
+  {
+    id: "q-mech-1",
+    question_text: "What is the SI unit of force?",
+    option_a: "Newton",
+    option_b: "Joule",
+    option_c: "Watt",
+    option_d: "Pascal",
+    correct_answer: "A",
+    subject: "Physics",
+    chapter_name: "Mechanics",
+    topic: "Forces",
+    subtopic: "Units and Dimensions",
+    difficulty_level: "Easy",
+    question_type: "MCQ",
+    bloom_taxonomy: "Remember",
+    priority_level: 3,
+    time_to_solve: 30,
+    key_concept_tested: "Understanding of basic physical units",
+    common_pitfalls: "Confusing force units with energy or pressure units",
+    creation_timestamp: "2025-01-15T10:30:00Z",
+    last_updated_timestamp: "2025-01-15T10:30:00Z"
+  },
+  {
+    id: "q-mech-2",
+    question_text: "Which law of motion states that for every action, there is an equal and opposite reaction?",
+    option_a: "First law",
+    option_b: "Second law",
+    option_c: "Third law",
+    option_d: "Fourth law",
+    correct_answer: "C",
+    subject: "Physics",
+    chapter_name: "Mechanics",
+    topic: "Newton's Laws",
+    subtopic: "Third Law",
+    difficulty_level: "Easy",
+    question_type: "MCQ",
+    bloom_taxonomy: "Remember",
+    priority_level: 3,
+    time_to_solve: 25,
+    key_concept_tested: "Knowledge of Newton's laws of motion",
+    creation_timestamp: "2025-01-15T11:00:00Z",
+    last_updated_timestamp: "2025-01-15T11:00:00Z"
+  },
+  {
+    id: "q-mech-3",
+    question_text: "A 2kg object moving at 4 m/s collides with a stationary 6kg object. If the collision is perfectly inelastic, what is the velocity of the combined objects after collision?",
+    option_a: "0.5 m/s",
+    option_b: "1 m/s",
+    option_c: "1.5 m/s",
+    option_d: "2 m/s",
+    correct_answer: "B",
+    subject: "Physics",
+    chapter_name: "Mechanics",
+    topic: "Collisions",
+    subtopic: "Inelastic Collisions",
+    difficulty_level: "Medium",
+    question_type: "MCQ",
+    bloom_taxonomy: "Apply",
+    priority_level: 2,
+    time_to_solve: 60,
+    key_concept_tested: "Conservation of momentum in inelastic collisions",
+    common_pitfalls: "Not accounting for the combined mass after collision",
+    creation_timestamp: "2025-01-16T09:15:00Z",
+    last_updated_timestamp: "2025-01-16T09:15:00Z"
+  }
+];
+
+// Add more questions for other chapters
+const thermodynamicsQuestions: Question[] = [
+  {
+    id: "q-therm-1",
+    question_text: "Which law of thermodynamics states that energy cannot be created or destroyed?",
+    option_a: "Zeroth law",
+    option_b: "First law",
+    option_c: "Second law",
+    option_d: "Third law",
+    correct_answer: "B",
+    subject: "Physics",
+    chapter_name: "Thermodynamics",
+    topic: "Laws of Thermodynamics",
+    subtopic: "First Law",
+    difficulty_level: "Easy",
+    question_type: "MCQ",
+    bloom_taxonomy: "Remember",
+    priority_level: 3,
+    time_to_solve: 30,
+    key_concept_tested: "Understanding of the first law of thermodynamics",
+    creation_timestamp: "2025-01-20T10:00:00Z",
+    last_updated_timestamp: "2025-01-20T10:00:00Z"
+  },
+  // Add more thermodynamics questions
+];
+
+// Create question sets
+export const questionSets: QuestionSet[] = [
+  {
+    id: "set-mech-a",
+    set_type: "A",
+    chapter_id: "phys-mechanics",
+    questions: mechanicsQuestions,
+    scheduled_date: today.toISOString().split("T")[0]
+  },
+  {
+    id: "set-therm-a",
+    set_type: "A",
+    chapter_id: "phys-thermodynamics",
+    questions: thermodynamicsQuestions,
+    scheduled_date: tomorrow.toISOString().split("T")[0]
+  }
+];
