@@ -5,6 +5,7 @@ import { suggestions } from "@/data/mockData";
 import { Heart, Clock, Smile } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import FocusScoreGauge from "@/components/FocusScoreGauge";
+import WellnessRewards from "@/components/WellnessRewards";
 
 const Wellness = () => {
   const wellnessActivities = [
@@ -139,6 +140,8 @@ const Wellness = () => {
               <FocusScoreGauge size="lg" />
             </CardContent>
           </Card>
+          
+          <WellnessRewards />
           
           <Card>
             <CardHeader>

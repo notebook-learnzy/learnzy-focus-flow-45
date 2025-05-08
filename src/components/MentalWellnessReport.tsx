@@ -49,6 +49,32 @@ const MentalWellnessReport = ({ report, className }: MentalWellnessReportProps) 
   
   const recommendations = getWellnessRecommendations(report.overall_focus_score);
 
+  // Custom dot renderer for the line chart
+  const renderDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    return (
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={4} 
+        fill={payload.isCorrect ? "#4ade80" : "#f87171"} 
+      />
+    );
+  };
+
+  // Custom active dot renderer for the line chart
+  const renderActiveDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    return (
+      <circle 
+        cx={cx} 
+        cy={cy} 
+        r={8} 
+        fill={payload.isCorrect ? "#4ade80" : "#f87171"} 
+      />
+    );
+  };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -79,13 +105,8 @@ const MentalWellnessReport = ({ report, className }: MentalWellnessReportProps) 
                 type="monotone"
                 dataKey="focus"
                 stroke="#8884d8"
-                activeDot={{ 
-                  r: 8,
-                  fill: (data: any) => data.payload.isCorrect ? "#4ade80" : "#f87171"
-                }}
-                dot={{
-                  fill: (data: any) => data.payload.isCorrect ? "#4ade80" : "#f87171"
-                }}
+                dot={renderDot}
+                activeDot={renderActiveDot}
               />
             </LineChart>
           </ResponsiveContainer>

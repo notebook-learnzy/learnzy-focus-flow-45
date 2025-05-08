@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Bell, Eye, Lock, RefreshCw } from "lucide-react";
+import MoodAwareThemeToggle from "@/components/MoodAwareThemeToggle";
 
 const Settings = () => {
   return (
@@ -87,6 +88,46 @@ const Settings = () => {
                 </p>
               </div>
               <Switch id="focus-mode" />
+            </div>
+            
+            <MoodAwareThemeToggle className="pt-4 border-t border-gray-100 mt-4" />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Social Features</CardTitle>
+            <CardDescription>Manage how you interact with other students</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="show-progress">Share Progress</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow anonymous progress sharing with classmates
+                </p>
+              </div>
+              <Switch id="show-progress" defaultChecked />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="join-challenges">Challenges</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive notifications about group learning challenges
+                </p>
+              </div>
+              <Switch id="join-challenges" defaultChecked />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="study-buddy">Study Buddy Matching</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow the app to suggest compatible study partners
+                </p>
+              </div>
+              <Switch id="study-buddy" />
             </div>
           </CardContent>
         </Card>

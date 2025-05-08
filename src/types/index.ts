@@ -25,6 +25,7 @@ export type Task = {
   duration: number;
   completed: boolean;
   chapterId?: string;
+  interval_adjusted?: boolean;
 };
 
 export type Suggestion = {
@@ -88,6 +89,7 @@ export type QuestionSet = {
   scheduled_date?: string; // ISO date string
   completed_date?: string; // ISO date string
   focus_score?: number; // 0-100
+  interval_adjusted?: boolean; // If the interval was dynamically adjusted
 };
 
 export type FocusData = {
@@ -128,4 +130,64 @@ export type ActionCard = {
   priority: number; // 1-5
   completed: boolean;
   created_at: string; // ISO date string
+  impact_score?: number; // 0-100, for prioritization
+};
+
+// New types for social features and wellness streaks
+
+export type UserStreaks = {
+  meditation_days: number;
+  high_focus_days: number;
+  practice_days: number;
+  last_updated: string; // ISO date string
+};
+
+export type Badge = {
+  id: string;
+  name: string;
+  description: string;
+  earned: boolean;
+  earned_date?: string; // ISO date string
+  progress?: number; // percentage towards earning
+  badge_type: "focus" | "meditation" | "accuracy" | "streak" | "completion";
+};
+
+export type Challenge = {
+  id: string;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  chapter_id?: string;
+  participants: number;
+  progress: number; // 0-100
+  joined: boolean;
+};
+
+export type StudyBuddy = {
+  id: string;
+  name: string;
+  avatar?: string;
+  focus_score: number;
+  average_accuracy: number;
+  current_chapter: string;
+  compatibility_score: number; // 0-100
+};
+
+export type MoodState = "calm" | "focused" | "stressed" | "tired" | "energetic";
+
+export type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  current_mood?: MoodState;
+  streak_count: {
+    meditation: number;
+    focus_threshold: number;
+    daily_practice: number;
+  };
+  badges_earned: Badge[];
+  theme_preference: "auto" | "soothing" | "focus" | "energizing";
+  enable_mood_aware_theming: boolean;
 };

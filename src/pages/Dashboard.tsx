@@ -12,6 +12,7 @@ import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
 import SleepMetricsCard from "@/components/SleepMetricsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, ChevronRight, Clock } from "lucide-react";
+import SocialLearning from "@/components/SocialLearning";
 
 const Dashboard = () => {
   const { mode } = useAppContext();
@@ -111,6 +112,8 @@ const Dashboard = () => {
                 ))}
             </div>
           </div>
+          
+          <SocialLearning />
         </div>
         
         <div className="space-y-4">
