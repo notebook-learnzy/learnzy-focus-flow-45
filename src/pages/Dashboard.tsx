@@ -11,12 +11,26 @@ import FocusScoreGauge from "@/components/FocusScoreGauge";
 import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
 import SleepMetricsCard from "@/components/SleepMetricsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, ChevronRight, Clock } from "lucide-react";
+import { AlertCircle, ChevronRight, Clock, GraduationCap } from "lucide-react";
 import SocialLearning from "@/components/SocialLearning";
+import ShivAssistant from "@/components/ShivAssistant";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { mode } = useAppContext();
   const [activeSuggestion] = useState(suggestions[0]);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleOpenAssistant = () => {
+    setAssistantOpen(true);
+  };
+
+  const handleAssistantFullPage = () => {
+    setAssistantOpen(false);
+    navigate('/assistant');
+  };
   
   const renderInstituteMode = () => (
     <div className="space-y-6 animate-fade-in">
@@ -70,6 +84,22 @@ const Dashboard = () => {
         </div>
         
         <div className="space-y-6">
+          <Card className="bg-gradient-to-br from-learnzy-purple/10 to-learnzy-purple/5 border-learnzy-purple/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-learnzy-purple" />
+                Shiv Assistant
+              </CardTitle>
+              <CardDescription>Your personalized NEET guide</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm mb-4">Ask Shiv about your progress, revision tips, or study plans tailored for NEET preparation.</p>
+              <Button onClick={handleOpenAssistant} className="w-full">
+                Chat with Shiv
+              </Button>
+            </CardContent>
+          </Card>
+          
           <CalendarWidget tasks={tasks} />
           <div className="grid grid-cols-1 gap-4">
             <FocusScoreGauge />
@@ -117,12 +147,40 @@ const Dashboard = () => {
         </div>
         
         <div className="space-y-4">
+          <Card className="bg-gradient-to-br from-learnzy-purple/10 to-learnzy-purple/5 border-learnzy-purple/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-learnzy-purple" />
+                Shiv Assistant
+              </CardTitle>
+              <CardDescription>Your personalized NEET guide</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm mb-4">Ask Shiv about your progress, revision tips, or study plans tailored for NEET preparation.</p>
+              <Button onClick={handleOpenAssistant} className="w-full">
+                Chat with Shiv
+              </Button>
+            </CardContent>
+          </Card>
+          
           <CalendarWidget tasks={tasks} />
           <FocusScoreGauge />
           <SleepMetricsCard metrics={sleepMetrics} />
           <SedentaryMetricsCard metrics={sedentaryMetrics} />
         </div>
       </div>
+      
+      {/* Assistant Dialog */}
+      <Dialog open={assistantOpen} onOpenChange={setAssistantOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh]">
+          <ShivAssistant onClose={() => setAssistantOpen(false)} />
+          <div className="mt-2 text-center">
+            <Button variant="link" onClick={handleAssistantFullPage}>
+              Open in full page
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
   

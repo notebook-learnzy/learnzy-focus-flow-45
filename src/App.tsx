@@ -12,6 +12,7 @@ import Practice from "./pages/Practice";
 import Wellness from "./pages/Wellness";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import Assistant from "./pages/Assistant";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/wellness" element={<Wellness />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/assistant" element={<Assistant />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
