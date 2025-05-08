@@ -30,7 +30,7 @@ export const scheduleSpacedRevision = (
     const adjustmentPercent = intervalAdjustments[setType] || 0;
     const adjustedInterval = interval * (1 + adjustmentPercent/100);
     return { 
-      set_type: setType, 
+      set_type: setType as "B" | "C" | "D" | "E", 
       interval: Math.round(adjustedInterval * performanceMultiplier) 
     };
   });

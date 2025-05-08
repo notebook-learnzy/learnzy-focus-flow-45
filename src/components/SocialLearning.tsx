@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PeopleIcon, TrophyIcon, UserIcon } from 'lucide-react';
+import { Users, Trophy, User } from 'lucide-react';
 
 interface SocialLearningProps {
   className?: string;
@@ -33,7 +33,7 @@ const SocialLearning = ({ className }: SocialLearningProps) => {
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <PeopleIcon className="h-5 w-5" />
+          <Users className="h-5 w-5" />
           Social Learning
         </CardTitle>
         <CardDescription>Connect with peers and participate in challenges</CardDescription>
@@ -104,7 +104,7 @@ const SocialLearning = ({ className }: SocialLearningProps) => {
                   
                   <div className="mt-4">
                     <Button variant="outline" size="sm" className="w-full">
-                      <UserIcon className="h-4 w-4 mr-2" />
+                      <User className="h-4 w-4 mr-2" />
                       Find Study Buddy
                     </Button>
                   </div>
@@ -126,7 +126,7 @@ const SocialLearning = ({ className }: SocialLearningProps) => {
                       <div className="flex justify-between items-start">
                         <div>
                           <h4 className="font-medium flex items-center">
-                            <TrophyIcon className="h-4 w-4 text-yellow-500 mr-1" />
+                            <Trophy className="h-4 w-4 text-yellow-500 mr-1" />
                             {challenge.name}
                           </h4>
                           <p className="text-xs text-gray-500">
@@ -149,7 +149,7 @@ const SocialLearning = ({ className }: SocialLearningProps) => {
                   ))}
                   
                   <Button variant="outline" size="sm" className="w-full mt-2">
-                    <TrophyIcon className="h-4 w-4 mr-2" />
+                    <Trophy className="h-4 w-4 mr-2" />
                     Create Challenge
                   </Button>
                 </div>
