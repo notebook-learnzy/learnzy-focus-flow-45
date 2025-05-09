@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { subjects } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,8 @@ const Subject = () => {
     );
   }
   
-  // Check if the subject is Biology to show class selection
-  const isBiology = subject.name.toLowerCase() === "biology";
+  // Check if the subject is Biology or Botany to show class selection
+  const showClassSelection = subject.name.toLowerCase() === "biology" || subject.name.toLowerCase() === "botany";
   
   return (
     <div className="container mx-auto max-w-7xl">
@@ -41,7 +42,7 @@ const Subject = () => {
         </div>
       </div>
       
-      {isBiology ? (
+      {showClassSelection ? (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Select Class</CardTitle>

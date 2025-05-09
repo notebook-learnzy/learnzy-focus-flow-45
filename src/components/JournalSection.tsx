@@ -1,164 +1,169 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-import { format, subDays } from "date-fns";
 
-// Mock journal entries
-const mockEntries = [
-  { 
-    id: "j1", 
-    date: subDays(new Date(), 1), 
-    content: "Feeling optimistic about my NEET preparation. Biology is starting to make more sense now.",
-    moodTag: "positive" 
+type MoodTag = "happy" | "neutral" | "sad" | "anxious" | "focused" | "tired";
+
+interface JournalEntry {
+  id: string;
+  date: Date;
+  content: string;
+  moodTag: MoodTag;
+}
+
+// Mock data for journal entries
+const mockEntries: JournalEntry[] = [
+  {
+    id: "1",
+    date: new Date(Date.now() - 86400000 * 1), // 1 day ago
+    content: "Studied for biology test. Feeling prepared but a bit nervous about the photosynthesis questions.",
+    moodTag: "anxious"
   },
-  { 
-    id: "j2", 
-    date: subDays(new Date(), 3), 
-    content: "Studied for 6 hours today. Feeling tired but accomplished. Cellular respiration is still challenging.",
-    moodTag: "neutral" 
+  {
+    id: "2",
+    date: new Date(Date.now() - 86400000 * 2), // 2 days ago
+    content: "Great study session today. Really understood the cell division concepts better after watching that video explanation.",
+    moodTag: "happy"
   },
-  { 
-    id: "j3", 
-    date: subDays(new Date(), 5), 
-    content: "Struggling with plant morphology. Need to find better study resources.",
-    moodTag: "negative" 
+  {
+    id: "3",
+    date: new Date(Date.now() - 86400000 * 4), // 4 days ago
+    content: "Feeling overwhelmed with the amount of material to review. Need to create a better study plan.",
+    moodTag: "sad"
   }
 ];
 
 const JournalSection = () => {
   const [journalText, setJournalText] = useState("");
-  const [mood, setMood] = useState<"positive" | "neutral" | "negative">("neutral");
-  const [entries, setEntries] = useState(mockEntries);
+  const [selectedMood, setSelectedMood] = useState<MoodTag>("neutral");
+  const [entries, setEntries] = useState<JournalEntry[]>(mockEntries);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const moodOptions: {tag: MoodTag, label: string, color: string}[] = [
+    { tag: "happy", label: "Happy", color: "bg-green-100 text-green-800 border-green-200" },
+    { tag: "neutral", label: "Neutral", color: "bg-blue-100 text-blue-800 border-blue-200" },
+    { tag: "sad", label: "Sad", color: "bg-indigo-100 text-indigo-800 border-indigo-200" },
+    { tag: "anxious", label: "Anxious", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+    { tag: "focused", label: "Focused", color: "bg-purple-100 text-purple-800 border-purple-200" },
+    { tag: "tired", label: "Tired", color: "bg-gray-100 text-gray-800 border-gray-200" }
+  ];
+
+  const getMoodColor = (mood: MoodTag) => {
+    return moodOptions.find(m => m.tag === mood)?.color || "";
+  };
+
+  const handleSubmit = () => {
     if (!journalText.trim()) {
       toast({
-        title: "Journal entry cannot be empty",
+        title: "Empty Entry",
+        description: "Please write something in your journal entry.",
         variant: "destructive"
       });
       return;
     }
-    
-    // Add new entry
-    const newEntry = {
-      id: `j${Date.now()}`,
+
+    // Create new entry
+    const newEntry: JournalEntry = {
+      id: Date.now().toString(),
       date: new Date(),
       content: journalText,
-      moodTag: mood
+      moodTag: selectedMood
     };
-    
-    // In a real app, we would save to Supabase here
-    // saveJournalEntry(newEntry);
-    
+
+    // In a real application, this would be sent to Supabase
+    // await supabase.from('user_journal').insert([{
+    //   user_id: userId,
+    //   entry_date: newEntry.date,
+    //   mood_tag: newEntry.moodTag,
+    //   content: newEntry.content
+    // }]);
+
+    // Add to local state
     setEntries([newEntry, ...entries]);
+    
+    // Reset form
     setJournalText("");
+    setSelectedMood("neutral");
     
     toast({
-      title: "Journal entry saved",
-      description: "Your thoughts have been recorded."
+      title: "Journal Entry Saved",
+      description: "Your journal entry has been saved successfully."
     });
   };
-  
-  const getMoodEmoji = (moodTag: string) => {
-    switch (moodTag) {
-      case "positive": return "😊";
-      case "negative": return "😔";
-      default: return "😐";
-    }
-  };
-  
-  const getMoodColor = (moodTag: string) => {
-    switch (moodTag) {
-      case "positive": return "bg-green-100 text-green-800";
-      case "negative": return "bg-red-100 text-red-800";
-      default: return "bg-blue-100 text-blue-800";
-    }
-  };
-  
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Journaling</CardTitle>
-        <CardDescription>
-          Record your thoughts and feelings about your study journey
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="journal" className="block text-sm font-medium mb-2">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Daily Journal</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               How are you feeling today?
             </label>
-            <Textarea
-              id="journal"
-              placeholder="Write your thoughts here..."
-              value={journalText}
-              onChange={(e) => setJournalText(e.target.value)}
-              className="min-h-[120px]"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <p className="block text-sm font-medium mb-2">Select your mood:</p>
-            <div className="flex space-x-2">
-              <Button 
-                type="button"
-                variant={mood === "positive" ? "default" : "outline"} 
-                onClick={() => setMood("positive")}
-                className="flex-1"
-              >
-                😊 Positive
-              </Button>
-              <Button 
-                type="button"
-                variant={mood === "neutral" ? "default" : "outline"} 
-                onClick={() => setMood("neutral")}
-                className="flex-1"
-              >
-                😐 Neutral
-              </Button>
-              <Button 
-                type="button"
-                variant={mood === "negative" ? "default" : "outline"} 
-                onClick={() => setMood("negative")}
-                className="flex-1"
-              >
-                😔 Negative
-              </Button>
+            <div className="flex flex-wrap gap-2">
+              {moodOptions.map((mood) => (
+                <Button
+                  key={mood.tag}
+                  type="button"
+                  variant="outline"
+                  className={`border ${selectedMood === mood.tag ? mood.color + " border-2" : ""}`}
+                  onClick={() => setSelectedMood(mood.tag)}
+                >
+                  {mood.label}
+                </Button>
+              ))}
             </div>
           </div>
           
-          <Button type="submit" className="w-full">Save Entry</Button>
-        </form>
-        
-        <div className="mt-8">
-          <h4 className="text-lg font-medium mb-4">Recent entries</h4>
-          <div className="space-y-4">
-            {entries.map((entry) => (
-              <div 
-                key={entry.id} 
-                className="p-4 border rounded-lg"
-              >
-                <div className="flex justify-between items-start">
-                  <div className={`px-2 py-1 rounded text-xs ${getMoodColor(entry.moodTag)}`}>
-                    {getMoodEmoji(entry.moodTag)} {entry.moodTag.charAt(0).toUpperCase() + entry.moodTag.slice(1)}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {format(new Date(entry.date), "MMM d, yyyy")}
-                  </div>
-                </div>
-                <p className="mt-3 text-sm">{entry.content}</p>
-              </div>
-            ))}
+          <div>
+            <Textarea
+              placeholder="Write about your thoughts, feelings, or study experiences..."
+              className="min-h-32 resize-none"
+              value={journalText}
+              onChange={(e) => setJournalText(e.target.value)}
+            />
           </div>
-        </div>
-      </CardContent>
-    </Card>
+          
+          <div className="flex justify-end">
+            <Button onClick={handleSubmit}>
+              Save Entry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Past Entries</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {entries.length > 0 ? (
+              entries.map((entry) => (
+                <div key={entry.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-500">
+                      {format(entry.date, "MMM d, yyyy")}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${getMoodColor(entry.moodTag)}`}>
+                      {moodOptions.find(m => m.tag === entry.moodTag)?.label}
+                    </span>
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap">{entry.content}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center py-4">No journal entries yet</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
