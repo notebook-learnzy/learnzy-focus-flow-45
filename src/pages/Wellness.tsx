@@ -4,6 +4,7 @@ import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
 import SleepMetricsCard from "@/components/SleepMetricsCard";
 import WellnessRewards from "@/components/WellnessRewards";
 import JournalSection from "@/components/JournalSection";
+import { sedentaryMetrics, sleepMetrics } from "@/data/mockData";
 
 const Wellness = () => {
   return (
@@ -19,8 +20,8 @@ const Wellness = () => {
         
         <TabsContent value="metrics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SedentaryMetricsCard />
-            <SleepMetricsCard />
+            <SedentaryMetricsCard metrics={sedentaryMetrics} />
+            <SleepMetricsCard metrics={sleepMetrics} />
           </div>
         </TabsContent>
         
