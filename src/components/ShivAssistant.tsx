@@ -5,11 +5,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, BookOpen, GraduationCap, Brain, Clock, ArrowRight, Calendar } from "lucide-react";
+import { User, BookOpen, GraduationCap, Brain, Clock, ArrowRight, Calendar, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { chapters, subjects } from "@/data/mockData";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 interface Message {
   id: string;
@@ -63,6 +65,9 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
   const [isThinking, setIsThinking] = useState(false);
   const [capabilityOpen, setCapabilityOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [openAIKey, setOpenAIKey] = useState<string>(localStorage.getItem('openai_key') || '');
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState<boolean>(false);
+  const [isUsingAI, setIsUsingAI] = useState<boolean>(!!localStorage.getItem('openai_key'));
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -74,6 +79,60 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 800));
     setIsThinking(false);
     return content;
+  };
+
+  const saveApiKey = () => {
+    if (openAIKey.trim()) {
+      localStorage.setItem('openai_key', openAIKey);
+      setIsUsingAI(true);
+      setShowApiKeyDialog(false);
+      toast({
+        title: "API Key Saved",
+        description: "Your OpenAI API key has been saved. Shiv can now use AI capabilities.",
+      });
+    } else {
+      toast({
+        title: "API Key Required",
+        description: "Please enter a valid OpenAI API key.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchOpenAIResponse = async (userMessage: string): Promise<string> => {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openAIKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are Shiv, an AI assistant for NEET (National Eligibility cum Entrance Test) exam preparation. Your goal is to help students prepare for the NEET exam by providing personalized assistance. Be concise, accurate, and focused on NEET-specific knowledge. Respond in a supportive, encouraging tone. Always provide evidence-based information aligned with NCERT syllabus. When asked about topics not in the NEET syllabus, gently guide the conversation back to relevant subjects: Physics, Chemistry, and Biology for NEET."
+            },
+            {
+              role: "user",
+              content: userMessage
+            }
+          ],
+          max_tokens: 800
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error("Error fetching from OpenAI:", error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,75 +152,91 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
     setIsLoading(true);
 
     try {
-      // In a real application, we would make an API call to an AI service
-      // For now, we'll use a mock response based on the input
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
       let responseContent = '';
       let responseType: 'text' | 'progress-report' | 'schedule' | 'study-tips' = 'text';
       let metadata = {};
-      
-      // Basic pattern matching to generate responses
-      const inputLower = input.toLowerCase();
-      
-      if (inputLower.includes('progress') || inputLower.includes('how am i doing')) {
-        responseType = 'progress-report';
-        responseContent = await simulateTyping("Here's your current progress across subjects:");
+
+      if (isUsingAI) {
+        // Use OpenAI for response
+        try {
+          responseContent = await fetchOpenAIResponse(input);
+        } catch (error) {
+          console.error("OpenAI API error:", error);
+          setIsUsingAI(false);
+          localStorage.removeItem('openai_key');
+          toast({
+            title: "API Error",
+            description: "There was an error with the OpenAI API. Please check your API key.",
+            variant: "destructive",
+          });
+          
+          // Fallback to mock response
+          responseContent = "I'm sorry, there was an error with the AI service. I've switched to offline mode. You can update your API key in settings to use AI features again.";
+        }
+      } else {
+        // Use mock responses if not using AI
+        // Basic pattern matching to generate responses
+        const inputLower = input.toLowerCase();
         
-        metadata = {
-          subjects: [
-            { name: "Physics", progress: 68, recommendation: "Focus on Mechanics and Thermodynamics" },
-            { name: "Chemistry", progress: 82, recommendation: "Review Organic Reactions" },
-            { name: "Biology", progress: 75, recommendation: "Strengthen Cell Biology concepts" }
-          ],
-          overallProgress: 75,
-          weakTopics: ["Thermodynamics", "Cell Division", "Organic Chemistry"],
-          improvement: "+12% in the last month",
-        };
-      } 
-      else if (inputLower.includes('study plan') || inputLower.includes('schedule')) {
-        responseType = 'schedule';
-        responseContent = await simulateTyping("I've analyzed your performance and created a personalized study schedule:");
-        
-        metadata = {
-          schedule: [
-            { day: "Monday", morning: "Physics - Mechanics", afternoon: "Biology - Cell Biology", evening: "Chemistry - Organic" },
-            { day: "Tuesday", morning: "Physics - Waves", afternoon: "Biology - Genetics", evening: "Chemistry - Physical" },
-            { day: "Wednesday", morning: "NEET Mock Test", afternoon: "Review Test Results", evening: "Weak Topics Revision" },
-            { day: "Thursday", morning: "Physics - Electrostatics", afternoon: "Biology - Human Physiology", evening: "Chemistry - Inorganic" },
-            { day: "Friday", morning: "Physics - Optics", afternoon: "Biology - Plant Physiology", evening: "Chemistry - Analytical" },
-            { day: "Weekend", morning: "Revision of weak topics", afternoon: "Practice tests", evening: "Relaxation & rest" },
-          ],
-          studyPattern: {
-            studyTime: "6 hours/day",
-            breakSchedule: "50 min study + 10 min break",
-            recommendedTimeOfDay: "Early morning and late afternoon"
-          }
-        };
-      }
-      else if (inputLower.includes('tips') || inputLower.includes('advice')) {
-        responseType = 'study-tips';
-        responseContent = await simulateTyping("Here are some personalized study tips based on your learning patterns:");
-        
-        metadata = {
-          tips: [
-            { tip: "Use the Feynman Technique", description: "Explain concepts as if teaching someone else to deepen your understanding." },
-            { tip: "Optimize your study space", description: "Your focus score is highest in quiet environments with minimal distractions." },
-            { tip: "Try time-blocking", description: "Schedule specific subjects at times when your focus is historically highest." },
-            { tip: "Take meditation breaks", description: "Your performance improves by 15% after meditation sessions." },
-          ],
-          focusPattern: "Your focus peaks between 9-11 AM and 4-6 PM",
-          retentionTip: "Review notes within 24 hours to increase retention by 60%"
-        };
-      }
-      else if (inputLower.includes('biology') || inputLower.includes('chapter')) {
-        responseContent = await simulateTyping("The Living World is a fundamental chapter in NEET Biology. Based on previous years, there are typically 2-3 questions from this chapter. Focus on characteristics of living organisms, taxonomical aids, and classification systems. Your practice sessions show you understand the concepts well, but need more work on distinguishing between taxonomical categories.");
-      }
-      else if (inputLower.includes('neet') || inputLower.includes('exam')) {
-        responseContent = await simulateTyping("NEET 2025 is scheduled for May. Based on your current progress, you're on track with Biology (75%) and Chemistry (82%), but need to focus more on Physics (68%). I recommend allocating an extra hour daily to Physics while maintaining your current study pattern for other subjects. Your concept retention has improved by 15% in the last month, which is excellent!");
-      }
-      else {
-        responseContent = await simulateTyping("I'm here to help with your NEET preparation journey. I can provide guidance on study plans, analyze your progress, help with revisions, or explain specific topics. What aspect of your preparation would you like assistance with today?");
+        if (inputLower.includes('progress') || inputLower.includes('how am i doing')) {
+          responseType = 'progress-report';
+          responseContent = await simulateTyping("Here's your current progress across subjects:");
+          
+          metadata = {
+            subjects: [
+              { name: "Physics", progress: 68, recommendation: "Focus on Mechanics and Thermodynamics" },
+              { name: "Chemistry", progress: 82, recommendation: "Review Organic Reactions" },
+              { name: "Biology", progress: 75, recommendation: "Strengthen Cell Biology concepts" }
+            ],
+            overallProgress: 75,
+            weakTopics: ["Thermodynamics", "Cell Division", "Organic Chemistry"],
+            improvement: "+12% in the last month",
+          };
+        } 
+        else if (inputLower.includes('study plan') || inputLower.includes('schedule')) {
+          responseType = 'schedule';
+          responseContent = await simulateTyping("I've analyzed your performance and created a personalized study schedule:");
+          
+          metadata = {
+            schedule: [
+              { day: "Monday", morning: "Physics - Mechanics", afternoon: "Biology - Cell Biology", evening: "Chemistry - Organic" },
+              { day: "Tuesday", morning: "Physics - Waves", afternoon: "Biology - Genetics", evening: "Chemistry - Physical" },
+              { day: "Wednesday", morning: "NEET Mock Test", afternoon: "Review Test Results", evening: "Weak Topics Revision" },
+              { day: "Thursday", morning: "Physics - Electrostatics", afternoon: "Biology - Human Physiology", evening: "Chemistry - Inorganic" },
+              { day: "Friday", morning: "Physics - Optics", afternoon: "Biology - Plant Physiology", evening: "Chemistry - Analytical" },
+              { day: "Weekend", morning: "Revision of weak topics", afternoon: "Practice tests", evening: "Relaxation & rest" },
+            ],
+            studyPattern: {
+              studyTime: "6 hours/day",
+              breakSchedule: "50 min study + 10 min break",
+              recommendedTimeOfDay: "Early morning and late afternoon"
+            }
+          };
+        }
+        else if (inputLower.includes('tips') || inputLower.includes('advice')) {
+          responseType = 'study-tips';
+          responseContent = await simulateTyping("Here are some personalized study tips based on your learning patterns:");
+          
+          metadata = {
+            tips: [
+              { tip: "Use the Feynman Technique", description: "Explain concepts as if teaching someone else to deepen your understanding." },
+              { tip: "Optimize your study space", description: "Your focus score is highest in quiet environments with minimal distractions." },
+              { tip: "Try time-blocking", description: "Schedule specific subjects at times when your focus is historically highest." },
+              { tip: "Take meditation breaks", description: "Your performance improves by 15% after meditation sessions." },
+            ],
+            focusPattern: "Your focus peaks between 9-11 AM and 4-6 PM",
+            retentionTip: "Review notes within 24 hours to increase retention by 60%"
+          };
+        }
+        else if (inputLower.includes('biology') || inputLower.includes('chapter')) {
+          responseContent = await simulateTyping("The Living World is a fundamental chapter in NEET Biology. Based on previous years, there are typically 2-3 questions from this chapter. Focus on characteristics of living organisms, taxonomical aids, and classification systems. Your practice sessions show you understand the concepts well, but need more work on distinguishing between taxonomical categories.");
+        }
+        else if (inputLower.includes('neet') || inputLower.includes('exam')) {
+          responseContent = await simulateTyping("NEET 2025 is scheduled for May. Based on your current progress, you're on track with Biology (75%) and Chemistry (82%), but need to focus more on Physics (68%). I recommend allocating an extra hour daily to Physics while maintaining your current study pattern for other subjects. Your concept retention has improved by 15% in the last month, which is excellent!");
+        }
+        else {
+          responseContent = await simulateTyping("I'm here to help with your NEET preparation journey. I can provide guidance on study plans, analyze your progress, help with revisions, or explain specific topics. What aspect of your preparation would you like assistance with today?");
+        }
       }
       
       // Add assistant response
@@ -289,119 +364,170 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
   };
 
   return (
-    <Card className={`flex flex-col h-[500px] ${className}`}>
-      <CardHeader className="py-3">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Avatar className="h-8 w-8 mr-2">
-              <AvatarImage src="/shiv-avatar.png" alt="Shiv" />
-              <AvatarFallback className="bg-learnzy-purple text-white">
-                <GraduationCap className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
-            <span>Shiv - NEET Assistant</span>
-          </div>
-          {onClose && (
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              ×
-            </Button>
-          )}
-        </CardTitle>
-      </CardHeader>
-      
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.sender === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
+    <>
+      <Card className={`flex flex-col h-[500px] ${className}`}>
+        <CardHeader className="py-3">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Avatar className="h-8 w-8 mr-2">
+                <AvatarImage src="/shiv-avatar.png" alt="Shiv" />
+                <AvatarFallback className="bg-learnzy-purple text-white">
+                  <GraduationCap className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <span>Shiv - NEET Assistant</span>
+            </div>
+            <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowApiKeyDialog(true)}
+                className="mr-2"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+              {onClose && (
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                  ×
+                </Button>
+              )}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        
+        <ScrollArea className="flex-1 px-4">
+          <div className="space-y-4">
+            {messages.map((message) => (
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.sender === 'user'
-                    ? 'bg-learnzy-purple text-white'
-                    : 'bg-gray-100 text-gray-900'
+                key={message.id}
+                className={`flex ${
+                  message.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {renderMessageContent(message)}
-                <p className="text-xs mt-1 opacity-70">
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
-          {isThinking && (
-            <div className="flex justify-start">
-              <div className="bg-gray-100 text-gray-900 max-w-[80%] rounded-lg p-3">
-                <div className="flex space-x-1 items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-300"></div>
+                <div
+                  className={`max-w-[80%] rounded-lg p-3 ${
+                    message.sender === 'user'
+                      ? 'bg-learnzy-purple text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  {renderMessageContent(message)}
+                  <p className="text-xs mt-1 opacity-70">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               </div>
+            ))}
+            {isThinking && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-900 max-w-[80%] rounded-lg p-3">
+                  <div className="flex space-x-1 items-center">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-300"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+        
+        <CardFooter className="p-4 border-t">
+          <form onSubmit={handleSubmit} className="flex w-full gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask Shiv about your NEET preparation..."
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Popover open={capabilityOpen} onOpenChange={setCapabilityOpen}>
+              <PopoverTrigger asChild>
+                <Button size="icon" variant="ghost" className="flex-shrink-0">
+                  <BookOpen size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent side="top" className="w-80 p-0" align="end">
+                <div className="p-4 border-b">
+                  <h4 className="font-medium">Assistant Capabilities</h4>
+                  <p className="text-sm text-gray-500">Try asking about these topics</p>
+                </div>
+                <div className="p-2">
+                  {capabilities.map((capability, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      className="w-full justify-start h-auto py-2 px-3"
+                      onClick={() => {
+                        setInput(`Tell me about my ${capability.name.toLowerCase()}`);
+                        setCapabilityOpen(false);
+                      }}
+                    >
+                      <div className="flex items-start">
+                        <div className="bg-learnzy-purple/10 p-1 rounded mr-2">
+                          <capability.icon className="h-4 w-4 text-learnzy-purple" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{capability.name}</p>
+                          <p className="text-xs text-gray-500">{capability.description}</p>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="flex-shrink-0"
+            >
+              {isLoading ? "..." : <ArrowRight size={16} />}
+            </Button>
+          </form>
+        </CardFooter>
+      </Card>
+
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>OpenAI API Settings</DialogTitle>
+            <DialogDescription>
+              Enter your OpenAI API key to enable AI capabilities for Shiv. 
+              Your key is stored locally on your device and is not sent to our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="apiKey">OpenAI API Key</Label>
+              <Input
+                id="apiKey"
+                placeholder="sk-..."
+                type="password"
+                value={openAIKey}
+                onChange={(e) => setOpenAIKey(e.target.value)}
+              />
+              <p className="text-xs text-gray-500">
+                Get your API key from the <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">OpenAI dashboard</a>
+              </p>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
-      
-      <CardFooter className="p-4 border-t">
-        <form onSubmit={handleSubmit} className="flex w-full gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Shiv about your NEET preparation..."
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Popover open={capabilityOpen} onOpenChange={setCapabilityOpen}>
-            <PopoverTrigger asChild>
-              <Button size="icon" variant="ghost" className="flex-shrink-0">
-                <BookOpen size={16} />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent side="top" className="w-80 p-0" align="end">
-              <div className="p-4 border-b">
-                <h4 className="font-medium">Assistant Capabilities</h4>
-                <p className="text-sm text-gray-500">Try asking about these topics</p>
-              </div>
-              <div className="p-2">
-                {capabilities.map((capability, index) => (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    className="w-full justify-start h-auto py-2 px-3"
-                    onClick={() => {
-                      setInput(`Tell me about my ${capability.name.toLowerCase()}`);
-                      setCapabilityOpen(false);
-                    }}
-                  >
-                    <div className="flex items-start">
-                      <div className="bg-learnzy-purple/10 p-1 rounded mr-2">
-                        <capability.icon className="h-4 w-4 text-learnzy-purple" />
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-sm">{capability.name}</p>
-                        <p className="text-xs text-gray-500">{capability.description}</p>
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-          <Button 
-            type="submit" 
-            disabled={isLoading}
-            className="flex-shrink-0"
-          >
-            {isLoading ? "..." : <ArrowRight size={16} />}
-          </Button>
-        </form>
-      </CardFooter>
-    </Card>
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${isUsingAI ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+              <span className="text-sm">
+                {isUsingAI ? 'AI features are enabled' : 'AI features are disabled'}
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowApiKeyDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveApiKey}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

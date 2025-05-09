@@ -3,9 +3,19 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ShivAssistant from "@/components/ShivAssistant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Star, HelpCircle } from "lucide-react";
+import { BookOpen, Star, HelpCircle, Shield } from "lucide-react";
+import { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const Assistant = () => {
+  const [hasApiKey, setHasApiKey] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if OpenAI API key is stored
+    const apiKey = localStorage.getItem('openai_key');
+    setHasApiKey(!!apiKey);
+  }, []);
+
   return (
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-2xl font-bold mb-6">Shiv Assistant</h1>
@@ -18,10 +28,17 @@ const Assistant = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-500" />
-                Assistant Capabilities
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  Assistant Capabilities
+                </CardTitle>
+                {hasApiKey ? (
+                  <Badge className="bg-green-500">AI Powered</Badge>
+                ) : (
+                  <Badge variant="outline" className="border-amber-500 text-amber-500">OpenAI Key Required</Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -49,7 +66,23 @@ const Assistant = () => {
                   </div>
                   <span>NCERT textbook summaries and key concepts</span>
                 </li>
+                {hasApiKey && (
+                  <li className="flex items-start gap-2 mt-3 pt-3 border-t">
+                    <div className="bg-green-100 p-1 rounded-full mt-0.5">
+                      <Shield className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span className="text-green-700">AI-powered responses with OpenAI integration</span>
+                  </li>
+                )}
               </ul>
+              
+              {!hasApiKey && (
+                <div className="mt-4 pt-3 border-t border-dashed">
+                  <p className="text-sm text-amber-700">
+                    To unlock AI-powered capabilities, click the settings icon in Shiv Assistant and add your OpenAI API key.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
           
