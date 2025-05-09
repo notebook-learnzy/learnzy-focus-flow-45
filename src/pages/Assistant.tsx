@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ShivAssistant from "@/components/ShivAssistant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Star, Help } from "lucide-react";
+import { BookOpen, Star, HelpCircle } from "lucide-react";
 
 const Assistant = () => {
   return (
@@ -56,7 +56,7 @@ const Assistant = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Help className="h-5 w-5" />
+                <HelpCircle className="h-5 w-5" />
                 Sample Questions
               </CardTitle>
               <CardDescription>Try asking Shiv these questions</CardDescription>
