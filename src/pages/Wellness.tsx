@@ -1,13 +1,22 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { suggestions } from "@/data/mockData";
-import { Heart, Clock, Smile } from "lucide-react";
+import { suggestions, journalEntries } from "@/data/mockData";
+import { Heart, Clock, Smile, Send, Calendar, Edit3, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FocusScoreGauge from "@/components/FocusScoreGauge";
 import WellnessRewards from "@/components/WellnessRewards";
+import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 const Wellness = () => {
+  const [journalText, setJournalText] = useState("");
+  const [moodTag, setMoodTag] = useState("");
+  const [entries, setEntries] = useState(journalEntries);
+  
   const wellnessActivities = [
     {
       id: "wellness-1",
@@ -54,12 +63,111 @@ const Wellness = () => {
     }
   };
   
+  const getMoodColor = (mood: string) => {
+    switch (mood) {
+      case "happy": return "bg-green-100 text-green-800";
+      case "anxious": return "bg-orange-100 text-orange-800";
+      case "tired": return "bg-blue-100 text-blue-800";
+      case "sad": return "bg-purple-100 text-purple-800";
+      case "focused": return "bg-cyan-100 text-cyan-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+  
+  const handleJournalSubmit = () => {
+    if (!journalText.trim() || !moodTag) {
+      toast({
+        title: "Incomplete Entry",
+        description: "Please provide both journal text and mood",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newEntry = {
+      id: `j${entries.length + 1}`,
+      date: new Date().toISOString(),
+      text: journalText,
+      mood_tag: moodTag
+    };
+    
+    setEntries([newEntry, ...entries]);
+    setJournalText("");
+    setMoodTag("");
+    
+    toast({
+      title: "Journal Entry Added",
+      description: "Your journal entry has been saved.",
+    });
+  };
+  
   return (
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-2xl font-bold mb-6">Wellness Hub</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Journal</CardTitle>
+              <CardDescription>Track your mood and thoughts throughout your NEET journey</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="How are you feeling today?"
+                    className="h-24"
+                    value={journalText}
+                    onChange={(e) => setJournalText(e.target.value)}
+                  />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
+                    <Select value={moodTag} onValueChange={setMoodTag}>
+                      <SelectTrigger className="w-44">
+                        <SelectValue placeholder="Select mood" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="happy">Happy</SelectItem>
+                        <SelectItem value="anxious">Anxious</SelectItem>
+                        <SelectItem value="tired">Tired</SelectItem>
+                        <SelectItem value="sad">Sad</SelectItem>
+                        <SelectItem value="focused">Focused</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button onClick={handleJournalSubmit}>
+                      <Send className="mr-2 h-4 w-4" /> Save Entry
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium">Recent Entries</h3>
+                    <Button variant="ghost" size="sm">
+                      <Calendar className="mr-2 h-4 w-4" /> View All
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    {entries.map((entry) => (
+                      <div key={entry.id} className="border rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <Badge className={getMoodColor(entry.mood_tag)}>
+                            {entry.mood_tag.charAt(0).toUpperCase() + entry.mood_tag.slice(1)}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {format(new Date(entry.date), "MMM dd, yyyy")}
+                          </span>
+                        </div>
+                        <p className="text-sm">{entry.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           <Card>
             <CardHeader>
               <CardTitle>Wellness Activities</CardTitle>
@@ -88,41 +196,6 @@ const Wellness = () => {
                         </Button>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Suggestions Hub</CardTitle>
-              <CardDescription>Personalized recommendations based on your activity</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {suggestions.map((suggestion) => (
-                  <div key={suggestion.id} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{suggestion.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(suggestion.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Badge variant={suggestion.applied ? "secondary" : "outline"}>
-                        {suggestion.applied ? "Applied" : "New"}
-                      </Badge>
-                    </div>
-                    {!suggestion.applied && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-3"
-                      >
-                        {suggestion.action}
-                      </Button>
-                    )}
                   </div>
                 ))}
               </div>

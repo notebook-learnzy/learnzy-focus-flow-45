@@ -1,489 +1,646 @@
-import { Subject, Chapter, Task, Suggestion, SedentaryMetrics, SleepMetrics, Question, QuestionSet, BloomSkillProfile, ActionCard } from "../types";
+export type Subject = {
+  id: string;
+  name: string;
+  icon: string;
+  progress: number;
+};
 
-export const subjects: Subject[] = [
+export type Chapter = {
+  id: string;
+  name: string;
+  subjectId: string;
+  progress: number;
+  lastPracticed?: string;
+};
+
+export type TaskType = "practice" | "wellness" | "custom";
+
+export type Task = {
+  id: string;
+  title: string;
+  type: TaskType;
+  date: string;
+  time: string;
+  duration: number;
+  completed: boolean;
+  chapterId?: string;
+  interval_adjusted?: boolean;
+};
+
+export type Suggestion = {
+  id: string;
+  message: string;
+  action: string;
+  applied: boolean;
+  date: string;
+};
+
+export type SedentaryMetrics = {
+  totalSittingTime: number; // in minutes
+  lastBreak: string; // ISO date string
+  breakSuggestion: string;
+};
+
+export type SleepMetrics = {
+  score: number; // out of 100
+  duration: number; // in minutes
+  remSleep: number; // in minutes
+  deepSleep: number; // in minutes
+  lightSleep: number; // in minutes
+  date: string; // ISO date string
+};
+
+// New question schema
+export type DifficultyLevel = "Easy" | "Medium" | "Hard";
+export type QuestionType = "MCQ" | "Assertion-Reason" | "Fill-in-the-blank" | "Match";
+export type BloomTaxonomy = "Remember" | "Understand" | "Apply" | "Analyze" | "Evaluate" | "Create";
+export type CorrectAnswer = "A" | "B" | "C" | "D";
+
+export type Question = {
+  id: string;
+  question_text: string;
+  figure?: string; // URL/File path
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: CorrectAnswer;
+  subject: string;
+  chapter_name: string;
+  topic: string;
+  subtopic: string;
+  difficulty_level: DifficultyLevel;
+  question_type: QuestionType;
+  bloom_taxonomy: BloomTaxonomy;
+  priority_level: 1 | 2 | 3 | 4 | 5; // 1 = highest
+  time_to_solve: number; // seconds
+  key_concept_tested: string;
+  common_pitfalls?: string;
+  creation_timestamp: string; // ISO date string
+  last_updated_timestamp: string; // ISO date string
+};
+
+export type QuestionSet = {
+  id: string;
+  set_type: "A" | "B" | "C" | "D" | "E";
+  chapter_id: string;
+  questions: Question[];
+  scheduled_date?: string; // ISO date string
+  completed_date?: string; // ISO date string
+  focus_score?: number; // 0-100
+  interval_adjusted?: boolean; // If the interval was dynamically adjusted
+};
+
+export type FocusData = {
+  question_id: string;
+  focus_score: number;
+  time_spent: number; // seconds
+  is_correct: boolean;
+};
+
+export type SessionReport = {
+  id: string;
+  question_set_id: string;
+  date: string; // ISO date string
+  overall_focus_score: number;
+  focus_timeline: FocusData[];
+  meditation_completed: boolean;
+  meditation_skipped: boolean;
+  total_time: number; // seconds
+  correct_answers: number;
+  total_questions: number;
+};
+
+export type BloomSkillProfile = {
+  remember: number; // 0-100 proficiency
+  understand: number;
+  apply: number;
+  analyze: number;
+  evaluate: number;
+  create: number;
+};
+
+export type ActionCard = {
+  id: string;
+  title: string;
+  description: string;
+  action_type: "revision" | "practice" | "wellness";
+  target: string; // topic, chapter, or wellness activity
+  priority: number; // 1-5
+  completed: boolean;
+  created_at: string; // ISO date string
+  impact_score?: number; // 0-100, for prioritization
+};
+
+// New types for social features and wellness streaks
+
+export type UserStreaks = {
+  meditation_days: number;
+  high_focus_days: number;
+  practice_days: number;
+  last_updated: string; // ISO date string
+};
+
+export type Badge = {
+  id: string;
+  name: string;
+  description: string;
+  earned: boolean;
+  earned_date?: string; // ISO date string
+  progress?: number; // percentage towards earning
+  badge_type: "focus" | "meditation" | "accuracy" | "streak" | "completion";
+};
+
+export type Challenge = {
+  id: string;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  chapter_id?: string;
+  participants: number;
+  progress: number; // 0-100
+  joined: boolean;
+};
+
+export type StudyBuddy = {
+  id: string;
+  name: string;
+  avatar?: string;
+  focus_score: number;
+  average_accuracy: number;
+  current_chapter: string;
+  compatibility_score: number; // 0-100
+};
+
+export type MoodState = "calm" | "focused" | "stressed" | "tired" | "energetic";
+
+export type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  current_mood?: MoodState;
+  streak_count: {
+    meditation: number;
+    focus_threshold: number;
+    daily_practice: number;
+  };
+  badges_earned: Badge[];
+  theme_preference: "auto" | "soothing" | "focus" | "energizing";
+  enable_mood_aware_theming: boolean;
+};
+
+// Biology Class 11 Chapters
+export const biologyChapters = [
+  { id: "bio11-ch01", name: "The Living World", subjectId: "biology", class: "11", progress: 10, lastPracticed: "2023-05-01" },
+  { id: "bio11-ch02", name: "Biological Classification", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch03", name: "Plant Kingdom", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch04", name: "Animal Kingdom", subjectId: "biology", class: "11", progress: 5, lastPracticed: "2023-04-15" },
+  { id: "bio11-ch05", name: "Morphology of Flowering Plants", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch06", name: "Anatomy of Flowering Plants", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch07", name: "Structural Organisation in Animals", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch08", name: "Cell: The Unit of Life", subjectId: "biology", class: "11", progress: 15, lastPracticed: "2023-04-28" },
+  { id: "bio11-ch09", name: "Biomolecules", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch10", name: "Cell Cycle and Cell Division", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch11", name: "Photosynthesis in Higher Plants", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch12", name: "Respiration in Plants", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch13", name: "Plant Growth and Development", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch14", name: "Breathing and Exchange of Gases", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch15", name: "Body Fluids and Circulation", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch16", name: "Excretory Products and their Elimination", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch17", name: "Locomotion and Movement", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch18", name: "Neural Control and Coordination", subjectId: "biology", class: "11", progress: 0 },
+  { id: "bio11-ch19", name: "Chemical Coordination and Integration", subjectId: "biology", class: "11", progress: 0 },
+];
+
+// Add biology subject
+export const subjects = [
   {
     id: "physics",
     name: "Physics",
     icon: "flask-round",
-    progress: 65,
+    progress: 35,
   },
   {
     id: "chemistry",
     name: "Chemistry",
     icon: "flask-round",
-    progress: 48,
+    progress: 42,
   },
   {
-    id: "botany",
-    name: "Botany",
+    id: "biology",
+    name: "Biology",
     icon: "leaf",
-    progress: 72,
+    progress: 27,
   },
   {
-    id: "zoology",
-    name: "Zoology",
-    icon: "heart",
-    progress: 55,
+    id: "maths",
+    name: "Mathematics",
+    icon: "book-open",
+    progress: 18,
   },
 ];
 
-export const chapters: Chapter[] = [
-  // Physics chapters
+// All chapters combined
+export const chapters = [
   {
-    id: "phys-mechanics",
-    name: "Mechanics",
+    id: "phy-ch01",
+    name: "Laws of Motion",
     subjectId: "physics",
-    progress: 85,
-    lastPracticed: "2025-04-25",
+    progress: 75,
+    lastPracticed: "2023-05-02"
   },
   {
-    id: "phys-thermodynamics",
-    name: "Thermodynamics",
-    subjectId: "physics",
-    progress: 70,
-    lastPracticed: "2025-04-20",
-  },
-  {
-    id: "phys-waves",
-    name: "Waves & Oscillations",
-    subjectId: "physics",
-    progress: 60,
-    lastPracticed: "2025-04-15",
-  },
-  {
-    id: "phys-optics",
-    name: "Optics",
+    id: "phy-ch02",
+    name: "Kinematics",
     subjectId: "physics",
     progress: 45,
-    lastPracticed: "2025-04-10",
+    lastPracticed: "2023-04-28"
   },
-  // Chemistry chapters
   {
-    id: "chem-atomic",
+    id: "phy-ch03",
+    name: "Waves",
+    subjectId: "physics",
+    progress: 20,
+    lastPracticed: "2023-04-15"
+  },
+  {
+    id: "phy-ch04",
+    name: "Electricity and Magnetism",
+    subjectId: "physics",
+    progress: 10,
+  },
+  {
+    id: "chem-ch01",
     name: "Atomic Structure",
     subjectId: "chemistry",
-    progress: 75,
-    lastPracticed: "2025-04-22",
+    progress: 65,
+    lastPracticed: "2023-05-01"
   },
   {
-    id: "chem-periodic",
-    name: "Periodic Table",
-    subjectId: "chemistry",
-    progress: 60,
-    lastPracticed: "2025-04-18",
-  },
-  {
-    id: "chem-organic",
+    id: "chem-ch02",
     name: "Organic Chemistry",
     subjectId: "chemistry",
-    progress: 40,
-    lastPracticed: "2025-04-12",
-  },
-  {
-    id: "chem-equilibrium",
-    name: "Chemical Equilibrium",
-    subjectId: "chemistry",
     progress: 30,
-    lastPracticed: "2025-04-05",
-  },
-  // Botany chapters
-  {
-    id: "bot-cell",
-    name: "Cell Biology",
-    subjectId: "botany",
-    progress: 90,
-    lastPracticed: "2025-04-28",
+    lastPracticed: "2023-04-18"
   },
   {
-    id: "bot-genetics",
-    name: "Genetics",
-    subjectId: "botany",
-    progress: 80,
-    lastPracticed: "2025-04-23",
-  },
-  {
-    id: "bot-morphology",
-    name: "Plant Morphology",
-    subjectId: "botany",
-    progress: 65,
-    lastPracticed: "2025-04-16",
-  },
-  {
-    id: "bot-physiology",
-    name: "Plant Physiology",
-    subjectId: "botany",
-    progress: 55,
-    lastPracticed: "2025-04-08",
-  },
-  // Zoology chapters
-  {
-    id: "zoo-evolution",
-    name: "Evolution",
-    subjectId: "zoology",
-    progress: 70,
-    lastPracticed: "2025-04-26",
-  },
-  {
-    id: "zoo-anatomy",
-    name: "Human Anatomy",
-    subjectId: "zoology",
-    progress: 60,
-    lastPracticed: "2025-04-21",
-  },
-  {
-    id: "zoo-physiology",
-    name: "Animal Physiology",
-    subjectId: "zoology",
+    id: "chem-ch03",
+    name: "Chemical Bonding",
+    subjectId: "chemistry",
     progress: 50,
-    lastPracticed: "2025-04-14",
+    lastPracticed: "2023-04-25"
+  },
+  ...biologyChapters,
+  {
+    id: "math-ch01",
+    name: "Calculus",
+    subjectId: "maths",
+    progress: 40,
+    lastPracticed: "2023-04-30"
   },
   {
-    id: "zoo-ecology",
-    name: "Ecology",
-    subjectId: "zoology",
-    progress: 40,
-    lastPracticed: "2025-04-07",
+    id: "math-ch02",
+    name: "Algebra",
+    subjectId: "maths",
+    progress: 25,
+    lastPracticed: "2023-04-20"
   },
+  {
+    id: "math-ch03",
+    name: "Statistics",
+    subjectId: "maths",
+    progress: 15,
+    lastPracticed: "2023-04-10"
+  }
 ];
 
-// Current date for reference
-const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
-const dayAfterTomorrow = new Date(today);
-dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+// Create question sets for the first chapter
+export const questionSets = [
+  {
+    id: "qs-living-world-a",
+    set_type: "A",
+    chapter_id: "bio11-ch01",
+    questions: [
+      {
+        id: "q1",
+        question_text: "Which of the following is NOT a characteristic of living organisms?",
+        option_a: "Growth",
+        option_b: "Reproduction",
+        option_c: "Crystallization",
+        option_d: "Response to stimuli",
+        correct_answer: "C",
+        subject: "Biology",
+        chapter_name: "The Living World",
+        topic: "Characteristics of Life",
+        subtopic: "Living vs Non-living",
+        difficulty_level: "Easy",
+        question_type: "MCQ",
+        bloom_taxonomy: "Remember",
+        priority_level: 1,
+        time_to_solve: 45,
+        key_concept_tested: "Distinguishing living from non-living",
+        common_pitfalls: "Crystallization is a physical property of non-living things",
+        creation_timestamp: "2023-01-01",
+        last_updated_timestamp: "2023-01-01"
+      },
+      {
+        id: "q2",
+        question_text: "Taxonomic hierarchy refers to:",
+        option_a: "Classification of plants only",
+        option_b: "A sequence of taxonomic categories in descending order",
+        option_c: "Classification based on habitat",
+        option_d: "The process of identifying new species",
+        correct_answer: "B",
+        subject: "Biology",
+        chapter_name: "The Living World",
+        topic: "Taxonomy",
+        subtopic: "Taxonomic Categories",
+        difficulty_level: "Medium",
+        question_type: "MCQ",
+        bloom_taxonomy: "Understand",
+        priority_level: 2,
+        time_to_solve: 60,
+        key_concept_tested: "Understanding taxonomic hierarchy",
+        creation_timestamp: "2023-01-01",
+        last_updated_timestamp: "2023-01-01"
+      },
+      {
+        id: "q3",
+        question_text: "Which of these is the correct scientific name format?",
+        option_a: "homo sapiens",
+        option_b: "Homo Sapiens",
+        option_c: "Homo sapiens",
+        option_d: "homo Sapiens",
+        correct_answer: "C",
+        subject: "Biology",
+        chapter_name: "The Living World",
+        topic: "Nomenclature",
+        subtopic: "Binomial Nomenclature",
+        difficulty_level: "Easy",
+        question_type: "MCQ",
+        bloom_taxonomy: "Remember",
+        priority_level: 1,
+        time_to_solve: 30,
+        key_concept_tested: "Rules of binomial nomenclature",
+        creation_timestamp: "2023-01-01",
+        last_updated_timestamp: "2023-01-01"
+      }
+    ],
+    completed_date: null,
+    scheduled_date: "2023-05-10"
+  },
+  {
+    id: "qs-living-world-b",
+    set_type: "B",
+    chapter_id: "bio11-ch01",
+    questions: [
+      // Similar question structure as set A
+    ],
+    completed_date: null,
+    scheduled_date: null
+  },
+  {
+    id: "qs-living-world-c",
+    set_type: "C",
+    chapter_id: "bio11-ch01",
+    questions: [],
+    completed_date: null,
+    scheduled_date: null
+  },
+  {
+    id: "qs-living-world-d",
+    set_type: "D",
+    chapter_id: "bio11-ch01",
+    questions: [],
+    completed_date: null,
+    scheduled_date: null
+  },
+  {
+    id: "qs-living-world-e",
+    set_type: "E",
+    chapter_id: "bio11-ch01",
+    questions: [],
+    completed_date: null,
+    scheduled_date: null
+  }
+];
 
-export const tasks: Task[] = [
+// Sample user journal entries
+export const journalEntries = [
+  {
+    id: "j1",
+    date: "2023-05-05",
+    text: "Studied for 3 hours today. Feeling confident about the upcoming test.",
+    mood_tag: "happy"
+  },
+  {
+    id: "j2",
+    date: "2023-05-04",
+    text: "Had trouble focusing today. Need to get more sleep.",
+    mood_tag: "tired"
+  },
+  {
+    id: "j3",
+    date: "2023-05-03",
+    text: "Anxiety about the Physics exam. Should revise more examples.",
+    mood_tag: "anxious"
+  }
+];
+
+// Tasks (now with proper TaskType)
+export const tasks = [
   {
     id: "task-1",
-    title: "Practice Mechanics Quiz",
-    type: "practice",
-    date: today.toISOString().split("T")[0],
-    time: "10:00",
-    duration: 30,
+    title: "Practice Physics Set B",
+    type: "practice", // Now matches TaskType
+    date: "2023-05-10",
+    time: "14:00",
+    duration: 60,
     completed: false,
-    chapterId: "phys-mechanics",
+    chapterId: "phy-ch01"
   },
   {
     id: "task-2",
-    title: "5-min Breathing Exercise",
-    type: "wellness",
-    date: today.toISOString().split("T")[0],
-    time: "14:30",
-    duration: 5,
-    completed: false,
+    title: "Meditation Session",
+    type: "wellness", // Now matches TaskType
+    date: "2023-05-10",
+    time: "08:00",
+    duration: 15,
+    completed: true
   },
   {
     id: "task-3",
-    title: "Cell Biology Review",
-    type: "practice",
-    date: tomorrow.toISOString().split("T")[0],
-    time: "09:00",
-    duration: 45,
+    title: "Chemistry Revision",
+    type: "practice", // Now matches TaskType
+    date: "2023-05-11",
+    time: "16:00",
+    duration: 90,
     completed: false,
-    chapterId: "bot-cell",
+    chapterId: "chem-ch01"
   },
   {
     id: "task-4",
-    title: "Guided Meditation",
-    type: "wellness",
-    date: tomorrow.toISOString().split("T")[0],
-    time: "18:00",
-    duration: 10,
+    title: "Biology - Living World Set A",
+    type: "practice", // Now matches TaskType
+    date: "2023-05-12",
+    time: "10:00",
+    duration: 45,
     completed: false,
-  },
-  {
-    id: "task-5",
-    title: "Chemistry Mock Test",
-    type: "practice",
-    date: dayAfterTomorrow.toISOString().split("T")[0],
-    time: "11:00",
-    duration: 60,
-    completed: false,
-  },
-  {
-    id: "task-6",
-    title: "Journal Entry",
-    type: "wellness",
-    date: dayAfterTomorrow.toISOString().split("T")[0],
-    time: "20:00",
-    duration: 15,
-    completed: false,
-  },
+    chapterId: "bio11-ch01"
+  }
 ];
 
-export const suggestions: Suggestion[] = [
+// Suggestions
+export const suggestions = [
   {
-    id: "sugg-1",
-    message: "You've been studying for 5 hours. Take a short break.",
-    action: "Schedule a 5-min breathing exercise",
+    id: "suggestion-1",
+    message: "Your focus seems to drop after 45 minutes. Consider shorter study sessions with breaks.",
+    action: "Update Schedule",
     applied: false,
-    date: today.toISOString(),
+    date: "2023-05-05"
   },
   {
-    id: "sugg-2",
-    message: "Your focus score is low. Try a quick meditation.",
-    action: "Add to calendar",
-    applied: false,
-    date: today.toISOString(),
-  },
-  {
-    id: "sugg-3",
-    message: "You perform better in mornings. Schedule tough topics early.",
-    action: "Optimize schedule",
+    id: "suggestion-2",
+    message: "Add a 5-minute meditation before your Physics practice to improve retention.",
+    action: "Try Now",
     applied: true,
-    date: new Date(today.setDate(today.getDate() - 2)).toISOString(),
+    date: "2023-05-04"
   },
+  {
+    id: "suggestion-3",
+    message: "You perform better in the morning. Schedule important study sessions before noon.",
+    action: "View Analysis",
+    applied: false,
+    date: "2023-05-03"
+  }
 ];
 
+// Institute assignments
 export const instituteAssignments = [
   {
-    id: "inst-1",
-    title: "Daily Practice Problems: Physics",
-    deadline: tomorrow.toISOString().split("T")[0],
-    status: "pending",
+    id: "assignment-1",
+    title: "Weekly Physics Test",
+    deadline: "May 12, 2023"
   },
   {
-    id: "inst-2",
-    title: "Chemistry Weekly Assessment",
-    deadline: dayAfterTomorrow.toISOString().split("T")[0],
-    status: "pending",
+    id: "assignment-2",
+    title: "Chemistry Lab Report",
+    deadline: "May 15, 2023"
   },
   {
-    id: "inst-3",
-    title: "Biology Mock Exam",
-    deadline: new Date(today.setDate(today.getDate() + 5)).toISOString().split("T")[0],
-    status: "pending",
-  },
+    id: "assignment-3",
+    title: "Biology Diagram Assignment",
+    deadline: "May 16, 2023"
+  }
 ];
 
+// Announcements
 export const announcements = [
   {
-    id: "ann-1",
-    title: "Physics Revision Session",
-    content: "Join the online revision session for Optics chapter tomorrow at 5:00 PM.",
-    date: today.toISOString(),
+    id: "announcement-1",
+    title: "Mock Test Schedule",
+    content: "The NEET mock test series will begin on May 20th. Please prepare accordingly.",
+    date: "2023-05-05"
   },
   {
-    id: "ann-2",
-    title: "Mock Test Results",
-    content: "Last week's mock test results are now available in your dashboard.",
-    date: new Date(today.setDate(today.getDate() - 1)).toISOString(),
-  },
-];
-
-// Focus score data points for visualization
-export const focusScoreData = [
-  { time: "09:00", score: 85 },
-  { time: "10:00", score: 90 },
-  { time: "11:00", score: 75 },
-  { time: "12:00", score: 60 },
-  { time: "13:00", score: 50 },
-  { time: "14:00", score: 65 },
-  { time: "15:00", score: 80 },
-  { time: "16:00", score: 85 },
-  { time: "17:00", score: 70 },
-];
-
-export const weeklyAccuracyData = [
-  { day: "Mon", accuracy: 75, focus: 80 },
-  { day: "Tue", accuracy: 80, focus: 85 },
-  { day: "Wed", accuracy: 70, focus: 65 },
-  { day: "Thu", accuracy: 85, focus: 80 },
-  { day: "Fri", accuracy: 90, focus: 90 },
-  { day: "Sat", accuracy: 80, focus: 75 },
-  { day: "Sun", accuracy: 75, focus: 70 },
-];
-
-// Sedentary metrics data
-export const sedentaryMetrics: SedentaryMetrics = {
-  totalSittingTime: 225, // 3h 45m in minutes
-  lastBreak: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago
-  breakSuggestion: "Consider a 5-min stretch quiz break"
-};
-
-// Sleep metrics data
-export const sleepMetrics: SleepMetrics = {
-  score: 72,
-  duration: 435, // 7h 15m in minutes
-  remSleep: 60, // 1h in minutes
-  deepSleep: 120, // 2h in minutes
-  lightSleep: 255, // 4h 15m in minutes
-  date: new Date().toISOString().split('T')[0]
-};
-
-// New mock data for weak topics
-export const weakTopicsData = [
-  { topic: "Kinematics", score: 45 },
-  { topic: "Chemical Bonding", score: 55 },
-  { topic: "Cell Division", score: 60 },
-  { topic: "Optics", score: 50 },
-  { topic: "Thermodynamics", score: 70 },
-];
-
-// Bloom's taxonomy skill profile
-export const bloomSkillsProfile: BloomSkillProfile = {
-  remember: 85,
-  understand: 75,
-  apply: 65,
-  analyze: 50,
-  evaluate: 40,
-  create: 30
-};
-
-// Action cards for recommendations
-export const actionCards: ActionCard[] = [
-  {
-    id: "action-1",
-    title: "Review Kinematics Concepts",
-    description: "Your accuracy in Kinematics questions is 45%. Practice 10 more questions.",
-    action_type: "revision",
-    target: "Kinematics",
-    priority: 1,
-    completed: false,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "action-2",
-    title: "Try a Guided Meditation",
-    description: "Your focus dips after 2 hours of study. A 3-minute meditation may help.",
-    action_type: "wellness",
-    target: "meditation",
-    priority: 3,
-    completed: false,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "action-3",
-    title: "Complete Thermodynamics Set B",
-    description: "Scheduled for spaced repetition. Due in 2 days.",
-    action_type: "practice",
-    target: "phys-thermodynamics",
-    priority: 2,
-    completed: false,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "action-4",
-    title: "Take a Study Break",
-    description: "You've been studying for 3+ hours. Schedule a 15-minute break.",
-    action_type: "wellness",
-    target: "break",
-    priority: 4,
-    completed: true,
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    id: "announcement-2",
+    title: "New Study Materials",
+    content: "Updated NCERT solutions are now available in the resources section.",
+    date: "2023-05-04"
   }
 ];
 
-// Questions for the mechanics chapter
-const mechanicsQuestions: Question[] = [
+// Sedentary metrics
+export const sedentaryMetrics = {
+  totalSittingTime: 340,
+  lastBreak: "2023-05-09T14:30:00",
+  breakSuggestion: "You've been sitting for over an hour. Consider taking a short walk."
+};
+
+// Sleep metrics
+export const sleepMetrics = {
+  score: 85,
+  duration: 440,
+  remSleep: 110,
+  deepSleep: 90,
+  lightSleep: 240,
+  date: "2023-05-09"
+};
+
+// Focus sessions for analytics
+export const focusSessions = [
   {
-    id: "q-mech-1",
-    question_text: "What is the SI unit of force?",
-    option_a: "Newton",
-    option_b: "Joule",
-    option_c: "Watt",
-    option_d: "Pascal",
-    correct_answer: "A",
-    subject: "Physics",
-    chapter_name: "Mechanics",
-    topic: "Forces",
-    subtopic: "Units and Dimensions",
-    difficulty_level: "Easy",
-    question_type: "MCQ",
-    bloom_taxonomy: "Remember",
-    priority_level: 3,
-    time_to_solve: 30,
-    key_concept_tested: "Understanding of basic physical units",
-    common_pitfalls: "Confusing force units with energy or pressure units",
-    creation_timestamp: "2025-01-15T10:30:00Z",
-    last_updated_timestamp: "2025-01-15T10:30:00Z"
+    id: "focus-1",
+    date: "2023-05-08",
+    duration: 55,
+    average_score: 78,
+    chapter_id: "phy-ch01"
   },
   {
-    id: "q-mech-2",
-    question_text: "Which law of motion states that for every action, there is an equal and opposite reaction?",
-    option_a: "First law",
-    option_b: "Second law",
-    option_c: "Third law",
-    option_d: "Fourth law",
-    correct_answer: "C",
-    subject: "Physics",
-    chapter_name: "Mechanics",
-    topic: "Newton's Laws",
-    subtopic: "Third Law",
-    difficulty_level: "Easy",
-    question_type: "MCQ",
-    bloom_taxonomy: "Remember",
-    priority_level: 3,
-    time_to_solve: 25,
-    key_concept_tested: "Knowledge of Newton's laws of motion",
-    creation_timestamp: "2025-01-15T11:00:00Z",
-    last_updated_timestamp: "2025-01-15T11:00:00Z"
+    id: "focus-2",
+    date: "2023-05-07",
+    duration: 45,
+    average_score: 82,
+    chapter_id: "chem-ch02"
   },
   {
-    id: "q-mech-3",
-    question_text: "A 2kg object moving at 4 m/s collides with a stationary 6kg object. If the collision is perfectly inelastic, what is the velocity of the combined objects after collision?",
-    option_a: "0.5 m/s",
-    option_b: "1 m/s",
-    option_c: "1.5 m/s",
-    option_d: "2 m/s",
-    correct_answer: "B",
-    subject: "Physics",
-    chapter_name: "Mechanics",
-    topic: "Collisions",
-    subtopic: "Inelastic Collisions",
-    difficulty_level: "Medium",
-    question_type: "MCQ",
-    bloom_taxonomy: "Apply",
-    priority_level: 2,
-    time_to_solve: 60,
-    key_concept_tested: "Conservation of momentum in inelastic collisions",
-    common_pitfalls: "Not accounting for the combined mass after collision",
-    creation_timestamp: "2025-01-16T09:15:00Z",
-    last_updated_timestamp: "2025-01-16T09:15:00Z"
+    id: "focus-3",
+    date: "2023-05-05",
+    duration: 60,
+    average_score: 75,
+    chapter_id: "bio11-ch08"
   }
 ];
 
-// Add more questions for other chapters
-const thermodynamicsQuestions: Question[] = [
+// User's meditation logs
+export const meditationLogs = [
   {
-    id: "q-therm-1",
-    question_text: "Which law of thermodynamics states that energy cannot be created or destroyed?",
-    option_a: "Zeroth law",
-    option_b: "First law",
-    option_c: "Second law",
-    option_d: "Third law",
-    correct_answer: "B",
-    subject: "Physics",
-    chapter_name: "Thermodynamics",
-    topic: "Laws of Thermodynamics",
-    subtopic: "First Law",
-    difficulty_level: "Easy",
-    question_type: "MCQ",
-    bloom_taxonomy: "Remember",
-    priority_level: 3,
-    time_to_solve: 30,
-    key_concept_tested: "Understanding of the first law of thermodynamics",
-    creation_timestamp: "2025-01-20T10:00:00Z",
-    last_updated_timestamp: "2025-01-20T10:00:00Z"
+    id: "med-1",
+    date: "2023-05-08",
+    duration_completed: 60,
+    meditation_skipped: false,
+    before_session_id: "focus-1"
   },
-  // Add more thermodynamics questions
+  {
+    id: "med-2",
+    date: "2023-05-07",
+    duration_completed: 60,
+    meditation_skipped: false,
+    before_session_id: "focus-2"
+  },
+  {
+    id: "med-3",
+    date: "2023-05-05",
+    duration_completed: 0,
+    meditation_skipped: true,
+    before_session_id: "focus-3"
+  }
 ];
 
-// Create question sets
-export const questionSets: QuestionSet[] = [
+// Completed question sets with performance data
+export const completedSets = [
   {
-    id: "set-mech-a",
-    set_type: "A",
-    chapter_id: "phys-mechanics",
-    questions: mechanicsQuestions,
-    scheduled_date: today.toISOString().split("T")[0]
-  },
-  {
-    id: "set-therm-a",
-    set_type: "A",
-    chapter_id: "phys-thermodynamics",
-    questions: thermodynamicsQuestions,
-    scheduled_date: tomorrow.toISOString().split("T")[0]
+    id: "completed-1",
+    question_set_id: "qs-phy-ch01-a",
+    date: "2023-05-08",
+    score: 75,
+    time_taken: 42,
+    focus_score: 78,
+    incorrect_questions: ["q2", "q5", "q8"],
+    analytics: {
+      bloom_levels: {
+        remember: 80,
+        understand: 70,
+        apply: 60,
+        analyze: 50
+      },
+      topic_performance: {
+        "Newton's Laws": 85,
+        "Friction": 65,
+        "Circular Motion": 75
+      }
+    }
   }
 ];

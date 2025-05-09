@@ -31,6 +31,10 @@ const Dashboard = () => {
     setAssistantOpen(false);
     navigate('/assistant');
   };
+
+  const handleViewBiology = () => {
+    navigate('/biology');
+  };
   
   const renderInstituteMode = () => (
     <div className="space-y-6 animate-fade-in">
@@ -118,7 +122,12 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Subjects</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Subjects</h2>
+              <Button onClick={handleViewBiology} className="bg-learnzy-purple">
+                View Biology <ChevronRight size={16} />
+              </Button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {subjects.map((subject) => (
                 <SubjectCard key={subject.id} subject={subject} />
