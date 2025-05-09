@@ -8,11 +8,7 @@ import { AppProvider } from "./contexts/AppContext";
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Subject from "./pages/Subject";
-import SubjectClass from "./pages/SubjectClass";
-import ChapterList from "./pages/ChapterList";
 import Practice from "./pages/Practice";
-import PracticeRitual from "./pages/PracticeRitual";
-import PracticeReport from "./pages/PracticeReport";
 import Wellness from "./pages/Wellness";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
@@ -36,12 +32,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/subject/:id" element={<Subject />} />
-              <Route path="/subject/:id/class/:classId" element={<SubjectClass />} />
-              <Route path="/subject/:id/class/:classId" element={<ChapterList />} />
               <Route path="/practice/:chapterId" element={<Practice />} />
-              <Route path="/practice/:subjectId/:classId/:chapterId/set/:setId/ritual" element={<PracticeRitual />} />
-              <Route path="/practice/:subjectId/:classId/:chapterId/set/:setId" element={<Practice />} />
-              <Route path="/practice/:subjectId/:classId/:chapterId/set/:setId/report" element={<PracticeReport />} />
               <Route path="/wellness" element={<Wellness />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />

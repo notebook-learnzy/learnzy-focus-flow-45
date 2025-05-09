@@ -1,464 +1,489 @@
+import { Subject, Chapter, Task, Suggestion, SedentaryMetrics, SleepMetrics, Question, QuestionSet, BloomSkillProfile, ActionCard } from "../types";
 
-export const subjects = [
-  {
-    id: "math",
-    name: "Mathematics",
-    icon: "book-open",
-    progress: 65
-  },
+export const subjects: Subject[] = [
   {
     id: "physics",
     name: "Physics",
     icon: "flask-round",
-    progress: 40
+    progress: 65,
   },
   {
     id: "chemistry",
     name: "Chemistry",
     icon: "flask-round",
-    progress: 25
-  },
-  {
-    id: "biology",
-    name: "Biology",
-    icon: "leaf",
-    progress: 50
+    progress: 48,
   },
   {
     id: "botany",
     name: "Botany",
     icon: "leaf",
-    progress: 10
+    progress: 72,
+  },
+  {
+    id: "zoology",
+    name: "Zoology",
+    icon: "heart",
+    progress: 55,
   },
 ];
 
-export const biologyChapters11 = [
-  { id: "bio-11-1", name: "The Living World", progress: 0, subjectId: "biology" },
-  { id: "bio-11-2", name: "Structural Organisation in Animals", progress: 0, subjectId: "biology" },
-  { id: "bio-11-3", name: "Respiration in Plants", progress: 0, subjectId: "biology" },
-  { id: "bio-11-4", name: "Plant Kingdom", progress: 0, subjectId: "biology" },
-  { id: "bio-11-5", name: "Plant Growth and Development", progress: 0, subjectId: "biology" },
-  { id: "bio-11-6", name: "Photosynthesis in Higher Plants", progress: 0, subjectId: "biology" },
-  { id: "bio-11-7", name: "Neural Control and Coordination", progress: 0, subjectId: "biology" },
-  { id: "bio-11-8", name: "Morphology of Flowering Plants", progress: 0, subjectId: "biology" },
-  { id: "bio-11-9", name: "Locomotion and Movement", progress: 0, subjectId: "biology" },
-  { id: "bio-11-10", name: "Chemical Coordination and Integration", progress: 0, subjectId: "biology" },
-  { id: "bio-11-11", name: "Cell: The Unit of Life", progress: 0, subjectId: "biology" },
-  { id: "bio-11-12", name: "Cell Cycle and Cell Division", progress: 0, subjectId: "biology" },
-  { id: "bio-11-13", name: "Breathing and Exchange of Gases", progress: 0, subjectId: "biology" },
-  { id: "bio-11-14", name: "Body Fluids and Circulation", progress: 0, subjectId: "biology" },
-  { id: "bio-11-15", name: "Biomolecules", progress: 0, subjectId: "biology" },
-  { id: "bio-11-16", name: "Biological Classification", progress: 0, subjectId: "biology" },
-  { id: "bio-11-17", name: "Animal Kingdom", progress: 0, subjectId: "biology" },
-  { id: "bio-11-18", name: "Excretory Products and their Elimination", progress: 0, subjectId: "biology" },
-  { id: "bio-11-19", name: "Anatomy of Flowering Plants", progress: 0, subjectId: "biology" }
-];
-
-export const botanyChapters11 = [
-  { id: "bot-11-1", name: "The Living World", progress: 0, subjectId: "botany" },
-  { id: "bot-11-2", name: "Structural Organisation in Plants", progress: 0, subjectId: "botany" },
-  { id: "bot-11-3", name: "Respiration in Plants", progress: 0, subjectId: "botany" },
-  { id: "bot-11-4", name: "Plant Kingdom", progress: 0, subjectId: "botany" },
-  { id: "bot-11-5", name: "Plant Growth and Development", progress: 0, subjectId: "botany" },
-  { id: "bot-11-6", name: "Photosynthesis in Higher Plants", progress: 0, subjectId: "botany" },
-  { id: "bot-11-7", name: "Morphology of Flowering Plants", progress: 0, subjectId: "botany" },
-  { id: "bot-11-8", name: "Anatomy of Flowering Plants", progress: 0, subjectId: "botany" },
-  { id: "bot-11-9", name: "Transport in Plants", progress: 0, subjectId: "botany" },
-  { id: "bot-11-10", name: "Mineral Nutrition", progress: 0, subjectId: "botany" },
-  { id: "bot-11-11", name: "Cell: The Unit of Life", progress: 0, subjectId: "botany" },
-  { id: "bot-11-12", name: "Cell Cycle and Cell Division", progress: 0, subjectId: "botany" },
-  { id: "bot-11-13", name: "Biological Classification", progress: 0, subjectId: "botany" },
-  { id: "bot-11-14", name: "The Living World", progress: 0, subjectId: "botany" },
-  { id: "bot-11-15", name: "Biomolecules", progress: 0, subjectId: "botany" }
-];
-
-// Modified chapters to include subjectId instead of subject string
-export const chapters = [
-  ...biologyChapters11.map(chapter => ({
-    ...chapter,
-    class: "11",
-    lastPracticed: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-  })),
-  ...botanyChapters11.map(chapter => ({
-    ...chapter,
-    class: "11",
-    lastPracticed: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-  }))
-];
-
-// Updated tasks to match the Task type
-export const tasks = [
+export const chapters: Chapter[] = [
+  // Physics chapters
   {
-    id: "task1",
-    title: "Complete Physics Set A",
+    id: "phys-mechanics",
+    name: "Mechanics",
+    subjectId: "physics",
+    progress: 85,
+    lastPracticed: "2025-04-25",
+  },
+  {
+    id: "phys-thermodynamics",
+    name: "Thermodynamics",
+    subjectId: "physics",
+    progress: 70,
+    lastPracticed: "2025-04-20",
+  },
+  {
+    id: "phys-waves",
+    name: "Waves & Oscillations",
+    subjectId: "physics",
+    progress: 60,
+    lastPracticed: "2025-04-15",
+  },
+  {
+    id: "phys-optics",
+    name: "Optics",
+    subjectId: "physics",
+    progress: 45,
+    lastPracticed: "2025-04-10",
+  },
+  // Chemistry chapters
+  {
+    id: "chem-atomic",
+    name: "Atomic Structure",
+    subjectId: "chemistry",
+    progress: 75,
+    lastPracticed: "2025-04-22",
+  },
+  {
+    id: "chem-periodic",
+    name: "Periodic Table",
+    subjectId: "chemistry",
+    progress: 60,
+    lastPracticed: "2025-04-18",
+  },
+  {
+    id: "chem-organic",
+    name: "Organic Chemistry",
+    subjectId: "chemistry",
+    progress: 40,
+    lastPracticed: "2025-04-12",
+  },
+  {
+    id: "chem-equilibrium",
+    name: "Chemical Equilibrium",
+    subjectId: "chemistry",
+    progress: 30,
+    lastPracticed: "2025-04-05",
+  },
+  // Botany chapters
+  {
+    id: "bot-cell",
+    name: "Cell Biology",
+    subjectId: "botany",
+    progress: 90,
+    lastPracticed: "2025-04-28",
+  },
+  {
+    id: "bot-genetics",
+    name: "Genetics",
+    subjectId: "botany",
+    progress: 80,
+    lastPracticed: "2025-04-23",
+  },
+  {
+    id: "bot-morphology",
+    name: "Plant Morphology",
+    subjectId: "botany",
+    progress: 65,
+    lastPracticed: "2025-04-16",
+  },
+  {
+    id: "bot-physiology",
+    name: "Plant Physiology",
+    subjectId: "botany",
+    progress: 55,
+    lastPracticed: "2025-04-08",
+  },
+  // Zoology chapters
+  {
+    id: "zoo-evolution",
+    name: "Evolution",
+    subjectId: "zoology",
+    progress: 70,
+    lastPracticed: "2025-04-26",
+  },
+  {
+    id: "zoo-anatomy",
+    name: "Human Anatomy",
+    subjectId: "zoology",
+    progress: 60,
+    lastPracticed: "2025-04-21",
+  },
+  {
+    id: "zoo-physiology",
+    name: "Animal Physiology",
+    subjectId: "zoology",
+    progress: 50,
+    lastPracticed: "2025-04-14",
+  },
+  {
+    id: "zoo-ecology",
+    name: "Ecology",
+    subjectId: "zoology",
+    progress: 40,
+    lastPracticed: "2025-04-07",
+  },
+];
+
+// Current date for reference
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+const dayAfterTomorrow = new Date(today);
+dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+
+export const tasks: Task[] = [
+  {
+    id: "task-1",
+    title: "Practice Mechanics Quiz",
     type: "practice",
-    date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-    time: "14:00",
+    date: today.toISOString().split("T")[0],
+    time: "10:00",
+    duration: 30,
+    completed: false,
+    chapterId: "phys-mechanics",
+  },
+  {
+    id: "task-2",
+    title: "5-min Breathing Exercise",
+    type: "wellness",
+    date: today.toISOString().split("T")[0],
+    time: "14:30",
+    duration: 5,
+    completed: false,
+  },
+  {
+    id: "task-3",
+    title: "Cell Biology Review",
+    type: "practice",
+    date: tomorrow.toISOString().split("T")[0],
+    time: "09:00",
     duration: 45,
     completed: false,
-    subject: "Physics"
+    chapterId: "bot-cell",
   },
   {
-    id: "task2",
-    title: "Review Biology Chapter 3",
+    id: "task-4",
+    title: "Guided Meditation",
+    type: "wellness",
+    date: tomorrow.toISOString().split("T")[0],
+    time: "18:00",
+    duration: 10,
+    completed: false,
+  },
+  {
+    id: "task-5",
+    title: "Chemistry Mock Test",
     type: "practice",
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    time: "16:30",
+    date: dayAfterTomorrow.toISOString().split("T")[0],
+    time: "11:00",
     duration: 60,
     completed: false,
-    subject: "Biology"
   },
   {
-    id: "task3",
-    title: "Chemistry Weekly Test",
-    type: "practice",
-    date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    time: "10:00",
-    duration: 90,
-    completed: false,
-    subject: "Chemistry"
-  },
-  {
-    id: "task4",
-    title: "Mathematics Practice Problems",
-    type: "practice",
-    date: new Date(Date.now()).toISOString(),
-    time: "18:00",
-    duration: 45,
-    completed: false,
-    subject: "Mathematics"
-  },
-  {
-    id: "task5",
-    title: "Biology Revision Session",
-    type: "practice",
-    date: new Date(Date.now()).toISOString(),
+    id: "task-6",
+    title: "Journal Entry",
+    type: "wellness",
+    date: dayAfterTomorrow.toISOString().split("T")[0],
     time: "20:00",
-    duration: 30,
-    completed: true,
-    subject: "Biology"
-  }
+    duration: 15,
+    completed: false,
+  },
 ];
 
-// Updated suggestions to match the Suggestion type
-export const suggestions = [
+export const suggestions: Suggestion[] = [
   {
-    id: "sug1",
-    message: "Take a break! You've been studying for 2 hours", 
-    action: "Set a timer",
+    id: "sugg-1",
+    message: "You've been studying for 5 hours. Take a short break.",
+    action: "Schedule a 5-min breathing exercise",
     applied: false,
-    date: new Date().toISOString()
+    date: today.toISOString(),
   },
   {
-    id: "sug2",
-    message: "Physics chapter 7 needs attention. Your accuracy has dropped below 60%. Consider revisiting the core concepts.",
-    action: "Review Chapter",
+    id: "sugg-2",
+    message: "Your focus score is low. Try a quick meditation.",
+    action: "Add to calendar",
     applied: false,
-    date: new Date().toISOString()
+    date: today.toISOString(),
   },
   {
-    id: "sug3",
-    message: "Join upcoming Biology group study. 10 peers are meeting tomorrow at 6PM to review Cell Division.",
-    action: "Join Group",
-    applied: false,
-    date: new Date().toISOString()
-  }
+    id: "sugg-3",
+    message: "You perform better in mornings. Schedule tough topics early.",
+    action: "Optimize schedule",
+    applied: true,
+    date: new Date(today.setDate(today.getDate() - 2)).toISOString(),
+  },
 ];
 
-// Mock data for institute assignments
 export const instituteAssignments = [
   {
-    id: "assign1",
-    title: "Physics Weekly Assignment",
-    deadline: "Today, 11:59 PM",
-    subject: "Physics",
-    status: "pending"
+    id: "inst-1",
+    title: "Daily Practice Problems: Physics",
+    deadline: tomorrow.toISOString().split("T")[0],
+    status: "pending",
   },
   {
-    id: "assign2",
-    title: "Chemistry Lab Report",
-    deadline: "Tomorrow, 3:00 PM",
-    subject: "Chemistry",
-    status: "pending"
+    id: "inst-2",
+    title: "Chemistry Weekly Assessment",
+    deadline: dayAfterTomorrow.toISOString().split("T")[0],
+    status: "pending",
   },
   {
-    id: "assign3",
-    title: "Mathematics Problem Set",
-    deadline: "May 12, 11:59 PM",
-    subject: "Mathematics",
-    status: "pending"
-  }
+    id: "inst-3",
+    title: "Biology Mock Exam",
+    deadline: new Date(today.setDate(today.getDate() + 5)).toISOString().split("T")[0],
+    status: "pending",
+  },
 ];
 
-// Mock data for announcements
 export const announcements = [
   {
-    id: "ann1",
-    title: "NEET Mock Test Schedule Updated",
-    content: "The schedule for upcoming mock tests has been updated. Please check the calendar for new dates.",
-    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    id: "ann-1",
+    title: "Physics Revision Session",
+    content: "Join the online revision session for Optics chapter tomorrow at 5:00 PM.",
+    date: today.toISOString(),
   },
   {
-    id: "ann2",
-    title: "Biology Special Lecture",
-    content: "Dr. Sharma will be conducting a special lecture on Cell Biology this Saturday at 10 AM.",
-    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
-
-export const sedentaryMetrics = {
-  totalSittingTime: 240, // in minutes
-  lastBreak: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-  breakSuggestion: "Take a 5-minute walk to improve circulation."
-};
-
-export const sleepMetrics = {
-  score: 85, // out of 100
-  duration: 480, // in minutes
-  remSleep: 90, // in minutes
-  deepSleep: 120, // in minutes
-  lightSleep: 270, // in minutes
-  date: new Date(Date.now() - 86400000).toISOString() // Yesterday
-};
-
-// Updated question type to match the Question type in types.ts
-export const questionSets = [
-  {
-    id: "set1",
-    chapter_id: "bio-11-1",
-    set_type: "A" as const,
-    questions: [
-      { 
-        id: "q1", 
-        question_text: "What is the definition of taxonomy?", 
-        option_a: "The study of plants",
-        option_b: "The science of classification of organisms",
-        option_c: "The study of animals",
-        option_d: "The study of microorganisms",
-        correct_answer: "B" as const,
-        subject: "Biology",
-        chapter_name: "The Living World",
-        topic: "Taxonomy",
-        subtopic: "Definition",
-        difficulty_level: "Easy" as const,
-        question_type: "MCQ" as const,
-        bloom_taxonomy: "Remember" as const,
-        priority_level: 1,
-        time_to_solve: 30,
-        key_concept_tested: "Understanding of basic taxonomic principles",
-        creation_timestamp: new Date().toISOString(),
-        last_updated_timestamp: new Date().toISOString()
-      },
-      { 
-        id: "q2", 
-        question_text: "Explain the binomial nomenclature system.", 
-        option_a: "System where organisms are named based on their habitat",
-        option_b: "System where organisms are named using two Latin words",
-        option_c: "System where organisms are classified based on their appearance",
-        option_d: "System where organisms are named after their discoverers",
-        correct_answer: "B" as const,
-        subject: "Biology",
-        chapter_name: "The Living World",
-        topic: "Nomenclature",
-        subtopic: "Binomial Nomenclature",
-        difficulty_level: "Medium" as const,
-        question_type: "MCQ" as const,
-        bloom_taxonomy: "Understand" as const,
-        priority_level: 2,
-        time_to_solve: 45,
-        key_concept_tested: "Understanding of Linnaeus' binomial system",
-        creation_timestamp: new Date().toISOString(),
-        last_updated_timestamp: new Date().toISOString()
-      }
-    ],
-    completed_date: null,
-    scheduled_date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
+    id: "ann-2",
+    title: "Mock Test Results",
+    content: "Last week's mock test results are now available in your dashboard.",
+    date: new Date(today.setDate(today.getDate() - 1)).toISOString(),
   },
-  {
-    id: "set2",
-    chapter_id: "bio-11-2",
-    set_type: "B" as const,
-    questions: [
-      { 
-        id: "q3", 
-        question_text: "Describe the structure of epithelial tissue.", 
-        option_a: "Loose cells with large intercellular spaces",
-        option_b: "Closely packed cells forming a continuous sheet",
-        option_c: "Star-shaped cells with long projections",
-        option_d: "Cells arranged in a fibrous network",
-        correct_answer: "B" as const,
-        subject: "Biology",
-        chapter_name: "Structural Organisation in Animals",
-        topic: "Tissues",
-        subtopic: "Epithelial Tissue",
-        difficulty_level: "Medium" as const,
-        question_type: "MCQ" as const,
-        bloom_taxonomy: "Understand" as const,
-        priority_level: 2,
-        time_to_solve: 45,
-        key_concept_tested: "Characteristics of epithelial tissue",
-        creation_timestamp: new Date().toISOString(),
-        last_updated_timestamp: new Date().toISOString()
-      },
-      { 
-        id: "q4", 
-        question_text: "What are the functions of connective tissue?", 
-        option_a: "Only structural support",
-        option_b: "Only protection of organs",
-        option_c: "Only binding different tissues",
-        option_d: "Support, protection, binding and insulation",
-        correct_answer: "D" as const,
-        subject: "Biology",
-        chapter_name: "Structural Organisation in Animals",
-        topic: "Tissues",
-        subtopic: "Connective Tissue",
-        difficulty_level: "Medium" as const,
-        question_type: "MCQ" as const,
-        bloom_taxonomy: "Understand" as const,
-        priority_level: 2,
-        time_to_solve: 45,
-        key_concept_tested: "Functions of connective tissues",
-        creation_timestamp: new Date().toISOString(),
-        last_updated_timestamp: new Date().toISOString()
-      }
-    ],
-    completed_date: null,
-    scheduled_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: "set3",
-    chapter_id: "bio-11-3",
-    set_type: "C" as const,
-    questions: [
-      { 
-        id: "q5", 
-        question_text: "Explain the process of glycolysis.", 
-        option_a: "Breaking down of fats in the liver",
-        option_b: "Conversion of glucose to pyruvate in the cytoplasm",
-        option_c: "Conversion of protein to amino acids",
-        option_d: "Breakdown of glycogen in muscles",
-        correct_answer: "B" as const,
-        subject: "Biology",
-        chapter_name: "Respiration in Plants",
-        topic: "Cellular Respiration",
-        subtopic: "Glycolysis",
-        difficulty_level: "Hard" as const,
-        question_type: "MCQ" as const,
-        bloom_taxonomy: "Analyze" as const,
-        priority_level: 3,
-        time_to_solve: 60,
-        key_concept_tested: "Understanding of glycolysis pathway",
-        creation_timestamp: new Date().toISOString(),
-        last_updated_timestamp: new Date().toISOString()
-      },
-      { 
-        id: "q6", 
-        question_text: "What is the role of mitochondria in cellular respiration?", 
-        option_a: "Site for protein synthesis",
-        option_b: "Site for lipid synthesis",
-        option_c: "Site for aerobic respiration and ATP production",
-        option_d: "Site for DNA replication",
-        correct_answer: "C" as const,
-        subject: "Biology",
-        chapter_name: "Respiration in Plants",
-        topic: "Cellular Respiration",
-        subtopic: "Mitochondrial Function",
-        difficulty_level: "Hard" as const,
-        question_type: "MCQ" as const,
-        bloom_taxonomy: "Analyze" as const,
-        priority_level: 3,
-        time_to_solve: 60,
-        key_concept_tested: "Function of mitochondria in respiration",
-        creation_timestamp: new Date().toISOString(),
-        last_updated_timestamp: new Date().toISOString()
-      }
-    ],
-    completed_date: null,
-    scheduled_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-  }
 ];
 
-// Mock data for analytics
-export const weeklyAccuracyData = [
-  { name: 'Mon', accuracy: 65 },
-  { name: 'Tue', accuracy: 59 },
-  { name: 'Wed', accuracy: 80 },
-  { name: 'Thu', accuracy: 81 },
-  { name: 'Fri', accuracy: 76 },
-  { name: 'Sat', accuracy: 85 },
-  { name: 'Sun', accuracy: 90 },
-];
-
+// Focus score data points for visualization
 export const focusScoreData = [
-  { name: 'Week 1', score: 65 },
-  { name: 'Week 2', score: 68 },
-  { name: 'Week 3', score: 75 },
-  { name: 'Week 4', score: 80 },
+  { time: "09:00", score: 85 },
+  { time: "10:00", score: 90 },
+  { time: "11:00", score: 75 },
+  { time: "12:00", score: 60 },
+  { time: "13:00", score: 50 },
+  { time: "14:00", score: 65 },
+  { time: "15:00", score: 80 },
+  { time: "16:00", score: 85 },
+  { time: "17:00", score: 70 },
 ];
 
+export const weeklyAccuracyData = [
+  { day: "Mon", accuracy: 75, focus: 80 },
+  { day: "Tue", accuracy: 80, focus: 85 },
+  { day: "Wed", accuracy: 70, focus: 65 },
+  { day: "Thu", accuracy: 85, focus: 80 },
+  { day: "Fri", accuracy: 90, focus: 90 },
+  { day: "Sat", accuracy: 80, focus: 75 },
+  { day: "Sun", accuracy: 75, focus: 70 },
+];
+
+// Sedentary metrics data
+export const sedentaryMetrics: SedentaryMetrics = {
+  totalSittingTime: 225, // 3h 45m in minutes
+  lastBreak: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago
+  breakSuggestion: "Consider a 5-min stretch quiz break"
+};
+
+// Sleep metrics data
+export const sleepMetrics: SleepMetrics = {
+  score: 72,
+  duration: 435, // 7h 15m in minutes
+  remSleep: 60, // 1h in minutes
+  deepSleep: 120, // 2h in minutes
+  lightSleep: 255, // 4h 15m in minutes
+  date: new Date().toISOString().split('T')[0]
+};
+
+// New mock data for weak topics
 export const weakTopicsData = [
-  { name: 'Cell Division', score: 45 },
-  { name: 'Photosynthesis', score: 52 },
-  { name: 'DNA Replication', score: 58 },
-  { name: 'Nervous System', score: 60 },
+  { topic: "Kinematics", score: 45 },
+  { topic: "Chemical Bonding", score: 55 },
+  { topic: "Cell Division", score: 60 },
+  { topic: "Optics", score: 50 },
+  { topic: "Thermodynamics", score: 70 },
 ];
 
-export const bloomSkillsProfile = {
+// Bloom's taxonomy skill profile
+export const bloomSkillsProfile: BloomSkillProfile = {
   remember: 85,
   understand: 75,
   apply: 65,
-  analyze: 60,
-  evaluate: 50,
-  create: 45
+  analyze: 50,
+  evaluate: 40,
+  create: 30
 };
 
-export const actionCards = [
+// Action cards for recommendations
+export const actionCards: ActionCard[] = [
   {
-    id: "action1",
-    title: "Practice Cell Division",
-    description: "10 questions to improve your understanding",
-    actionLabel: "Start Practice",
-    priority: "high",
-    completed: false,
-    action_type: "practice",
-    target: "Cell Division",
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "action2",
-    title: "Review Photosynthesis",
-    description: "Revisit key concepts and mechanisms",
-    actionLabel: "Review Now",
-    priority: "medium",
-    completed: false,
+    id: "action-1",
+    title: "Review Kinematics Concepts",
+    description: "Your accuracy in Kinematics questions is 45%. Practice 10 more questions.",
     action_type: "revision",
-    target: "Photosynthesis",
+    target: "Kinematics",
+    priority: 1,
+    completed: false,
     created_at: new Date().toISOString()
   },
   {
-    id: "action3",
-    title: "Take DNA Quiz",
-    description: "Test your knowledge on DNA structure",
-    actionLabel: "Take Quiz",
-    priority: "medium",
+    id: "action-2",
+    title: "Try a Guided Meditation",
+    description: "Your focus dips after 2 hours of study. A 3-minute meditation may help.",
+    action_type: "wellness",
+    target: "meditation",
+    priority: 3,
     completed: false,
-    action_type: "practice",
-    target: "DNA Structure",
     created_at: new Date().toISOString()
+  },
+  {
+    id: "action-3",
+    title: "Complete Thermodynamics Set B",
+    description: "Scheduled for spaced repetition. Due in 2 days.",
+    action_type: "practice",
+    target: "phys-thermodynamics",
+    priority: 2,
+    completed: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "action-4",
+    title: "Take a Study Break",
+    description: "You've been studying for 3+ hours. Schedule a 15-minute break.",
+    action_type: "wellness",
+    target: "break",
+    priority: 4,
+    completed: true,
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
   }
 ];
 
-// Fixed the ActionCard properties to meet the type requirements
-export const typedActionCards = actionCards.map(card => ({
-  id: card.id,
-  title: card.title,
-  description: card.description,
-  action_type: card.action_type as "revision" | "practice" | "wellness",
-  target: card.target,
-  priority: typeof card.priority === "string" ? 
-    (card.priority === "high" ? 1 : card.priority === "medium" ? 2 : 3) : 
-    card.priority,
-  completed: Boolean(card.completed),
-  created_at: card.created_at,
-  impact_score: 75
-}));
+// Questions for the mechanics chapter
+const mechanicsQuestions: Question[] = [
+  {
+    id: "q-mech-1",
+    question_text: "What is the SI unit of force?",
+    option_a: "Newton",
+    option_b: "Joule",
+    option_c: "Watt",
+    option_d: "Pascal",
+    correct_answer: "A",
+    subject: "Physics",
+    chapter_name: "Mechanics",
+    topic: "Forces",
+    subtopic: "Units and Dimensions",
+    difficulty_level: "Easy",
+    question_type: "MCQ",
+    bloom_taxonomy: "Remember",
+    priority_level: 3,
+    time_to_solve: 30,
+    key_concept_tested: "Understanding of basic physical units",
+    common_pitfalls: "Confusing force units with energy or pressure units",
+    creation_timestamp: "2025-01-15T10:30:00Z",
+    last_updated_timestamp: "2025-01-15T10:30:00Z"
+  },
+  {
+    id: "q-mech-2",
+    question_text: "Which law of motion states that for every action, there is an equal and opposite reaction?",
+    option_a: "First law",
+    option_b: "Second law",
+    option_c: "Third law",
+    option_d: "Fourth law",
+    correct_answer: "C",
+    subject: "Physics",
+    chapter_name: "Mechanics",
+    topic: "Newton's Laws",
+    subtopic: "Third Law",
+    difficulty_level: "Easy",
+    question_type: "MCQ",
+    bloom_taxonomy: "Remember",
+    priority_level: 3,
+    time_to_solve: 25,
+    key_concept_tested: "Knowledge of Newton's laws of motion",
+    creation_timestamp: "2025-01-15T11:00:00Z",
+    last_updated_timestamp: "2025-01-15T11:00:00Z"
+  },
+  {
+    id: "q-mech-3",
+    question_text: "A 2kg object moving at 4 m/s collides with a stationary 6kg object. If the collision is perfectly inelastic, what is the velocity of the combined objects after collision?",
+    option_a: "0.5 m/s",
+    option_b: "1 m/s",
+    option_c: "1.5 m/s",
+    option_d: "2 m/s",
+    correct_answer: "B",
+    subject: "Physics",
+    chapter_name: "Mechanics",
+    topic: "Collisions",
+    subtopic: "Inelastic Collisions",
+    difficulty_level: "Medium",
+    question_type: "MCQ",
+    bloom_taxonomy: "Apply",
+    priority_level: 2,
+    time_to_solve: 60,
+    key_concept_tested: "Conservation of momentum in inelastic collisions",
+    common_pitfalls: "Not accounting for the combined mass after collision",
+    creation_timestamp: "2025-01-16T09:15:00Z",
+    last_updated_timestamp: "2025-01-16T09:15:00Z"
+  }
+];
+
+// Add more questions for other chapters
+const thermodynamicsQuestions: Question[] = [
+  {
+    id: "q-therm-1",
+    question_text: "Which law of thermodynamics states that energy cannot be created or destroyed?",
+    option_a: "Zeroth law",
+    option_b: "First law",
+    option_c: "Second law",
+    option_d: "Third law",
+    correct_answer: "B",
+    subject: "Physics",
+    chapter_name: "Thermodynamics",
+    topic: "Laws of Thermodynamics",
+    subtopic: "First Law",
+    difficulty_level: "Easy",
+    question_type: "MCQ",
+    bloom_taxonomy: "Remember",
+    priority_level: 3,
+    time_to_solve: 30,
+    key_concept_tested: "Understanding of the first law of thermodynamics",
+    creation_timestamp: "2025-01-20T10:00:00Z",
+    last_updated_timestamp: "2025-01-20T10:00:00Z"
+  },
+  // Add more thermodynamics questions
+];
+
+// Create question sets
+export const questionSets: QuestionSet[] = [
+  {
+    id: "set-mech-a",
+    set_type: "A",
+    chapter_id: "phys-mechanics",
+    questions: mechanicsQuestions,
+    scheduled_date: today.toISOString().split("T")[0]
+  },
+  {
+    id: "set-therm-a",
+    set_type: "A",
+    chapter_id: "phys-thermodynamics",
+    questions: thermodynamicsQuestions,
+    scheduled_date: tomorrow.toISOString().split("T")[0]
+  }
+];

@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { chapters, questionSets, subjects } from "@/data/mockData";
+import { chapters, questionSets } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
@@ -44,7 +45,7 @@ const Practice = () => {
       );
       
       if (nextSet) {
-        setCurrentQuestionSet(nextSet as QuestionSet);
+        setCurrentQuestionSet(nextSet);
       }
     }
   }, [chapterId]);
