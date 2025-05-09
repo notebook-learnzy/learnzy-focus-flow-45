@@ -5,14 +5,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, BookOpen, GraduationCap } from "lucide-react";
+import { User, BookOpen, GraduationCap, Brain, Clock, ArrowRight, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { chapters, subjects } from "@/data/mockData";
+import { Progress } from "@/components/ui/progress";
 
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  type?: 'text' | 'progress-report' | 'schedule' | 'study-tips';
+  metadata?: any;
 }
 
 interface ShivAssistantProps {
@@ -20,37 +25,56 @@ interface ShivAssistantProps {
   onClose?: () => void;
 }
 
-// Mock NEET preparation data
-const neetPreparationData = {
-  idealStudyHours: {
-    physics: 3,
-    chemistry: 2.5,
-    biology: 4
+// AI Assistant capabilities
+const capabilities = [
+  {
+    name: "Progress Analysis",
+    description: "Get a detailed analysis of your learning progress",
+    icon: Brain,
   },
-  topicsImportance: {
-    physics: ["Mechanics", "Thermodynamics", "Optics", "Modern Physics"],
-    chemistry: ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry"],
-    biology: ["Human Physiology", "Plant Physiology", "Genetics", "Ecology"]
+  {
+    name: "Schedule Optimizer",
+    description: "Optimize your study schedule based on your performance",
+    icon: Calendar,
+  },
+  {
+    name: "Revision Planning",
+    description: "Get personalized revision plans for weak topics",
+    icon: Clock,
+  },
+  {
+    name: "Subject Insights",
+    description: "Get insights on different subjects and chapters",
+    icon: BookOpen,
   }
-};
+];
 
 const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "Hello! I'm Shiv, your NEET preparation assistant. How can I help you today?",
+      content: "Hello! I'm Shiv, your NEET preparation assistant. I can analyze your progress, create study schedules, suggest revisions, and more. How can I help you today?",
       sender: 'assistant',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const [capabilityOpen, setCapabilityOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const simulateTyping = async (content: string) => {
+    setIsThinking(true);
+    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 800));
+    setIsThinking(false);
+    return content;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,27 +98,70 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
       
       let responseContent = '';
+      let responseType: 'text' | 'progress-report' | 'schedule' | 'study-tips' = 'text';
+      let metadata = {};
       
       // Basic pattern matching to generate responses
       const inputLower = input.toLowerCase();
       
-      if (inputLower.includes('how is my preparation')) {
-        responseContent = "Based on your progress in the app, I see you've been consistent with your practice sets in Biology, but might need more focus on Physics. Your accuracy in Chemistry practice sets has improved by 15% in the last month, which is excellent! To stay on track for NEET, I recommend increasing your weekly practice hours for Physics by at least 2 hours.";
+      if (inputLower.includes('progress') || inputLower.includes('how am i doing')) {
+        responseType = 'progress-report';
+        responseContent = await simulateTyping("Here's your current progress across subjects:");
+        
+        metadata = {
+          subjects: [
+            { name: "Physics", progress: 68, recommendation: "Focus on Mechanics and Thermodynamics" },
+            { name: "Chemistry", progress: 82, recommendation: "Review Organic Reactions" },
+            { name: "Biology", progress: 75, recommendation: "Strengthen Cell Biology concepts" }
+          ],
+          overallProgress: 75,
+          weakTopics: ["Thermodynamics", "Cell Division", "Organic Chemistry"],
+          improvement: "+12% in the last month",
+        };
       } 
-      else if (inputLower.includes('study plan')) {
-        responseContent = "For optimal NEET preparation, I recommend: \n\n• Physics: 3 hours daily focusing on mechanics and electromagnetism\n• Chemistry: 2.5 hours daily with emphasis on organic reactions\n• Biology: 4 hours daily prioritizing human physiology and genetics\n\nYour current study pattern shows more time on Biology, which is good, but consider balancing with more Physics practice.";
+      else if (inputLower.includes('study plan') || inputLower.includes('schedule')) {
+        responseType = 'schedule';
+        responseContent = await simulateTyping("I've analyzed your performance and created a personalized study schedule:");
+        
+        metadata = {
+          schedule: [
+            { day: "Monday", morning: "Physics - Mechanics", afternoon: "Biology - Cell Biology", evening: "Chemistry - Organic" },
+            { day: "Tuesday", morning: "Physics - Waves", afternoon: "Biology - Genetics", evening: "Chemistry - Physical" },
+            { day: "Wednesday", morning: "NEET Mock Test", afternoon: "Review Test Results", evening: "Weak Topics Revision" },
+            { day: "Thursday", morning: "Physics - Electrostatics", afternoon: "Biology - Human Physiology", evening: "Chemistry - Inorganic" },
+            { day: "Friday", morning: "Physics - Optics", afternoon: "Biology - Plant Physiology", evening: "Chemistry - Analytical" },
+            { day: "Weekend", morning: "Revision of weak topics", afternoon: "Practice tests", evening: "Relaxation & rest" },
+          ],
+          studyPattern: {
+            studyTime: "6 hours/day",
+            breakSchedule: "50 min study + 10 min break",
+            recommendedTimeOfDay: "Early morning and late afternoon"
+          }
+        };
       }
-      else if (inputLower.includes('revise') || inputLower.includes('help me with')) {
-        const topic = inputLower.includes('physics') ? 'Physics' : 
-                      inputLower.includes('chemistry') ? 'Chemistry' : 
-                      'Biology';
-        responseContent = `Let's review the key concepts for ${topic}. Based on your practice history, I'd suggest focusing on these specific areas that align with NEET exam patterns. Would you like me to create a revision schedule for this topic or provide practice questions?`;
+      else if (inputLower.includes('tips') || inputLower.includes('advice')) {
+        responseType = 'study-tips';
+        responseContent = await simulateTyping("Here are some personalized study tips based on your learning patterns:");
+        
+        metadata = {
+          tips: [
+            { tip: "Use the Feynman Technique", description: "Explain concepts as if teaching someone else to deepen your understanding." },
+            { tip: "Optimize your study space", description: "Your focus score is highest in quiet environments with minimal distractions." },
+            { tip: "Try time-blocking", description: "Schedule specific subjects at times when your focus is historically highest." },
+            { tip: "Take meditation breaks", description: "Your performance improves by 15% after meditation sessions." },
+          ],
+          focusPattern: "Your focus peaks between 9-11 AM and 4-6 PM",
+          retentionTip: "Review notes within 24 hours to increase retention by 60%"
+        };
       }
-      else if (inputLower.includes('ncert')) {
-        responseContent = "The NCERT textbooks are essential for NEET preparation. Based on the chapter you mentioned, here are the key concepts to focus on: [Key concepts would be provided here]. Your practice sessions show you're stronger in conceptual questions but need more practice with numerical problems from this chapter.";
+      else if (inputLower.includes('biology') || inputLower.includes('chapter')) {
+        responseContent = await simulateTyping("The Living World is a fundamental chapter in NEET Biology. Based on previous years, there are typically 2-3 questions from this chapter. Focus on characteristics of living organisms, taxonomical aids, and classification systems. Your practice sessions show you understand the concepts well, but need more work on distinguishing between taxonomical categories.");
+      }
+      else if (inputLower.includes('neet') || inputLower.includes('exam')) {
+        responseContent = await simulateTyping("NEET 2025 is scheduled for May. Based on your current progress, you're on track with Biology (75%) and Chemistry (82%), but need to focus more on Physics (68%). I recommend allocating an extra hour daily to Physics while maintaining your current study pattern for other subjects. Your concept retention has improved by 15% in the last month, which is excellent!");
       }
       else {
-        responseContent = "I'm here to help with your NEET preparation journey. I can provide guidance on study plans, analyze your progress, help with revisions, or explain specific topics. What aspect of your preparation would you like assistance with?";
+        responseContent = await simulateTyping("I'm here to help with your NEET preparation journey. I can provide guidance on study plans, analyze your progress, help with revisions, or explain specific topics. What aspect of your preparation would you like assistance with today?");
       }
       
       // Add assistant response
@@ -102,7 +169,9 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
         id: `assistant-${Date.now()}`,
         content: responseContent,
         sender: 'assistant',
-        timestamp: new Date()
+        timestamp: new Date(),
+        type: responseType,
+        metadata: metadata
       };
       
       setMessages(prev => [...prev, assistantMessage]);
@@ -114,6 +183,108 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper to render specialized message content based on type
+  const renderMessageContent = (message: Message) => {
+    if (message.sender === 'user' || !message.type || message.type === 'text') {
+      return <p className="whitespace-pre-line">{message.content}</p>;
+    }
+
+    switch (message.type) {
+      case 'progress-report':
+        return (
+          <div className="space-y-4">
+            <p className="whitespace-pre-line">{message.content}</p>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="flex justify-between mb-2">
+                <span className="font-medium">Overall Progress</span>
+                <span className="font-medium">{message.metadata.overallProgress}%</span>
+              </div>
+              <Progress value={message.metadata.overallProgress} className="mb-4" />
+              
+              <div className="space-y-3">
+                {message.metadata.subjects.map((subject: any, index: number) => (
+                  <div key={index} className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>{subject.name}</span>
+                      <span>{subject.progress}%</span>
+                    </div>
+                    <Progress value={subject.progress} className={
+                      subject.progress < 70 ? "bg-red-100" : 
+                      subject.progress < 85 ? "bg-yellow-100" : 
+                      "bg-green-100"
+                    } />
+                    <p className="text-xs text-gray-600">{subject.recommendation}</p>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-4 pt-3 border-t">
+                <p className="text-sm font-medium">Focus areas:</p>
+                <div className="flex gap-2 mt-1 flex-wrap">
+                  {message.metadata.weakTopics.map((topic: string, index: number) => (
+                    <span key={index} className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'schedule':
+        return (
+          <div className="space-y-4">
+            <p className="whitespace-pre-line">{message.content}</p>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Weekly Schedule</p>
+              <div className="space-y-3">
+                {message.metadata.schedule.map((day: any, index: number) => (
+                  <div key={index} className="border-b pb-2">
+                    <p className="font-medium">{day.day}</p>
+                    <div className="grid grid-cols-3 gap-1 mt-1 text-xs">
+                      <div className="bg-blue-50 p-1 rounded">{day.morning}</div>
+                      <div className="bg-green-50 p-1 rounded">{day.afternoon}</div>
+                      <div className="bg-purple-50 p-1 rounded">{day.evening}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 pt-2 text-sm">
+                <p><span className="font-medium">Daily study:</span> {message.metadata.studyPattern.studyTime}</p>
+                <p><span className="font-medium">Breaks:</span> {message.metadata.studyPattern.breakSchedule}</p>
+                <p><span className="font-medium">Best time:</span> {message.metadata.studyPattern.recommendedTimeOfDay}</p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'study-tips':
+        return (
+          <div className="space-y-4">
+            <p className="whitespace-pre-line">{message.content}</p>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="space-y-3">
+                {message.metadata.tips.map((tip: any, index: number) => (
+                  <div key={index} className="border-b pb-2">
+                    <p className="font-medium">{tip.tip}</p>
+                    <p className="text-xs text-gray-600">{tip.description}</p>
+                  </div>
+                ))}
+                <div className="pt-2 text-sm">
+                  <p className="bg-blue-50 p-2 rounded">{message.metadata.focusPattern}</p>
+                  <p className="bg-green-50 p-2 rounded mt-2">{message.metadata.retentionTip}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return <p className="whitespace-pre-line">{message.content}</p>;
     }
   };
 
@@ -154,13 +325,24 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
                     : 'bg-gray-100 text-gray-900'
                 }`}
               >
-                <p className="whitespace-pre-line">{message.content}</p>
+                {renderMessageContent(message)}
                 <p className="text-xs mt-1 opacity-70">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             </div>
           ))}
+          {isThinking && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 text-gray-900 max-w-[80%] rounded-lg p-3">
+                <div className="flex space-x-1 items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-300"></div>
+                </div>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
@@ -174,8 +356,48 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
             disabled={isLoading}
             className="flex-1"
           />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "..." : "Send"}
+          <Popover open={capabilityOpen} onOpenChange={setCapabilityOpen}>
+            <PopoverTrigger asChild>
+              <Button size="icon" variant="ghost" className="flex-shrink-0">
+                <BookOpen size={16} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top" className="w-80 p-0" align="end">
+              <div className="p-4 border-b">
+                <h4 className="font-medium">Assistant Capabilities</h4>
+                <p className="text-sm text-gray-500">Try asking about these topics</p>
+              </div>
+              <div className="p-2">
+                {capabilities.map((capability, index) => (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="w-full justify-start h-auto py-2 px-3"
+                    onClick={() => {
+                      setInput(`Tell me about my ${capability.name.toLowerCase()}`);
+                      setCapabilityOpen(false);
+                    }}
+                  >
+                    <div className="flex items-start">
+                      <div className="bg-learnzy-purple/10 p-1 rounded mr-2">
+                        <capability.icon className="h-4 w-4 text-learnzy-purple" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-sm">{capability.name}</p>
+                        <p className="text-xs text-gray-500">{capability.description}</p>
+                      </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="flex-shrink-0"
+          >
+            {isLoading ? "..." : <ArrowRight size={16} />}
           </Button>
         </form>
       </CardFooter>
