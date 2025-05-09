@@ -454,7 +454,7 @@ export const tasks = [
   {
     id: "task-1",
     title: "Practice Physics Set B",
-    type: "practice", // Now matches TaskType
+    type: "practice" as TaskType, // Explicit type casting
     date: "2023-05-10",
     time: "14:00",
     duration: 60,
@@ -464,7 +464,7 @@ export const tasks = [
   {
     id: "task-2",
     title: "Meditation Session",
-    type: "wellness", // Now matches TaskType
+    type: "wellness" as TaskType, // Explicit type casting
     date: "2023-05-10",
     time: "08:00",
     duration: 15,
@@ -473,7 +473,7 @@ export const tasks = [
   {
     id: "task-3",
     title: "Chemistry Revision",
-    type: "practice", // Now matches TaskType
+    type: "practice" as TaskType, // Explicit type casting
     date: "2023-05-11",
     time: "16:00",
     duration: 90,
@@ -483,12 +483,21 @@ export const tasks = [
   {
     id: "task-4",
     title: "Biology - Living World Set A",
-    type: "practice", // Now matches TaskType
+    type: "practice" as TaskType, // Explicit type casting
     date: "2023-05-12",
     time: "10:00",
     duration: 45,
     completed: false,
     chapterId: "bio11-ch01"
+  },
+  {
+    id: "task-5",
+    title: "Daily Planning",
+    type: "custom" as TaskType, // Explicit type casting
+    date: "2023-05-13",
+    time: "07:30",
+    duration: 15,
+    completed: false
   }
 ];
 
@@ -642,5 +651,76 @@ export const completedSets = [
         "Circular Motion": 75
       }
     }
+  }
+];
+
+// Analytics chart data
+export const weeklyAccuracyData = [
+  { day: "Mon", accuracy: 68, focus: 72 },
+  { day: "Tue", accuracy: 74, focus: 78 },
+  { day: "Wed", accuracy: 82, focus: 85 },
+  { day: "Thu", accuracy: 78, focus: 75 },
+  { day: "Fri", accuracy: 85, focus: 88 },
+  { day: "Sat", accuracy: 90, focus: 92 },
+  { day: "Sun", accuracy: 76, focus: 80 }
+];
+
+export const focusScoreData = [
+  { time: "8 AM", score: 75 },
+  { time: "9 AM", score: 82 },
+  { time: "10 AM", score: 90 },
+  { time: "11 AM", score: 85 },
+  { time: "12 PM", score: 72 },
+  { time: "1 PM", score: 68 },
+  { time: "2 PM", score: 75 },
+  { time: "3 PM", score: 80 },
+  { time: "4 PM", score: 78 }
+];
+
+export const weakTopicsData = [
+  { topic: "Photosynthesis", score: 45 },
+  { topic: "Cell Division", score: 55 },
+  { topic: "Newton's Laws", score: 60 },
+  { topic: "Organic Chemistry", score: 65 },
+  { topic: "Integration", score: 70 }
+];
+
+export const bloomSkillsProfile = {
+  remember: 85,
+  understand: 75,
+  apply: 68,
+  analyze: 62,
+  evaluate: 55,
+  create: 48
+};
+
+export const actionCards = [
+  {
+    id: "action-1",
+    title: "Revise Photosynthesis",
+    description: "Your accuracy dropped in this topic",
+    completed: false,
+    priority: "high"
+  },
+  {
+    id: "action-2",
+    title: "Take a 5-minute break",
+    description: "You've been studying for 45 minutes",
+    completed: true,
+    priority: "medium"
+  },
+  {
+    id: "action-3",
+    title: "Practice Newton's Laws",
+    description: "Recommended based on your schedule",
+    completed: false,
+    priority: "medium"
+  },
+  {
+    id: "action-4",
+    title: "Meditate before next session",
+    description: "Improve focus for difficult topics",
+    completed: false,
+    priority: "low"
   }
 ];
