@@ -1,4 +1,3 @@
-
 export type Subject = {
   id: string;
   name: string;
@@ -36,23 +35,34 @@ export type Suggestion = {
   date: string;
 };
 
-export type SedentaryMetrics = {
-  totalSittingTime: number; // in minutes
-  lastBreak: string; // ISO date string
-  breakSuggestion: string;
-};
-
 export type SleepMetrics = {
-  score: number; // out of 100
+  score: number;
+  quality: string;
   duration: number; // in minutes
+  date: string;
   remSleep: number; // in minutes
   deepSleep: number; // in minutes
   lightSleep: number; // in minutes
-  date: string; // ISO date string
+  efficiency: number; // percentage
+  stressScore?: {
+    beforeSleep: number;
+    duringSleep: number;
+  };
 };
 
-// New question schema
-export type DifficultyLevel = "Easy" | "Medium" | "Hard";
+export type SedentaryMetrics = {
+  totalSittingTime: number; // in minutes
+  lastBreak: string; // timestamp
+  breaks: number;
+  breakSuggestion: string;
+  movementScore: number; // 0-100
+  hourlyActivity?: {
+    hour: string;
+    movementScore: number;
+    sittingMinutes: number;
+  }[];
+};
+
 export type QuestionType = "MCQ" | "Assertion-Reason" | "Fill-in-the-blank" | "Match";
 export type BloomTaxonomy = "Remember" | "Understand" | "Apply" | "Analyze" | "Evaluate" | "Create";
 export type CorrectAnswer = "A" | "B" | "C" | "D";
@@ -132,8 +142,6 @@ export type ActionCard = {
   created_at: string; // ISO date string
   impact_score?: number; // 0-100, for prioritization
 };
-
-// New types for social features and wellness streaks
 
 export type UserStreaks = {
   meditation_days: number;

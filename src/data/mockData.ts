@@ -561,21 +561,57 @@ export const announcements = [
   }
 ];
 
-// Sedentary metrics
-export const sedentaryMetrics = {
-  totalSittingTime: 340,
-  lastBreak: "2023-05-09T14:30:00",
-  breakSuggestion: "You've been sitting for over an hour. Consider taking a short walk."
-};
+// Sleep metrics mock data
+export const sleepMetrics: SleepMetrics[] = [
+  {
+    score: 80,
+    quality: "Good",
+    duration: 472, // 7h 52m
+    date: "2025-05-10",
+    remSleep: 108,
+    deepSleep: 92,
+    lightSleep: 272,
+    efficiency: 92
+  },
+  {
+    score: 68,
+    quality: "Average",
+    duration: 401, // 6h 41m
+    date: "2025-05-09",
+    remSleep: 85,
+    deepSleep: 76,
+    lightSleep: 240,
+    efficiency: 84
+  },
+  {
+    score: 92,
+    quality: "Excellent",
+    duration: 496, // 8h 16m
+    date: "2025-05-08",
+    remSleep: 125,
+    deepSleep: 112,
+    lightSleep: 259,
+    efficiency: 95
+  }
+];
 
-// Sleep metrics
-export const sleepMetrics = {
-  score: 85,
-  duration: 440,
-  remSleep: 110,
-  deepSleep: 90,
-  lightSleep: 240,
-  date: "2023-05-09"
+// Sedentary metrics mock data
+export const sedentaryMetrics: SedentaryMetrics = {
+  totalSittingTime: 340,
+  lastBreak: "2025-05-10T14:30:00",
+  breaks: 4,
+  breakSuggestion: "You've been sitting for a while. Consider taking a 5-minute break soon.",
+  movementScore: 45,
+  hourlyActivity: [
+    { hour: '08:00', movementScore: 65, sittingMinutes: 42 },
+    { hour: '09:00', movementScore: 30, sittingMinutes: 55 },
+    { hour: '10:00', movementScore: 45, sittingMinutes: 49 },
+    { hour: '11:00', movementScore: 75, sittingMinutes: 28 },
+    { hour: '12:00', movementScore: 85, sittingMinutes: 20 },
+    { hour: '13:00', movementScore: 35, sittingMinutes: 52 },
+    { hour: '14:00', movementScore: 40, sittingMinutes: 50 },
+    { hour: '15:00', movementScore: 50, sittingMinutes: 44 }
+  ]
 };
 
 // Focus sessions for analytics

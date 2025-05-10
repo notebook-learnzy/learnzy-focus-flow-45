@@ -3,12 +3,15 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { suggestions, journalEntries } from "@/data/mockData";
-import { Heart, Clock, Smile, Send, Calendar, Edit3, Check } from "lucide-react";
+import { Heart, Clock, Smile, Send, Calendar, Edit3, Check, Moon, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FocusScoreGauge from "@/components/FocusScoreGauge";
 import WellnessRewards from "@/components/WellnessRewards";
+import SleepVisualization from "@/components/SleepVisualization";
+import SedentaryActivity from "@/components/SedentaryActivity";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -105,76 +108,122 @@ const Wellness = () => {
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-2xl font-bold mb-6">Wellness Hub</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Journal</CardTitle>
-              <CardDescription>Track your mood and thoughts throughout your NEET journey</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="How are you feeling today?"
-                    className="h-24"
-                    value={journalText}
-                    onChange={(e) => setJournalText(e.target.value)}
-                  />
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
-                    <Select value={moodTag} onValueChange={setMoodTag}>
-                      <SelectTrigger className="w-44">
-                        <SelectValue placeholder="Select mood" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="happy">Happy</SelectItem>
-                        <SelectItem value="anxious">Anxious</SelectItem>
-                        <SelectItem value="tired">Tired</SelectItem>
-                        <SelectItem value="sad">Sad</SelectItem>
-                        <SelectItem value="focused">Focused</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={handleJournalSubmit}>
-                      <Send className="mr-2 h-4 w-4" /> Save Entry
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-4 pt-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Recent Entries</h3>
-                    <Button variant="ghost" size="sm">
-                      <Calendar className="mr-2 h-4 w-4" /> View All
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    {entries.map((entry) => (
-                      <div key={entry.id} className="border rounded-lg p-3">
-                        <div className="flex justify-between items-center mb-2">
-                          <Badge className={getMoodColor(entry.mood_tag)}>
-                            {entry.mood_tag.charAt(0).toUpperCase() + entry.mood_tag.slice(1)}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {format(new Date(entry.date), "MMM dd, yyyy")}
-                          </span>
-                        </div>
-                        <p className="text-sm">{entry.text}</p>
+      <Tabs defaultValue="journal">
+        <TabsList className="mb-6">
+          <TabsTrigger value="journal">Journal</TabsTrigger>
+          <TabsTrigger value="metrics">Health Metrics</TabsTrigger>
+          <TabsTrigger value="activities">Activities</TabsTrigger>
+        </TabsList>
+      
+        <TabsContent value="journal">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Journal</CardTitle>
+                  <CardDescription>Track your mood and thoughts throughout your NEET journey</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder="How are you feeling today?"
+                        className="h-24"
+                        value={journalText}
+                        onChange={(e) => setJournalText(e.target.value)}
+                      />
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between">
+                        <Select value={moodTag} onValueChange={setMoodTag}>
+                          <SelectTrigger className="w-44">
+                            <SelectValue placeholder="Select mood" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="happy">Happy</SelectItem>
+                            <SelectItem value="anxious">Anxious</SelectItem>
+                            <SelectItem value="tired">Tired</SelectItem>
+                            <SelectItem value="sad">Sad</SelectItem>
+                            <SelectItem value="focused">Focused</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button onClick={handleJournalSubmit}>
+                          <Send className="mr-2 h-4 w-4" /> Save Entry
+                        </Button>
                       </div>
-                    ))}
+                    </div>
+                    
+                    <div className="space-y-4 pt-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium">Recent Entries</h3>
+                        <Button variant="ghost" size="sm">
+                          <Calendar className="mr-2 h-4 w-4" /> View All
+                        </Button>
+                      </div>
+                      
+                      <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                        {entries.map((entry) => (
+                          <div key={entry.id} className="border rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <Badge className={getMoodColor(entry.mood_tag)}>
+                                {entry.mood_tag.charAt(0).toUpperCase() + entry.mood_tag.slice(1)}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                {format(new Date(entry.date), "MMM dd, yyyy")}
+                              </span>
+                            </div>
+                            <p className="text-sm">{entry.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Current Focus</CardTitle>
+                  <CardDescription>Your focus level right now</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                  <FocusScoreGauge size="lg" />
+                </CardContent>
+              </Card>
+              
+              <WellnessRewards />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Daily Wellness Tip</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-learnzy-mint/20 p-4 rounded-lg">
+                    <p className="text-sm font-medium">
+                      "Regular short breaks improve long-term focus and memory retention. Try the 25-5 method: 25 minutes of focused study, followed by a 5-minute break."
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="metrics">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SleepVisualization />
+            <SedentaryActivity />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="activities">
           <Card>
             <CardHeader>
               <CardTitle>Wellness Activities</CardTitle>
               <CardDescription>Quick activities to improve your wellbeing</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {wellnessActivities.map((activity) => (
                   <div
                     key={activity.id}
@@ -201,35 +250,64 @@ const Wellness = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Current Focus</CardTitle>
-              <CardDescription>Your focus level right now</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <FocusScoreGauge size="lg" />
-            </CardContent>
-          </Card>
           
-          <WellnessRewards />
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Daily Wellness Tip</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-learnzy-mint/20 p-4 rounded-lg">
-                <p className="text-sm font-medium">
-                  "Regular short breaks improve long-term focus and memory retention. Try the 25-5 method: 25 minutes of focused study, followed by a 5-minute break."
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Moon className="h-5 w-5" />
+                  Sleep Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-blue-800 mb-1">Optimal Sleep Schedule</h4>
+                    <p className="text-sm">Based on your exam calendar, aim to sleep between 10:30 PM and 6:00 AM to maintain consistent sleep cycles.</p>
+                  </div>
+                  
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-purple-800 mb-1">Pre-sleep Routine</h4>
+                    <p className="text-sm">Consider a 15-minute meditation session before bed to improve sleep quality and memory consolidation.</p>
+                  </div>
+                  
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-green-800 mb-1">Sleep-Study Balance</h4>
+                    <p className="text-sm">Aim for 7-8 hours of sleep consistently. Extra study at the cost of sleep has diminishing returns on memory retention.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Activity Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-green-800 mb-1">Study Breaks</h4>
+                    <p className="text-sm">Take a 5-minute break every 25-30 minutes of focused study. Stand up and stretch during these breaks.</p>
+                  </div>
+                  
+                  <div className="bg-orange-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-orange-800 mb-1">Movement Goal</h4>
+                    <p className="text-sm">Aim for 30-45 minutes of moderate physical activity daily to improve cognitive function and reduce stress.</p>
+                  </div>
+                  
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <h4 className="font-medium text-blue-800 mb-1">Posture Check</h4>
+                    <p className="text-sm">Set hourly reminders to check your posture while studying. Proper posture reduces fatigue and improves concentration.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
