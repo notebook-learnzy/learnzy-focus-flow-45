@@ -23,6 +23,9 @@ const Dashboard = () => {
   const [assistantOpen, setAssistantOpen] = useState(false);
   const navigate = useNavigate();
   
+  // Get the latest sleep metrics
+  const latestSleepMetric = sleepMetrics[0]; 
+  
   const handleOpenAssistant = () => {
     setAssistantOpen(true);
   };
@@ -107,7 +110,7 @@ const Dashboard = () => {
           <CalendarWidget tasks={tasks} />
           <div className="grid grid-cols-1 gap-4">
             <FocusScoreGauge />
-            <SleepMetricsCard metrics={sleepMetrics} />
+            <SleepMetricsCard metrics={latestSleepMetric} />
             <SedentaryMetricsCard metrics={sedentaryMetrics} />
           </div>
         </div>
@@ -174,7 +177,7 @@ const Dashboard = () => {
           
           <CalendarWidget tasks={tasks} />
           <FocusScoreGauge />
-          <SleepMetricsCard metrics={sleepMetrics} />
+          <SleepMetricsCard metrics={latestSleepMetric} />
           <SedentaryMetricsCard metrics={sedentaryMetrics} />
         </div>
       </div>

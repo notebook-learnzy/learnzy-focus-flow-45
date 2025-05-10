@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Moon } from "lucide-react";
+import { Moon, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { SleepMetrics } from "@/types";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SleepMetricsCardProps {
   metrics: SleepMetrics;
@@ -13,24 +13,19 @@ interface SleepMetricsCardProps {
 
 const SleepMetricsCard = ({ metrics }: SleepMetricsCardProps) => {
   // Convert minutes to hours and minutes
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
-  };
+  const hours = Math.floor(metrics.duration / 60);
+  const minutes = metrics.duration % 60;
   
-  // Determine color based on sleep score
+  // Calculate percentages for sleep stages
+  const remPercentage = (metrics.remSleep / metrics.duration) * 100;
+  const deepPercentage = (metrics.deepSleep / metrics.duration) * 100;
+  const lightPercentage = (metrics.lightSleep / metrics.duration) * 100;
+  
+  // Determine score color
   const getScoreColor = () => {
     if (metrics.score >= 80) return "text-green-500";
-    if (metrics.score >= 60) return "text-orange-500";
+    if (metrics.score >= 60) return "text-amber-500";
     return "text-red-500";
-  };
-
-  // Get progress color for the bar
-  const getProgressColor = () => {
-    if (metrics.score >= 80) return "bg-green-500";
-    if (metrics.score >= 60) return "bg-orange-500";
-    return "bg-red-500";
   };
   
   return (
@@ -38,43 +33,66 @@ const SleepMetricsCard = ({ metrics }: SleepMetricsCardProps) => {
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center">
           <Moon size={18} className="mr-2" />
-          Sleep Score
+          Sleep Quality
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
           <Tooltip>
             <TooltipTrigger>
-              <div className="flex items-center gap-2">
-                <span className={cn("text-2xl font-semibold", getScoreColor())}>
-                  {metrics.score}/100
-                </span>
-              </div>
+              <span className={cn("text-2xl font-semibold", getScoreColor())}>
+                {metrics.score}/100
+              </span>
             </TooltipTrigger>
-            <TooltipContent className="p-2">
-              <div className="space-y-1">
-                <p><strong>Total:</strong> {formatTime(metrics.duration)}</p>
-                <p><strong>REM:</strong> {formatTime(metrics.remSleep)}</p>
-                <p><strong>Deep:</strong> {formatTime(metrics.deepSleep)}</p>
-                <p><strong>Light:</strong> {formatTime(metrics.lightSleep)}</p>
-              </div>
+            <TooltipContent>
+              <p>Sleep quality score</p>
             </TooltipContent>
           </Tooltip>
           
-          <span className="text-xs text-gray-500">
-            {new Date(metrics.date).toLocaleDateString()}
+          <span className="text-right">
+            <span className="font-medium">{hours}h {minutes}m</span>
+            <p className="text-xs text-gray-500">
+              {new Date(metrics.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+            </p>
           </span>
         </div>
         
-        <Progress 
-          value={metrics.score} 
-          className={cn("h-2", getProgressColor())}
-        />
+        <div className="flex h-2 rounded-full overflow-hidden bg-gray-100">
+          <div 
+            className="bg-blue-900"
+            style={{ width: `${deepPercentage}%` }}
+          />
+          <div 
+            className="bg-blue-500"
+            style={{ width: `${remPercentage}%` }}
+          />
+          <div 
+            className="bg-blue-200"
+            style={{ width: `${lightPercentage}%` }}
+          />
+        </div>
         
-        <p className="text-sm text-gray-700">
-          {metrics.score < 70 ? 
-            "Low sleep quality. Consider light revision today." : 
-            "Good sleep quality. You're ready for focused study."}
+        <div className="grid grid-cols-3 text-xs">
+          <div className="flex items-center">
+            <span className="w-2 h-2 bg-blue-900 rounded-full mr-1" /> 
+            <span className="text-gray-600">Deep</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-2 h-2 bg-blue-500 rounded-full mr-1" /> 
+            <span className="text-gray-600">REM</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-2 h-2 bg-blue-200 rounded-full mr-1" /> 
+            <span className="text-gray-600">Light</span>
+          </div>
+        </div>
+        
+        <p className="text-sm text-gray-700 pt-1">
+          {metrics.quality === "Excellent" 
+            ? "You had excellent sleep quality last night. Keep it up!" 
+            : metrics.quality === "Good" 
+              ? "Good sleep quality. Your body is well-rested."
+              : "Average sleep quality. Try to get more deep sleep."}
         </p>
       </CardContent>
     </Card>

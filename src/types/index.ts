@@ -1,3 +1,4 @@
+
 export type Subject = {
   id: string;
   name: string;
@@ -66,6 +67,7 @@ export type SedentaryMetrics = {
 export type QuestionType = "MCQ" | "Assertion-Reason" | "Fill-in-the-blank" | "Match";
 export type BloomTaxonomy = "Remember" | "Understand" | "Apply" | "Analyze" | "Evaluate" | "Create";
 export type CorrectAnswer = "A" | "B" | "C" | "D";
+export type DifficultyLevel = "Easy" | "Medium" | "Hard";
 
 export type Question = {
   id: string;
