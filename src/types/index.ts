@@ -38,13 +38,13 @@ export type Suggestion = {
 
 export type SleepMetrics = {
   score: number;
-  quality: string;
+  quality: string; // Added this property
   duration: number; // in minutes
   date: string;
   remSleep: number; // in minutes
   deepSleep: number; // in minutes
   lightSleep: number; // in minutes
-  efficiency: number; // percentage
+  efficiency: number; // percentage - Added this property
   stressScore?: {
     beforeSleep: number;
     duringSleep: number;
@@ -54,9 +54,9 @@ export type SleepMetrics = {
 export type SedentaryMetrics = {
   totalSittingTime: number; // in minutes
   lastBreak: string; // timestamp
-  breaks: number;
+  breaks: number; // Added this property
   breakSuggestion: string;
-  movementScore: number; // 0-100
+  movementScore: number; // 0-100 - Added this property
   hourlyActivity?: {
     hour: string;
     movementScore: number;
