@@ -39,6 +39,13 @@ export type SedentaryMetrics = {
   totalSittingTime: number; // in minutes
   lastBreak: string; // ISO date string
   breakSuggestion: string;
+  breaks: number; // Added this property
+  movementScore: number; // 0-100 - Added this property
+  hourlyActivity?: {
+    hour: string;
+    movementScore: number;
+    sittingMinutes: number;
+  }[];
 };
 
 export type SleepMetrics = {
@@ -48,6 +55,8 @@ export type SleepMetrics = {
   deepSleep: number; // in minutes
   lightSleep: number; // in minutes
   date: string; // ISO date string
+  quality: string; // Added this property
+  efficiency: number; // percentage - Added this property
 };
 
 // New question schema

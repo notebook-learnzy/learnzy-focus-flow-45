@@ -1,14 +1,14 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, BookOpen, ChartLineUp, ArrowLeft, CheckCircle, XCircle, Timer, AlertCircle, Focus } from "lucide-react";
+import { Brain, BookOpen, ChartLine, ArrowLeft, CheckCircle, XCircle, Timer, AlertCircle, Focus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { FocusData, SessionReport } from "@/types";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
+import { cn } from "@/lib/utils";
 
 // Normally this would come from an API or context
 // Mock data for demonstration
@@ -198,12 +198,13 @@ const PerformanceReport = () => {
                             <Progress 
                               value={item.focus_score} 
                               className="h-1.5" 
-                              indicatorClassName={
+                              className={cn(
+                                "h-1.5",
                                 item.focus_score >= 85 ? "bg-green-500" :
                                 item.focus_score >= 70 ? "bg-blue-500" :
                                 item.focus_score >= 55 ? "bg-amber-500" :
                                 "bg-red-500"
-                              }
+                              )}
                             />
                             <span className={`ml-2 text-xs ${getFocusColor(item.focus_score)}`}>
                               {item.focus_score}
@@ -337,7 +338,7 @@ const PerformanceReport = () => {
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="bg-learnzy-purple/10 p-2 rounded-full">
-                  <ChartLineUp className="h-4 w-4 text-learnzy-purple" />
+                  <ChartLine className="h-4 w-4 text-learnzy-purple" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">Practice Similar Questions</p>
