@@ -1,4 +1,6 @@
 
+import { MoodState, Badge } from './wellness';
+
 export type Challenge = {
   id: string;
   name: string;
