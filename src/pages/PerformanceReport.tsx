@@ -197,7 +197,6 @@ const PerformanceReport = () => {
                             <div className="text-xs mr-2">Focus:</div>
                             <Progress 
                               value={item.focus_score} 
-                              className="h-1.5" 
                               className={cn(
                                 "h-1.5",
                                 item.focus_score >= 85 ? "bg-green-500" :
