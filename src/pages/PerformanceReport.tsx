@@ -1,314 +1,389 @@
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Brain, GraduationCap, ArrowRight, Calendar } from "lucide-react";
-import { biologyChapters, completedSets } from "@/data/mockData";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Brain, BookOpen, ChartLineUp, ArrowLeft, CheckCircle, XCircle, Timer, AlertCircle, Focus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { FocusData, SessionReport } from "@/types";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
+
+// Normally this would come from an API or context
+// Mock data for demonstration
+const mockSessionReport: SessionReport = {
+  id: "session-123",
+  question_set_id: "qs-biology-a",
+  date: new Date().toISOString(),
+  overall_focus_score: 78,
+  focus_timeline: [
+    { question_id: "q1", focus_score: 85, time_spent: 45, is_correct: true },
+    { question_id: "q2", focus_score: 92, time_spent: 32, is_correct: true },
+    { question_id: "q3", focus_score: 65, time_spent: 60, is_correct: false },
+    { question_id: "q4", focus_score: 72, time_spent: 55, is_correct: true },
+    { question_id: "q5", focus_score: 58, time_spent: 48, is_correct: false },
+    { question_id: "q6", focus_score: 79, time_spent: 40, is_correct: true },
+    { question_id: "q7", focus_score: 83, time_spent: 37, is_correct: true },
+    { question_id: "q8", focus_score: 68, time_spent: 63, is_correct: false },
+    { question_id: "q9", focus_score: 88, time_spent: 29, is_correct: true },
+    { question_id: "q10", focus_score: 76, time_spent: 42, is_correct: true },
+  ],
+  meditation_completed: true,
+  meditation_skipped: false,
+  total_time: 450,
+  correct_answers: 7,
+  total_questions: 10
+};
+
+const getQuestionNumber = (questionId: string): string => {
+  return questionId.replace('q', 'Q');
+};
+
+const getFocusColor = (score: number): string => {
+  if (score >= 85) return "text-green-600";
+  if (score >= 70) return "text-blue-600";
+  if (score >= 55) return "text-amber-600";
+  return "text-red-600";
+};
+
+const getFocusSegmentData = (focusTimeline: FocusData[]) => {
+  // Group focus scores by range
+  const ranges = [
+    { label: "Very High Focus (85-100)", min: 85, max: 100, count: 0 },
+    { label: "High Focus (70-84)", min: 70, max: 84, count: 0 },
+    { label: "Moderate Focus (55-69)", min: 55, max: 69, count: 0 },
+    { label: "Low Focus (0-54)", min: 0, max: 54, count: 0 },
+  ];
+
+  focusTimeline.forEach(item => {
+    const range = ranges.find(r => item.focus_score >= r.min && item.focus_score <= r.max);
+    if (range) range.count++;
+  });
+
+  return ranges;
+};
 
 const PerformanceReport = () => {
-  const { chapterId, setId } = useParams();
+  const { subjectId, chapterId, setId } = useParams<{ subjectId: string; chapterId: string; setId: string; }>();
   const navigate = useNavigate();
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   
-  // In a real app, we would fetch the actual completion data from the database
-  const chapter = biologyChapters.find(ch => ch.id === chapterId);
-  const completionData = completedSets[0]; // Using sample data
+  // Normally this would be fetched based on the params
+  const report = mockSessionReport;
   
-  if (!chapter) {
-    return (
-      <div className="container mx-auto max-w-7xl py-12 text-center">
-        <h2 className="text-xl font-semibold mb-4">Chapter not found</h2>
-        <Button onClick={() => navigate("/biology")}>Return to Biology</Button>
-      </div>
-    );
-  }
+  // Calculate metrics
+  const scorePercentage = (report.correct_answers / report.total_questions) * 100;
+  const timePerQuestion = report.total_time / report.total_questions;
+  const averageFocusScore = report.overall_focus_score;
+  const focusSegments = getFocusSegmentData(report.focus_timeline);
   
-  // Sample focus data over questions
-  const focusData = [
-    { question: 1, focus: 85, isCorrect: true },
-    { question: 2, focus: 78, isCorrect: true },
-    { question: 3, focus: 65, isCorrect: false },
-    { question: 4, focus: 62, isCorrect: false },
-    { question: 5, focus: 75, isCorrect: true },
-    { question: 6, focus: 88, isCorrect: true },
-    { question: 7, focus: 82, isCorrect: true },
-    { question: 8, focus: 70, isCorrect: false },
-    { question: 9, focus: 75, isCorrect: true },
-    { question: 10, focus: 85, isCorrect: true }
-  ];
-  
-  // Sample bloom taxonomy data
-  const bloomData = [
-    { name: "Remember", score: 85 },
-    { name: "Understand", score: 70 },
-    { name: "Apply", score: 65 },
-    { name: "Analyze", score: 55 },
-    { name: "Evaluate", score: 40 },
-    { name: "Create", score: 30 }
-  ];
-  
-  // Sample topic performance data
-  const topicData = [
-    { topic: "Characteristics of Life", score: 90 },
-    { topic: "Taxonomy", score: 75 },
-    { topic: "Nomenclature", score: 80 },
-    { topic: "Classification", score: 65 }
-  ];
-  
-  const handleAddToCalendar = () => {
-    toast({
-      title: "Added to Calendar",
-      description: "Revision schedule has been added to your calendar."
-    });
-    setShowScheduleDialog(false);
-    navigate("/biology");
+  const chartData = report.focus_timeline.map((item, index) => ({
+    name: getQuestionNumber(item.question_id),
+    focusScore: item.focus_score,
+    correct: item.is_correct ? 100 : 0,
+    questionIndex: index + 1
+  }));
+
+  const handleContinue = () => {
+    navigate(`/subject/${subjectId}`);
   };
   
-  const handleFinish = () => {
-    setShowScheduleDialog(true);
+  const handlePracticeAgain = () => {
+    navigate(`/${subjectId}`);
   };
-  
-  // Sample focus insights based on focus data
-  const getFocusInsights = () => {
-    const lowestFocus = [...focusData].sort((a, b) => a.focus - b.focus)[0];
-    const anxietySpot = focusData.findIndex((data, i, arr) => 
-      i > 0 && i < arr.length - 1 && data.focus < arr[i-1].focus && data.focus < arr[i+1].focus
-    );
-    
-    return [
-      `Your focus was lowest on question ${lowestFocus.question} (${lowestFocus.focus}%)`,
-      anxietySpot !== -1 ? `You may have experienced anxiety around question ${focusData[anxietySpot].question}` : null,
-      "Your focus was higher on correctly answered questions"
-    ].filter(Boolean);
-  };
-  
-  const insights = getFocusInsights();
-  
+
   return (
-    <>
-      <div className="container mx-auto max-w-7xl">
-        <Button 
-          variant="ghost" 
-          className="mb-4 text-gray-500"
-          onClick={() => navigate(`/biology/chapter/${chapterId}`)}
-        >
-          <ArrowLeft size={16} className="mr-2" /> Back to Chapter
-        </Button>
-        
-        <h1 className="text-2xl font-bold mb-6">Performance Report: {chapter.name} - Set {setId}</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-learnzy-purple" />
-                Academic Performance
-              </CardTitle>
-              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                {completionData?.score || 75}%
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="font-medium mb-2">Topic Performance</h3>
-                <div className="space-y-2">
-                  {topicData.map((topic) => (
-                    <div key={topic.topic} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>{topic.topic}</span>
-                        <span className="font-medium">{topic.score}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-learnzy-purple h-2 rounded-full" 
-                          style={{ width: `${topic.score}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-medium mb-2">Bloom Taxonomy Levels</h3>
-                <div className="space-y-2">
-                  {bloomData.map((level) => (
-                    <div key={level.name} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>{level.name}</span>
-                        <span className="font-medium">{level.score}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-learnzy-orange h-2 rounded-full" 
-                          style={{ width: `${level.score}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="pt-2">
-                <h3 className="font-medium mb-2">Recommended Actions</h3>
-                <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    Revise "Taxonomy" concepts
-                  </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    Practice 10 more "Analyze" level questions
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-learnzy-purple" />
-                Mental Performance
-              </CardTitle>
-              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                Focus: {completionData?.focus_score || 78}%
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="font-medium mb-2">Focus Timeline</h3>
-                <div className="h-60">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={focusData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="question" 
-                        label={{ value: 'Question', position: 'insideBottomRight', offset: 0 }} 
-                      />
-                      <YAxis domain={[0, 100]} label={{ value: 'Focus %', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip />
-                      <Line 
-                        type="monotone" 
-                        dataKey="focus" 
-                        stroke="#8884d8" 
-                        dot={(props) => {
-                          const { cx, cy, payload } = props;
-                          return (
-                            <circle 
-                              cx={cx} 
-                              cy={cy} 
-                              r={4} 
-                              fill={payload.isCorrect ? "#4ade80" : "#f87171"} 
-                            />
-                          );
-                        }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-medium mb-2">Focus Insights</h3>
-                <ul className="space-y-2">
-                  {insights.map((insight, index) => (
-                    <li key={index} className="text-sm bg-blue-50 p-2 rounded-md">
-                      {insight}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className="pt-2">
-                <h3 className="font-medium mb-2">Recommendations</h3>
-                <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    Try a 2-minute breathing exercise
-                  </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    Schedule study during your high-focus hours
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="flex justify-end">
-          <Button className="bg-learnzy-purple" onClick={handleFinish}>
-            Continue to Dashboard <ArrowRight size={16} className="ml-2" />
-          </Button>
-        </div>
+    <div className="container mx-auto max-w-7xl">
+      <Button 
+        variant="ghost" 
+        className="mb-4 text-gray-500"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft size={16} className="mr-2" /> Back
+      </Button>
+      
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Performance Report</h1>
+        <p className="text-gray-500">
+          Set {setId?.toUpperCase()} • Completed on {new Date(report.date).toLocaleDateString()}
+        </p>
       </div>
       
-      {/* Revision Schedule Dialog */}
-      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Your Revision Schedule</DialogTitle>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <div className="bg-blue-50 p-4 rounded-lg mb-4">
-              <p className="text-center text-sm">
-                Based on proven spaced repetition techniques, we've scheduled your revision sets to maximize retention.
-              </p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Tabs defaultValue="academic">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="academic">
+                <BookOpen className="h-4 w-4 mr-2" />
+                Academic Performance
+              </TabsTrigger>
+              <TabsTrigger value="mental">
+                <Brain className="h-4 w-4 mr-2" />
+                Mental Metrics
+              </TabsTrigger>
+            </TabsList>
             
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between p-2 border-b">
-                <div className="flex items-center gap-2">
-                  <div className="bg-learnzy-purple/10 h-6 w-6 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-learnzy-purple">B</span>
+            <TabsContent value="academic" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Score Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="text-center">
+                      <div className="text-5xl font-bold mb-2">{Math.round(scorePercentage)}%</div>
+                      <div className="text-gray-500">
+                        {report.correct_answers} of {report.total_questions} correct
+                      </div>
+                    </div>
                   </div>
-                  <span>Set B</span>
+                  
+                  <Progress value={scorePercentage} className="h-2 mb-6" />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-3 rounded-md">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Timer className="h-4 w-4 text-gray-600" />
+                        <span className="text-sm font-medium">Time Spent</span>
+                      </div>
+                      <div className="text-xl font-semibold">
+                        {Math.floor(report.total_time / 60)}m {report.total_time % 60}s
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        ~{Math.round(timePerQuestion)}s per question
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-md">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Focus className="h-4 w-4 text-gray-600" />
+                        <span className="text-sm font-medium">Focus Score</span>
+                      </div>
+                      <div className="text-xl font-semibold">
+                        {averageFocusScore}/100
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {report.meditation_completed ? "Meditation completed" : "Meditation skipped"}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Question Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {report.focus_timeline.map((item, index) => (
+                      <div key={item.question_id} className="flex items-center gap-3 p-2 border-b">
+                        <div className="font-medium w-8">{getQuestionNumber(item.question_id)}</div>
+                        {item.is_correct ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-500" />
+                        )}
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <span className={item.is_correct ? "text-green-700" : "text-red-700"}>
+                              {item.is_correct ? "Correct" : "Incorrect"}
+                            </span>
+                            <span className="text-gray-500 text-sm">
+                              {item.time_spent}s
+                            </span>
+                          </div>
+                          <div className="flex items-center mt-1">
+                            <div className="text-xs mr-2">Focus:</div>
+                            <Progress 
+                              value={item.focus_score} 
+                              className="h-1.5" 
+                              indicatorClassName={
+                                item.focus_score >= 85 ? "bg-green-500" :
+                                item.focus_score >= 70 ? "bg-blue-500" :
+                                item.focus_score >= 55 ? "bg-amber-500" :
+                                "bg-red-500"
+                              }
+                            />
+                            <span className={`ml-2 text-xs ${getFocusColor(item.focus_score)}`}>
+                              {item.focus_score}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="mental" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Focus Analysis</CardTitle>
+                  <CardDescription>How your focus varied during the test</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 mb-6">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis domain={[0, 100]} />
+                        <Tooltip />
+                        <ReferenceLine y={70} stroke="#8884d8" strokeDasharray="3 3" label="Threshold" />
+                        <Line 
+                          type="monotone" 
+                          dataKey="focusScore" 
+                          stroke="#8884d8" 
+                          activeDot={{ r: 8 }} 
+                          name="Focus Score" 
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="correct" 
+                          stroke="#82ca9d" 
+                          strokeWidth={2} 
+                          dot={{ stroke: '#82ca9d', strokeWidth: 2, r: 4 }} 
+                          name="Correct" 
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {focusSegments.map((segment, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div 
+                          className={`w-3 h-3 rounded-full ${
+                            index === 0 ? "bg-green-500" :
+                            index === 1 ? "bg-blue-500" :
+                            index === 2 ? "bg-amber-500" :
+                            "bg-red-500"
+                          }`} 
+                        />
+                        <div className="flex-1 text-sm">
+                          {segment.label}
+                        </div>
+                        <div className="font-medium">
+                          {segment.count}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Focus Dipped on Questions 3, 5 and 8</p>
+                        <p className="text-xs text-gray-500">
+                          Consider taking a short break after every 3-4 questions to maintain focus.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Meditation Improved Performance</p>
+                        <p className="text-xs text-gray-500">
+                          The meditation session before the test helped improve your focus scores.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Wellness Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="font-medium mb-2">Mental Pattern Analysis</h3>
+                      <div className="space-y-2 text-sm">
+                        <p>You tend to be more focused at the beginning of test sessions.</p>
+                        <p>Your focus drops noticeably after question 5, suggesting a potential attention span of 15-20 minutes.</p>
+                        <p>Correct answers correlate strongly with higher focus scores.</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium mb-2 text-sm">Focus Tags</h4>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline" className="bg-blue-50">Morning performer</Badge>
+                        <Badge variant="outline" className="bg-amber-50">Mid-session dips</Badge>
+                        <Badge variant="outline" className="bg-green-50">Meditation responsive</Badge>
+                        <Badge variant="outline" className="bg-purple-50">Strong starter</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+        
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Recommendations</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="bg-learnzy-purple/10 p-2 rounded-full">
+                  <ChartLineUp className="h-4 w-4 text-learnzy-purple" />
                 </div>
-                <span className="text-sm font-medium">May 17, 2023</span>
+                <div>
+                  <p className="font-medium text-sm">Practice Similar Questions</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Your performance suggests you should practice more questions related to the topics you missed.
+                  </p>
+                </div>
               </div>
               
-              <div className="flex items-center justify-between p-2 border-b">
-                <div className="flex items-center gap-2">
-                  <div className="bg-learnzy-purple/10 h-6 w-6 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-learnzy-purple">C</span>
-                  </div>
-                  <span>Set C</span>
+              <div className="flex items-start gap-3">
+                <div className="bg-learnzy-purple/10 p-2 rounded-full">
+                  <Brain className="h-4 w-4 text-learnzy-purple" />
                 </div>
-                <span className="text-sm font-medium">May 24, 2023</span>
+                <div>
+                  <p className="font-medium text-sm">Take Short Study Breaks</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Consider the Pomodoro technique with 25min study and 5min break to maintain focus.
+                  </p>
+                </div>
               </div>
               
-              <div className="flex items-center justify-between p-2 border-b">
-                <div className="flex items-center gap-2">
-                  <div className="bg-learnzy-purple/10 h-6 w-6 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-learnzy-purple">D</span>
-                  </div>
-                  <span>Set D</span>
+              <div className="flex items-start gap-3">
+                <div className="bg-learnzy-purple/10 p-2 rounded-full">
+                  <BookOpen className="h-4 w-4 text-learnzy-purple" />
                 </div>
-                <span className="text-sm font-medium">May 31, 2023</span>
+                <div>
+                  <p className="font-medium text-sm">Review Weak Topics</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Topics related to questions 3, 5, and 8 need special attention.
+                  </p>
+                </div>
               </div>
               
-              <div className="flex items-center justify-between p-2">
-                <div className="flex items-center gap-2">
-                  <div className="bg-learnzy-purple/10 h-6 w-6 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-learnzy-purple">E</span>
-                  </div>
-                  <span>Set E</span>
-                </div>
-                <span className="text-sm font-medium">June 28, 2023</span>
+              <div className="pt-2">
+                <Button onClick={handlePracticeAgain} className="w-full mb-2">
+                  Practice Again
+                </Button>
+                <Button onClick={handleContinue} variant="outline" className="w-full">
+                  Continue
+                </Button>
               </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button className="w-full" onClick={handleAddToCalendar}>
-              <Calendar className="mr-2 h-4 w-4" /> Add to Calendar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 

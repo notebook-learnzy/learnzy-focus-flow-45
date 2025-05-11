@@ -1,3 +1,4 @@
+
 import { useAppContext } from "@/contexts/AppContext";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import SocialLearning from "@/components/SocialLearning";
 import ShivAssistant from "@/components/ShivAssistant";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import MistakeNotebook from "@/components/MistakeNotebook";
 
 const Dashboard = () => {
   const { mode } = useAppContext();
@@ -34,8 +36,8 @@ const Dashboard = () => {
     navigate('/assistant');
   };
 
-  const handleViewBiology = () => {
-    navigate('/biology');
+  const handleViewSubject = (subjectId: string) => {
+    navigate(`/${subjectId}`);
   };
   
   const renderInstituteMode = () => (
@@ -126,13 +128,17 @@ const Dashboard = () => {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Subjects</h2>
-              <Button onClick={handleViewBiology} className="bg-learnzy-purple">
-                View Biology <ChevronRight size={16} />
+              <Button onClick={() => handleViewSubject('botany')} className="bg-learnzy-purple">
+                View Botany <ChevronRight size={16} />
               </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {subjects.map((subject) => (
-                <SubjectCard key={subject.id} subject={subject} />
+                <SubjectCard 
+                  key={subject.id} 
+                  subject={subject} 
+                  onClick={() => handleViewSubject(subject.id)}
+                />
               ))}
             </div>
           </div>
@@ -153,6 +159,8 @@ const Dashboard = () => {
                 ))}
             </div>
           </div>
+          
+          <MistakeNotebook />
           
           <SocialLearning />
         </div>

@@ -1,5 +1,4 @@
 
-import { useNavigate } from "react-router-dom";
 import { Subject } from "@/types";
 import ProgressRing from "./ProgressRing";
 import { BookOpen, Heart, FlaskRound, Leaf } from "lucide-react";
@@ -7,11 +6,10 @@ import { cn } from "@/lib/utils";
 
 interface SubjectCardProps {
   subject: Subject;
+  onClick?: () => void;
 }
 
-const SubjectCard = ({ subject }: SubjectCardProps) => {
-  const navigate = useNavigate();
-  
+const SubjectCard = ({ subject, onClick }: SubjectCardProps) => {
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case "flask-round":
@@ -28,7 +26,7 @@ const SubjectCard = ({ subject }: SubjectCardProps) => {
   return (
     <div 
       className="bg-white rounded-lg shadow-sm p-5 cursor-pointer border border-gray-100 hover:shadow-md transition-shadow"
-      onClick={() => navigate(`/subject/${subject.id}`)}
+      onClick={onClick}
     >
       <div className="flex justify-between items-start">
         <div className="flex flex-col">

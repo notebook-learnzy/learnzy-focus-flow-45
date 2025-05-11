@@ -214,7 +214,7 @@ export const biologyChapters = [
   { id: "bio11-ch19", name: "Chemical Coordination and Integration", subjectId: "biology", class: "11", progress: 0 },
 ];
 
-// Add biology subject
+// Update subjects - Remove math and split biology into botany and zoology
 export const subjects = [
   {
     id: "physics",
@@ -229,21 +229,22 @@ export const subjects = [
     progress: 42,
   },
   {
-    id: "biology",
-    name: "Biology",
+    id: "botany",
+    name: "Botany",
     icon: "leaf",
     progress: 27,
   },
   {
-    id: "maths",
-    name: "Mathematics",
-    icon: "book-open",
-    progress: 18,
+    id: "zoology",
+    name: "Zoology",
+    icon: "heart",
+    progress: 22,
   },
 ];
 
-// All chapters combined
+// Update chapters - removing math chapters and update biology to reflect botany/zoology
 export const chapters = [
+  // Physics chapters
   {
     id: "phy-ch01",
     name: "Laws of Motion",
@@ -271,6 +272,7 @@ export const chapters = [
     subjectId: "physics",
     progress: 10,
   },
+  // Chemistry chapters
   {
     id: "chem-ch01",
     name: "Atomic Structure",
@@ -292,27 +294,73 @@ export const chapters = [
     progress: 50,
     lastPracticed: "2023-04-25"
   },
-  ...biologyChapters,
+  // Botany chapters (moved from biology)
   {
-    id: "math-ch01",
-    name: "Calculus",
-    subjectId: "maths",
-    progress: 40,
-    lastPracticed: "2023-04-30"
+    id: "bot-ch01",
+    name: "The Living World",
+    subjectId: "botany",
+    class: "11",
+    progress: 10,
+    lastPracticed: "2023-05-01"
   },
   {
-    id: "math-ch02",
-    name: "Algebra",
-    subjectId: "maths",
-    progress: 25,
-    lastPracticed: "2023-04-20"
+    id: "bot-ch02",
+    name: "Biological Classification",
+    subjectId: "botany",
+    class: "11",
+    progress: 0
   },
   {
-    id: "math-ch03",
-    name: "Statistics",
-    subjectId: "maths",
+    id: "bot-ch03",
+    name: "Plant Kingdom",
+    subjectId: "botany",
+    class: "11",
+    progress: 0
+  },
+  {
+    id: "bot-ch04",
+    name: "Morphology of Flowering Plants",
+    subjectId: "botany",
+    class: "11",
+    progress: 0
+  },
+  {
+    id: "bot-ch05",
+    name: "Anatomy of Flowering Plants",
+    subjectId: "botany",
+    class: "11",
+    progress: 0
+  },
+  // Zoology chapters
+  {
+    id: "zoo-ch01",
+    name: "Animal Kingdom",
+    subjectId: "zoology",
+    class: "11",
+    progress: 5,
+    lastPracticed: "2023-04-15"
+  },
+  {
+    id: "zoo-ch02", 
+    name: "Structural Organisation in Animals",
+    subjectId: "zoology",
+    class: "11",
+    progress: 0
+  },
+  {
+    id: "zoo-ch03",
+    name: "Human Physiology",
+    subjectId: "zoology",
+    class: "11",
     progress: 15,
-    lastPracticed: "2023-04-10"
+    lastPracticed: "2023-04-28"
+  },
+  {
+    id: "zoo-ch04",
+    name: "Animal Reproduction",
+    subjectId: "zoology",
+    class: "11",
+    progress: 0
   }
 ];
 
@@ -561,7 +609,7 @@ export const announcements = [
   }
 ];
 
-// Sleep metrics mock data
+// Sleep metrics mock data - update to include quality and efficiency properties
 export const sleepMetrics: SleepMetrics[] = [
   {
     score: 80,
@@ -595,7 +643,7 @@ export const sleepMetrics: SleepMetrics[] = [
   }
 ];
 
-// Sedentary metrics mock data
+// Sedentary metrics mock data - update to include breaks and movementScore properties
 export const sedentaryMetrics: SedentaryMetrics = {
   totalSittingTime: 340,
   lastBreak: "2025-05-10T14:30:00",
