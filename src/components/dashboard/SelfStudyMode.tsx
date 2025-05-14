@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import SleepMetricsCard from "@/components/SleepMetricsCard";
 import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
 import SuggestionBanner from "@/components/SuggestionBanner";
 import ShivAssistant from "@/components/ShivAssistant";
+import MoodStatsCard from "@/components/dashboard/MoodStatsCard";
 
 interface SelfStudyModeProps {
   subjects: Subject[];
@@ -90,6 +90,7 @@ const SelfStudyMode = ({
         </div>
         
         <div className="space-y-4">
+          <MoodStatsCard />
           <Card className="bg-gradient-to-br from-learnzy-purple/10 to-learnzy-purple/5 border-learnzy-purple/20">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">

@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { FocusData, SessionReport } from "@/types";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Normally this would come from an API or context
 // Mock data for demonstration
@@ -68,8 +70,48 @@ const PerformanceReport = () => {
   const { subjectId, chapterId, setId } = useParams<{ subjectId: string; chapterId: string; setId: string; }>();
   const navigate = useNavigate();
   
-  // Normally this would be fetched based on the params
-  const report = mockSessionReport;
+  // NEW: Load botany session result from Supabase for demo
+  const [sessionData, setSessionData] = useState<SessionReport | null>(null);
+
+  useEffect(() => {
+    async function getRealSession() {
+      if (subjectId?.toLowerCase() === "botany") {
+        // Fetch 10 botany questions as "session"
+        const { data } = await supabase
+          .from("demo")
+          .select()
+          .eq("Subject", "Botany")
+          .limit(10);
+
+        if (data && data.length > 0) {
+          // Fake a plausible SessionReport for the demo
+          const timeline = (data as any[]).map((q, idx) => ({
+            question_id: `db-${q.q_no}`,
+            focus_score: 75 + Math.floor(Math.random() * 20) - 10,
+            time_spent: 40 + Math.floor(Math.random() * 30),
+            is_correct: Math.random() > 0.3,
+          }));
+          setSessionData({
+            id: `session-demo-botany`,
+            question_set_id: "qs-botany-a",
+            date: new Date().toISOString(),
+            overall_focus_score: Math.round(timeline.reduce((acc, q) => acc + q.focus_score, 0)/timeline.length),
+            focus_timeline: timeline,
+            meditation_completed: true,
+            meditation_skipped: false,
+            total_time: timeline.reduce((t,x) => t+x.time_spent, 0),
+            correct_answers: timeline.filter(x=>x.is_correct).length,
+            total_questions: timeline.length,
+          });
+        }
+      }
+    }
+    getRealSession();
+    //eslint-disable-next-line
+  }, [subjectId]);
+
+  // Use Supabase result for Botany, fallback to mock if not available
+  const report = (subjectId?.toLowerCase() === "botany" && sessionData) ? sessionData : mockSessionReport;
   
   // Calculate metrics
   const scorePercentage = (report.correct_answers / report.total_questions) * 100;

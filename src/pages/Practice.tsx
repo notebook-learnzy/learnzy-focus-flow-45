@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { chapters, questionSets, subjects } from "@/data/mockData";
@@ -15,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Question, QuestionSet, FocusData, SessionReport } from "@/types";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Practice = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -24,8 +24,9 @@ const Practice = () => {
   const chapter = chapters.find(c => c.id === chapterId);
   const subject = chapter ? subjects.find(s => s.id === chapter.subjectId) : null;
   
-  // Find the appropriate question set for this chapter
+  // NEW: Load Botany questions from Supabase if this is Botany + Set A
   const [currentQuestionSet, setCurrentQuestionSet] = useState<QuestionSet | null>(null);
+  const [questionsLoading, setQuestionsLoading] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showFocusMode, setShowFocusMode] = useState(false);
@@ -38,17 +39,94 @@ const Practice = () => {
   
   // Initialize the question set when the component mounts
   useEffect(() => {
-    if (chapterId) {
-      // Find the next available set for this chapter
-      const nextSet = questionSets.find(set => 
-        set.chapter_id === chapterId && !set.completed_date
-      );
-      
-      if (nextSet) {
-        setCurrentQuestionSet(nextSet as QuestionSet);
+    const fetchSetA = async () => {
+      setQuestionsLoading(true);
+      // Only for Botany subject
+      if (subject?.name === "Botany") {
+        // Fetch 10 Botany questions as demo
+        const { data, error } = await supabase
+          .from("demo")
+          .select()
+          .eq("Subject", "Botany")
+          .limit(10);
+
+        if (error) {
+          setQuestionsLoading(false);
+          toast({
+            title: "Error loading Botany Set",
+            description: error.message,
+            variant: "destructive",
+          });
+          // fallback to mockData
+          setCurrentQuestionSet(null);
+          return;
+        }
+
+        // Transform DB rows to Question[] type
+        const mappedQuestions = (data || []).map((q, i) => ({
+          id: `db-${q.q_no}`,
+          question_text: q.Question_Text,
+          figure: undefined,
+          option_a: q.Option_A,
+          option_b: q.Option_B,
+          option_c: q.Option_C,
+          option_d: q.Option_D,
+          correct_answer: (q.Correct_Answer?.toUpperCase() ?? "A") as "A" | "B" | "C" | "D",
+          subject: q.Subject,
+          chapter_name: q.Chapter_name,
+          topic: q.Topic || "",
+          subtopic: q.Subtopic || "",
+          difficulty_level: (q.Difficulty_Level || "Easy") as DifficultyLevel,
+          question_type: (q.Question_Structure || "MCQ") as QuestionType,
+          bloom_taxonomy: (q.Bloom_Taxonomy || "Remember") as BloomTaxonomy,
+          priority_level: parseInt(q.Priority_Level || "3") as 1|2|3|4|5,
+          time_to_solve: Number(q.Time_to_Solve) || 60,
+          key_concept_tested: q.Key_Concept_Tested || "",
+          common_pitfalls: q.Common_Pitfalls || "",
+          creation_timestamp: new Date().toISOString(),
+          last_updated_timestamp: new Date().toISOString(),
+        }));
+
+        setCurrentQuestionSet({
+          id: `botany-setA`,
+          set_type: "A",
+          chapter_id: chapterId!,
+          questions: mappedQuestions,
+          scheduled_date: undefined,
+          completed_date: undefined,
+          focus_score: undefined,
+          interval_adjusted: false,
+        });
+        setQuestionsLoading(false);
+        return;
       }
+
+      // Default/fallback (other subject, mockData)
+      if (chapterId) {
+        // Find the next available set for this chapter
+        const nextSet = questionSets.find(set => 
+          set.chapter_id === chapterId && !set.completed_date
+        );
+        
+        if (nextSet) {
+          setCurrentQuestionSet(nextSet as QuestionSet);
+        }
+      }
+    };
+
+    if (chapter && subject) {
+      fetchSetA();
     }
-  }, [chapterId]);
+  }, [chapterId, chapter, subject]);
+  
+  // Show loading indicator if fetching questions
+  if (questionsLoading) {
+    return (
+      <div className="container mx-auto max-w-7xl py-16 text-center">
+        <h2 className="text-xl font-semibold mb-4">Loading questions...</h2>
+      </div>
+    );
+  }
   
   // Simulate focus score fluctuation
   useEffect(() => {
