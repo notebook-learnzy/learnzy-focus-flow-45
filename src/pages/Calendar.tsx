@@ -81,15 +81,38 @@ const Calendar = () => {
     setSelectedDate(subWeeks(selectedDate, 1));
   };
   
+  // For FAB floating
+  const [showDialog, setShowDialog] = useState(false);
+
+  // Track target day/time for quick add
+  const [taskModalDefaults, setTaskModalDefaults] = useState<{date?:string, time?:string}>({});
+
   const [newTask, setNewTask] = useState<Partial<Task>>({
     type: "practice",
     title: "",
     date: format(new Date(), "yyyy-MM-dd"),
     time: "12:00",
     duration: 30,
+    description: "",
+    color: "",
     completed: false
   });
-  
+
+  // When opening dialog for a specific slot
+  const openAddTaskDialog = (date: string, time?: string) => {
+    setTaskModalDefaults({ date, time });
+    setNewTask({
+      ...newTask,
+      date,
+      time: time || "12:00"
+    });
+    setShowDialog(true);
+  };
+
+  // Add a floating "+" button for quick add
+  // Fix add-task dialog logic to use proper details and clear defaults when closing
+  // Add detailed fields: title (required), type, chapter, description, location
+
   const handleAddTask = () => {
     if (!newTask.title || !newTask.date || !newTask.time) {
       toast({
@@ -99,8 +122,8 @@ const Calendar = () => {
       });
       return;
     }
-    
-    const createdTask: Task = {
+
+    const createdTask: Task & { description?: string; color?: string; location?: string } = {
       id: `task-${Date.now()}`,
       title: newTask.title!,
       type: newTask.type as TaskType || "practice",
@@ -108,25 +131,32 @@ const Calendar = () => {
       time: newTask.time!,
       duration: newTask.duration || 30,
       completed: false,
-      chapterId: newTask.chapterId
+      chapterId: newTask.chapterId,
+      description: newTask.description || "",
+      color: newTask.color || "",
+      location: newTask.location || ""
     };
-    
+
     setAllTasks([...allTasks, createdTask]);
-    
+
     toast({
       title: "Task added",
       description: `${createdTask.title} has been scheduled for ${format(parseISO(createdTask.date), "MMMM d")}`,
     });
-    
-    // Reset form
+
     setNewTask({
       type: "practice",
       title: "",
       date: format(new Date(), "yyyy-MM-dd"),
       time: "12:00",
       duration: 30,
+      description: "",
+      color: "",
       completed: false
     });
+
+    setShowDialog(false);
+    setTaskModalDefaults({});
   };
   
   const handleCompleteTask = (taskId: string, completed: boolean) => {
@@ -156,6 +186,21 @@ const Calendar = () => {
         onCreate={() => setShowDialog(true)}
       />
 
+      {/* Floating action button */}
+      <button
+        className="fixed bottom-8 right-8 z-50 shadow-lg bg-learnzy-purple hover:bg-learnzy-purple/90 text-white rounded-full p-4 flex items-center justify-center transition-colors duration-200"
+        onClick={() => {
+          setShowDialog(true);
+          setTaskModalDefaults({
+            date: format(selectedDate, "yyyy-MM-dd"),
+            time: undefined
+          });
+        }}
+        aria-label="Add new task"
+      >
+        <Plus size={28} />
+      </button>
+      
       {/* Main area */}
       <div className="flex-1 flex flex-col">
         <div className="flex justify-between items-center px-4 pt-4 pb-2 border-b bg-white">
@@ -195,24 +240,44 @@ const Calendar = () => {
           tasks={allTasks}
           onSelectDate={setSelectedDate}
           viewMode={viewMode}
+          onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
         />
 
         {/* Dialog for Add Task */}
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <Dialog open={showDialog} onOpenChange={(open) => {
+          setShowDialog(open);
+          if (!open) setTaskModalDefaults({});
+        }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Task</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Task Title</label>
+                <label className="text-sm font-medium">Task Title*</label>
                 <Input 
                   value={newTask.title} 
                   onChange={(e) => setNewTask({...newTask, title: e.target.value})}
                   placeholder="Enter task title"
+                  required
                 />
               </div>
-              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <Input 
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                  placeholder="Details (optional)"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Location</label>
+                <Input 
+                  value={newTask.location}
+                  onChange={(e) => setNewTask({...newTask, location: e.target.value})}
+                  placeholder="Where? (optional)"
+                />
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Task Type</label>
                 <Select
@@ -225,7 +290,7 @@ const Calendar = () => {
                   <SelectContent>
                     <SelectItem value="practice">Practice</SelectItem>
                     <SelectItem value="wellness">Wellness</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="custom">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -248,37 +313,38 @@ const Calendar = () => {
                   </Select>
                 </div>
               )}
-              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Date</label>
+                  <label className="text-sm font-medium">Date*</label>
                   <Input 
                     type="date"
                     value={newTask.date}
                     onChange={(e) => setNewTask({...newTask, date: e.target.value})}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Time</label>
+                  <label className="text-sm font-medium">Time*</label>
                   <Input 
                     type="time"
                     value={newTask.time}
                     onChange={(e) => setNewTask({...newTask, time: e.target.value})}
+                    required
                   />
                 </div>
               </div>
-              
               <div className="space-y-2">
-                <label className="text-sm font-medium">Duration (minutes)</label>
+                <label className="text-sm font-medium">Duration (minutes)*</label>
                 <Input 
                   type="number"
                   value={newTask.duration}
                   onChange={(e) => setNewTask({...newTask, duration: Number(e.target.value)})}
                   min={5}
                   max={240}
+                  required
                 />
               </div>
-              
+              {/* Future: can add color picker etc */}
               <Button className="w-full bg-learnzy-purple" onClick={handleAddTask}>
                 Add Task
               </Button>

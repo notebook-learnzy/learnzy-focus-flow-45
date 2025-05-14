@@ -10,6 +10,7 @@ type CalendarTimeGridProps = {
   tasks: Task[];
   onSelectDate: (date: Date) => void;
   viewMode: "week" | "day";
+  onAddTaskSlot?: (date: string, time: string) => void; // 👈 add prop
 };
 
 const HOURS = Array.from({ length: 15 }, (_, i) => i + 7); // 7 AM to 21 PM
@@ -25,7 +26,8 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
   selectedDate,
   tasks,
   onSelectDate,
-  viewMode
+  viewMode,
+  onAddTaskSlot
 }) => {
   const now = new Date();
   const gridRef = useRef<HTMLDivElement>(null);
@@ -33,9 +35,11 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
   // Auto-scroll to current hour when mounting
   useEffect(() => {
     if (gridRef.current && isToday(selectedDate)) {
-      const hour = now.getHours() - 7;
-      if (hour > 0) {
-        gridRef.current.scrollTop = hour * 60;
+      const hour = now.getHours();
+      const hourIndex = hour - 7;
+      if (hourIndex > 0) {
+        // Each hour slot is 48px (as per styles below)
+        gridRef.current.scrollTop = hourIndex * 48;
       }
     }
   }, [selectedDate]);
@@ -72,16 +76,17 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
     });
   };
 
-  // "Now" indicator
+  // Corrected "Now" indicator
   const renderNowIndicator = (day: Date) => {
     if (!isToday(day)) return null;
     const minutes = now.getHours() * 60 + now.getMinutes();
-    const offset = minutes - 420; // 7 AM = 0 px
-    if (offset < 0) return null;
+    const calendarStartMinutes = 7 * 60;
+    const offset = minutes - calendarStartMinutes; // 7 AM = 0 px
+    if (offset < 0 || offset > (HOURS.length * 60)) return null;
     return (
       <div
-        className="absolute left-0 right-0 h-0.5 bg-red-500"
-        style={{ top: offset }}
+        className="absolute left-0 right-0 h-0.5 bg-red-500 z-20"
+        style={{ top: (offset / 60) * 48 }}
       >
         <div className="absolute left-[-16px] top-[-4px] w-3 h-3 rounded-full bg-red-500 border-2 border-white" />
       </div>
@@ -94,6 +99,7 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
       ? Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i))
       : [selectedDate];
 
+  // To enable "click to add task" for each time-slot, update below:
   return (
     <div className="flex-1 flex flex-col relative overflow-x-auto">
       <div className="flex border-b bg-white shadow-sm z-10">
@@ -154,6 +160,15 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
                   key={hIdx}
                   className="border-t border-dashed border-gray-100 absolute left-0 right-0"
                   style={{ top: hIdx * 48, height: 0 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // For slots, map grid click to time slot
+                    if (onAddTaskSlot) {
+                      const time = `${String(HOURS[hIdx]).padStart(2, "0")}:00`;
+                      onAddTaskSlot(format(day, "yyyy-MM-dd"), time);
+                    }
+                  }}
+                  title="Add a task to this time slot"
                 />
               ))}
               {/* Now indicator */}
@@ -171,3 +186,4 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
 };
 
 export default CalendarTimeGrid;
+
