@@ -11,6 +11,9 @@ export type Task = {
   completed: boolean;
   chapterId?: string;
   interval_adjusted?: boolean;
+  description?: string; // newly added
+  location?: string;    // newly added
+  color?: string;       // newly added
 };
 
 export type Suggestion = {

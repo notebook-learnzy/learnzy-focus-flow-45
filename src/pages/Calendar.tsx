@@ -82,7 +82,7 @@ const Calendar = () => {
   };
   
   // For FAB floating
-  const [showDialog, setShowDialog] = useState(false);
+  
 
   // Track target day/time for quick add
   const [taskModalDefaults, setTaskModalDefaults] = useState<{date?:string, time?:string}>({});
@@ -95,6 +95,7 @@ const Calendar = () => {
     duration: 30,
     description: "",
     color: "",
+    location: "",
     completed: false
   });
 
@@ -152,6 +153,7 @@ const Calendar = () => {
       duration: 30,
       description: "",
       color: "",
+      location: "",
       completed: false
     });
 
