@@ -4,12 +4,20 @@ import SummaryMetrics from "@/components/dashboard/SummaryMetrics";
 import FilterBar from "@/components/dashboard/FilterBar";
 import ActivityCharts from "@/components/dashboard/ActivityCharts";
 import RecentActivity from "@/components/dashboard/RecentActivity";
+import {
+  ChartPie,
+  ChartBar,
+  Clock,
+  TrendingUp,
+  User,
+  Calendar
+} from "lucide-react";
 
 // Placeholder for future: hook/query to real data.
 const getMockStats = (range: "week" | "month" | "custom") => ({
   summary: [
-    { icon: <PieChart size={26}/>, label: "Questions Attempted", value: range === "week" ? 82 : 340 },
-    { icon: <BarChart size={26}/>, label: "Revision Sessions", value: range === "week" ? 7 : 22 },
+    { icon: <ChartPie size={26}/>, label: "Questions Attempted", value: range === "week" ? 82 : 340 },
+    { icon: <ChartBar size={26}/>, label: "Revision Sessions", value: range === "week" ? 7 : 22 },
     { icon: <Clock size={26}/>, label: "Wellness Sessions", value: range === "week" ? 5 : 18 },
     { icon: <TrendingUp size={26}/>, label: "Accuracy", value: range === "week" ? "72%" : "74%" },
     { icon: <User size={26}/>, label: "Focus Score Avg", value: range === "week" ? 81 : 79 },
@@ -31,7 +39,13 @@ const getMockStats = (range: "week" | "month" | "custom") => ({
     { id: '1', type: "practice", title: "120 Questions Attempted", date: new Date().toISOString(), description: "Great practice in Physics!" },
     { id: '2', type: "wellness", title: "Meditation Session", date: new Date(Date.now() - 86400000).toISOString(), description: "Completed 10 min meditation." },
     { id: '3', type: "revision", title: "Revision on Ecology", date: new Date(Date.now() - 2 * 86400000).toISOString(), description: "Reviewed all key concepts." }
-  ]
+  ] as {
+    id: string;
+    type: "practice" | "wellness" | "revision";
+    title: string;
+    date: string;
+    description: string;
+  }[],
 });
 
 const Dashboard = () => {
