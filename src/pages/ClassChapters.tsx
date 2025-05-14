@@ -106,7 +106,11 @@ const ClassChapters = () => {
           <Card
             key={chapter.id}
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(`chapter/${chapter.id}`)}
+            onClick={() =>
+              navigate(
+                `/academics/${subjectId}/classes/${classId}/chapters/${chapter.id}/sets`
+              )
+            }
           >
             <CardContent className="p-5">
               <div className="flex items-center">

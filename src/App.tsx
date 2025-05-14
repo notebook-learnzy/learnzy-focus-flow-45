@@ -26,6 +26,8 @@ import Index from "./pages/Index";
 import Academics from "./pages/Academics";
 import ClassChapters from "./pages/ClassChapters";
 import ChapterSets from "./pages/ChapterSets";
+import PreTestRitual from "./pages/PreTestRitual";
+import TestPage from "./pages/TestPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,9 @@ const App = () => (
               {/* NEW: ClassChapters and ChapterSets routes */}
               <Route path="/academics/:subjectId/classes/:classId" element={<ClassChapters />} />
               <Route path="/academics/:subjectId/classes/:classId/chapter/:chapterId" element={<ChapterSets />} />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets" element={<ChapterSets />} />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/preritual" element={<PreTestRitual />} />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/test" element={<TestPage />} />
               
               {/* Legacy Biology routes kept for now */}
               <Route path="/:subjectId/class/:classId" element={<BiologyChapters />} />
