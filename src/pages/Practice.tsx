@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { chapters, questionSets, subjects } from "@/data/mockData";
@@ -13,6 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Question, QuestionSet, FocusData, SessionReport } from "@/types";
+// Add explicit imports for needed types:
+import { DifficultyLevel, QuestionType, BloomTaxonomy } from "@/types/questions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
