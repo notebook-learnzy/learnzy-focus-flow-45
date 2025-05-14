@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FocusScoreGauge from "@/components/FocusScoreGauge";
 import WellnessRewards from "@/components/WellnessRewards";
 import SleepVisualization from "@/components/SleepVisualization";
 import SedentaryActivity from "@/components/SedentaryActivity";
@@ -181,16 +179,7 @@ const Wellness = () => {
             </div>
             
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Current Focus</CardTitle>
-                  <CardDescription>Your focus level right now</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center">
-                  <FocusScoreGauge size="lg" />
-                </CardContent>
-              </Card>
-              
+              {/* Removed FocusScoreGauge Card */}
               <WellnessRewards />
               
               <Card>
