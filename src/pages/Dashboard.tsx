@@ -1,72 +1,58 @@
 
-import { useAppContext } from "@/contexts/AppContext";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  subjects, 
-  chapters, 
-  tasks, 
-  suggestions, 
-  instituteAssignments, 
-  announcements, 
-  sedentaryMetrics, 
-  sleepMetrics 
-} from "@/data/mockData";
-import InstituteMode from "@/components/dashboard/InstituteMode";
-import SelfStudyMode from "@/components/dashboard/SelfStudyMode";
-import { CardDescription } from "@/components/ui/card";
-import { GraduationCap } from "lucide-react";
+import React, { useState } from "react";
+import SummaryMetrics from "@/components/dashboard/SummaryMetrics";
+import FilterBar from "@/components/dashboard/FilterBar";
+import ActivityCharts from "@/components/dashboard/ActivityCharts";
+import RecentActivity from "@/components/dashboard/RecentActivity";
+
+// Placeholder for future: hook/query to real data.
+const getMockStats = (range: "week" | "month" | "custom") => ({
+  summary: [
+    { icon: <PieChart size={26}/>, label: "Questions Attempted", value: range === "week" ? 82 : 340 },
+    { icon: <BarChart size={26}/>, label: "Revision Sessions", value: range === "week" ? 7 : 22 },
+    { icon: <Clock size={26}/>, label: "Wellness Sessions", value: range === "week" ? 5 : 18 },
+    { icon: <TrendingUp size={26}/>, label: "Accuracy", value: range === "week" ? "72%" : "74%" },
+    { icon: <User size={26}/>, label: "Focus Score Avg", value: range === "week" ? 81 : 79 },
+    { icon: <Calendar size={26}/>, label: "Practice Sessions", value: range === "week" ? 13 : 55 },
+  ],
+  questionsChart: Array(7).fill(0).map((_, i) => ({
+    label: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i],
+    value: Math.floor(Math.random() * 30) + 10
+  })),
+  revisionChart: Array(7).fill(0).map((_, i) => ({
+    label: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i],
+    value: Math.floor(Math.random() * 6)
+  })),
+  wellnessChart: Array(7).fill(0).map((_, i) => ({
+    label: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i],
+    value: Math.floor(Math.random() * 3) + 1
+  })),
+  activities: [
+    { id: '1', type: "practice", title: "120 Questions Attempted", date: new Date().toISOString(), description: "Great practice in Physics!" },
+    { id: '2', type: "wellness", title: "Meditation Session", date: new Date(Date.now() - 86400000).toISOString(), description: "Completed 10 min meditation." },
+    { id: '3', type: "revision", title: "Revision on Ecology", date: new Date(Date.now() - 2 * 86400000).toISOString(), description: "Reviewed all key concepts." }
+  ]
+});
 
 const Dashboard = () => {
-  const { mode } = useAppContext();
-  const [activeSuggestion] = useState(suggestions[0]);
-  const [assistantOpen, setAssistantOpen] = useState(false);
-  const navigate = useNavigate();
-  
-  // Get the latest sleep metrics
-  const latestSleepMetric = sleepMetrics[0]; 
-  
-  const handleOpenAssistant = () => {
-    setAssistantOpen(true);
-  };
+  const [range, setRange] = useState<"week" | "month" | "custom">("week");
 
-  const handleAssistantFullPage = () => {
-    setAssistantOpen(false);
-    navigate('/assistant');
-  };
+  // Use placeholder/mock data (replace with data query as needed)
+  const { summary, questionsChart, revisionChart, wellnessChart, activities } = getMockStats(range);
 
-  const handleViewSubject = (subjectId: string) => {
-    navigate(`/${subjectId}`);
-  };
-  
   return (
-    <div className="container mx-auto max-w-7xl">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      {mode === "institute" ? (
-        <InstituteMode
-          activeSuggestion={activeSuggestion}
-          tasks={tasks}
-          instituteAssignments={instituteAssignments}
-          announcements={announcements}
-          latestSleepMetric={latestSleepMetric}
-          sedentaryMetrics={sedentaryMetrics}
-          handleOpenAssistant={handleOpenAssistant}
-        />
-      ) : (
-        <SelfStudyMode
-          subjects={subjects}
-          chapters={chapters}
-          tasks={tasks}
-          activeSuggestion={activeSuggestion}
-          latestSleepMetric={latestSleepMetric}
-          sedentaryMetrics={sedentaryMetrics}
-          assistantOpen={assistantOpen}
-          setAssistantOpen={setAssistantOpen}
-          handleOpenAssistant={handleOpenAssistant}
-          handleAssistantFullPage={handleAssistantFullPage}
-          handleViewSubject={handleViewSubject}
-        />
-      )}
+    <div className="container mx-auto max-w-7xl animate-fade-in">
+      <h1 className="text-2xl font-bold mb-4">Dashboard Overview</h1>
+      <FilterBar range={range} onChange={setRange} />
+      <SummaryMetrics data={summary} />
+      <ActivityCharts 
+        questionsChart={questionsChart}
+        revisionChart={revisionChart}
+        wellnessChart={wellnessChart}
+      />
+      <div className="my-8">
+        <RecentActivity activities={activities} />
+      </div>
     </div>
   );
 };
