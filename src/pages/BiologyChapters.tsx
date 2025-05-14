@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen } from "lucide-react";
@@ -14,23 +13,23 @@ const BiologyChapters = () => {
   const filteredChapters = biologyChapters.filter(chapter => chapter.class === classId);
   
   return (
-    <div className="container mx-auto max-w-7xl">
+    <div className="container mx-auto max-w-7xl pb-20 pt-2 px-3">
       <Button 
         variant="ghost" 
-        className="mb-4 text-gray-500"
+        className="mb-2 sm:mb-4 text-gray-500"
         onClick={() => navigate("/biology")}
       >
         <ArrowLeft size={16} className="mr-2" /> Back to Classes
       </Button>
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
         <div className="flex items-center">
-          <div className="bg-learnzy-purple/10 p-3 rounded-full mr-4">
-            <BookOpen className="h-6 w-6 text-learnzy-purple" />
+          <div className="bg-learnzy-purple/10 p-2 sm:p-3 rounded-full mr-3 sm:mr-4">
+            <BookOpen className="h-5 w-5 text-learnzy-purple" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">Biology - Class {classId}</h1>
-            <p className="text-gray-500">{filteredChapters.length} chapters</p>
+            <p className="text-gray-500 text-xs sm:text-base">{filteredChapters.length} chapters</p>
           </div>
         </div>
       </div>
@@ -44,24 +43,24 @@ const BiologyChapters = () => {
             {filteredChapters.map((chapter) => (
               <div
                 key={chapter.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
                 onClick={() => navigate(`/biology/chapter/${chapter.id}`)}
               >
-                <div className="flex items-center gap-4">
-                  <div className="bg-learnzy-purple/10 h-10 w-10 rounded-full flex items-center justify-center">
-                    <BookOpen className="h-5 w-5 text-learnzy-purple" />
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="bg-learnzy-purple/10 h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center">
+                    <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-learnzy-purple" />
                   </div>
                   <div>
-                    <h3 className="font-medium">{chapter.name}</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="text-sm sm:font-medium">{chapter.name}</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {chapter.lastPracticed 
                         ? `Last practiced: ${format(new Date(chapter.lastPracticed), "MMM dd, yyyy")}` 
                         : "Not practiced yet"}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <ProgressRing progress={chapter.progress} size={40} textClassName="text-xs" />
+                <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-0">
+                  <ProgressRing progress={chapter.progress} size={32} textClassName="text-xs" />
                   <Button 
                     size="sm" 
                     className="bg-learnzy-orange hover:bg-learnzy-orange/90"
