@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle, GraduationCap } from "lucide-react";
 import SuggestionBanner from "@/components/SuggestionBanner";
 import FocusScoreGauge from "@/components/FocusScoreGauge";
 import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
