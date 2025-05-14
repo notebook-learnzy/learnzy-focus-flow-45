@@ -2,14 +2,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sleep, Clock, TrendingUp, TrendingDown, Book, Heart } from "lucide-react";
+import { Bed, Clock, TrendingUp, TrendingDown, Book } from "lucide-react";
 
 interface ActionableInsightsProps {
   summary: Array<{ label: string; value: string | number }>;
 }
 
 const ICONS = {
-  sleep: <Sleep className="h-6 w-6 text-blue-700" />,
+  sleep: <Bed className="h-6 w-6 text-blue-700" />,
   time: <Clock className="h-6 w-6 text-learnzy-purple" />,
   focus: <TrendingUp className="h-6 w-6 text-green-600" />,
   anxious: <TrendingDown className="h-6 w-6 text-pink-600" />,
