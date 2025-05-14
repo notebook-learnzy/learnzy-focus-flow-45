@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,8 @@ import Social from "./pages/Social";
 import MoodCheckModal from "./components/MoodCheckModal";
 import Index from "./pages/Index";
 import Academics from "./pages/Academics";
+import ClassChapters from "./pages/ClassChapters";
+import ChapterSets from "./pages/ChapterSets";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,12 @@ const App = () => (
               
               {/* Updated Subject Routes */}
               <Route path="/:subjectId" element={<SubjectClasses />} />
+              
+              {/* NEW: ClassChapters and ChapterSets routes */}
+              <Route path="/academics/:subjectId/classes/:classId" element={<ClassChapters />} />
+              <Route path="/academics/:subjectId/classes/:classId/chapter/:chapterId" element={<ChapterSets />} />
+              
+              {/* Legacy Biology routes kept for now */}
               <Route path="/:subjectId/class/:classId" element={<BiologyChapters />} />
               <Route path="/:subjectId/chapter/:chapterId" element={<BiologyChapterDetail />} />
               <Route path="/practice/:subjectId/:chapterId/set/:setId/ritual" element={<MeditationRitual />} />

@@ -9,9 +9,9 @@ import { subjects } from "@/data/mockData";
 const SubjectClasses = () => {
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
-  
+
   const subject = subjects.find(s => s.id === subjectId);
-  
+
   if (!subject) {
     return (
       <div className="container mx-auto max-w-7xl py-12 text-center">
@@ -20,7 +20,7 @@ const SubjectClasses = () => {
       </div>
     );
   }
-  
+
   const classes = [
     {
       id: "11",
@@ -33,7 +33,7 @@ const SubjectClasses = () => {
       description: `Advanced Concepts in ${subject.name}`,
     }
   ];
-  
+
   return (
     <div className="container mx-auto max-w-7xl">
       <Button 
@@ -54,7 +54,7 @@ const SubjectClasses = () => {
               "cursor-pointer hover:shadow-md transition-shadow",
               "border-2 border-learnzy-purple/20"
             )}
-            onClick={() => navigate(`/${subject.id}/class/${classItem.id}`)}
+            onClick={() => navigate(`/academics/${subject.id}/classes/${classItem.id}`)}
           >
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center space-y-4">
