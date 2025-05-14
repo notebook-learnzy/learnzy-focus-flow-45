@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import SummaryMetrics from "@/components/dashboard/SummaryMetrics";
 import FilterBar from "@/components/dashboard/FilterBar";
@@ -19,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/contexts/AppContext";
 import FocusScoreGauge from "@/components/FocusScoreGauge";
 import SmartRingCard from "@/components/dashboard/SmartRingCard";
+import FocusTrendChart from "@/components/dashboard/FocusTrendChart";
 
 const getMockStats = (range: "week" | "month" | "custom") => ({
   summary: [
@@ -106,8 +106,8 @@ const Dashboard = () => {
       {/* New Row: Focus Visualizer + Smart Ring Card */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="rounded-xl bg-white p-4 shadow flex flex-col items-center justify-center">
-          <FocusScoreGauge size="lg" />
-          <p className="mt-2 text-base text-gray-700 font-medium">Your Focus (Live)</p>
+          <FocusTrendChart />
+          <p className="mt-2 text-base text-gray-700 font-medium">Your Focus Over Time</p>
         </div>
         <SmartRingCard />
       </div>
