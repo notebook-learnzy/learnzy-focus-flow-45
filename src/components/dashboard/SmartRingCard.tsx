@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BatteryFull, ring as RingIcon } from "lucide-react";
+import { BatteryFull, Ring } from "lucide-react";
 
 interface SmartRingCardProps {
   name?: string;
@@ -21,7 +21,7 @@ const SmartRingCard = ({
   return (
     <Card className="bg-gradient-to-br from-learnzy-purple/10 to-learnzy-purple/5 border-learnzy-purple/20 flex flex-col h-full">
       <CardHeader className="pb-2 flex-row items-center gap-3">
-        <RingIcon className="text-learnzy-purple h-6 w-6" />
+        <Ring className="text-learnzy-purple h-6 w-6" />
         <CardTitle className="text-base flex-1">{name} Smart Ring</CardTitle>
         <span className={`text-xs px-2 py-0.5 rounded-full ${connected ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-500"}`}>
           {connected ? "Connected" : "Disconnected"}
@@ -37,7 +37,7 @@ const SmartRingCard = ({
               onError={() => setImgError(true)}
             />
           ) : (
-            <RingIcon className="w-12 h-12 text-learnzy-purple" />
+            <Ring className="w-12 h-12 text-learnzy-purple" />
           )}
         </div>
         <div className="flex items-center gap-2 mb-2">
