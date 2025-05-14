@@ -24,6 +24,7 @@ import MistakeNotebook from "./pages/MistakeNotebook";
 import Social from "./pages/Social";
 import MoodCheckModal from "./components/MoodCheckModal";
 import Index from "./pages/Index";
+import Academics from "./pages/Academics";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<Index />} />
+              <Route path="/academics" element={<Academics />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/subject/:id" element={<Subject />} />
@@ -55,6 +57,7 @@ const App = () => (
               <Route path="/:subjectId/chapter/:chapterId" element={<BiologyChapterDetail />} />
               <Route path="/practice/:subjectId/:chapterId/set/:setId/ritual" element={<MeditationRitual />} />
               <Route path="/practice/:subjectId/:chapterId/set/:setId/report" element={<PerformanceReport />} />
+              <Route path="/practice/create-test" element={<Practice />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
