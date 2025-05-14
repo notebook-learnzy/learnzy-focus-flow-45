@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { RitualLog } from "@/types/wellness";
 
 export type AppMode = "institute" | "self-study";
 export type MoodState = "calm" | "focused" | "stressed" | "tired" | "energetic";

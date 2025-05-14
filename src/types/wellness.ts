@@ -1,4 +1,3 @@
-
 export type SleepMetrics = {
   score: number;
   quality: string;
@@ -44,4 +43,9 @@ export type Badge = {
   earned_date?: string; // ISO date string
   progress?: number; // percentage towards earning
   badge_type: "focus" | "meditation" | "accuracy" | "streak" | "completion";
+};
+
+export type RitualLog = {
+  result: "completed" | "skipped";
+  date: Date;
 };
