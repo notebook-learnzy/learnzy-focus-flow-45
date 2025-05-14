@@ -102,15 +102,15 @@ const ActionableInsights: React.FC<ActionableInsightsProps> = ({ summary }) => {
     });
   }
 
-  // Responsive scroll: grid on desktop, scroll snap row on mobile/tablet.
+  // Horizontally scrollable banners:
   return (
-    <div className="overflow-x-auto pb-2">
-      <div className="flex gap-4 sm:grid sm:grid-cols-2 md:grid-cols-3 flex-nowrap scroll-smooth scroll-pl-3 snap-x">
+    <div className="overflow-x-auto -mx-2 pb-2">
+      <div className="flex flex-nowrap gap-4 snap-x snap-mandatory px-2">
         {actionableItems.map((item, idx) => (
           <div
             key={idx}
-            className="snap-start min-w-[320px] sm:min-w-0 flex items-center p-4 bg-white rounded-lg shadow-sm border border-learnzy-purple/10 hover:shadow-md transition
-            animate-fade-in"
+            className="snap-start min-w-[330px] max-w-xs w-[90vw] sm:w-[330px] flex items-center p-4 bg-white rounded-lg shadow-sm border border-learnzy-purple/10 hover:shadow-md transition animate-fade-in mr-1"
+            style={{ flex: '0 0 auto' }}
           >
             <div className="mr-4">{item.icon}</div>
             <div className="flex-1">
@@ -118,7 +118,7 @@ const ActionableInsights: React.FC<ActionableInsightsProps> = ({ summary }) => {
               <div className="text-sm text-gray-600">{item.description}</div>
             </div>
             <Button
-              className="ml-4 bg-learnzy-purple text-white hover:scale-105"
+              className="ml-4 bg-learnzy-purple text-white hover:scale-105 whitespace-nowrap"
               onClick={item.onClick}
             >
               {item.cta}
@@ -131,3 +131,4 @@ const ActionableInsights: React.FC<ActionableInsightsProps> = ({ summary }) => {
 };
 
 export default ActionableInsights;
+
