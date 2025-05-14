@@ -43,7 +43,7 @@ import CalendarTimeGrid from "@/components/CalendarTimeGrid";
 
 const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<"day" | "week">("week");
+  const [viewMode, setViewMode] = useState<"day" | "week" | "month">("week");
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [allTasks, setAllTasks] = useState<Task[]>(tasks);
   const [showDialog, setShowDialog] = useState(false);
@@ -188,20 +188,24 @@ const Calendar = () => {
         onCreate={() => setShowDialog(true)}
       />
 
-      {/* Floating action button */}
-      <button
-        className="fixed bottom-8 right-8 z-50 shadow-lg bg-learnzy-purple hover:bg-learnzy-purple/90 text-white rounded-full p-4 flex items-center justify-center transition-colors duration-200"
-        onClick={() => {
-          setShowDialog(true);
-          setTaskModalDefaults({
-            date: format(selectedDate, "yyyy-MM-dd"),
-            time: undefined
-          });
-        }}
-        aria-label="Add new task"
-      >
-        <Plus size={28} />
-      </button>
+      {/* Floating Add Task button */}
+      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center">
+        <button
+          className="shadow-xl bg-learnzy-purple hover:bg-learnzy-purple/90 transition-colors duration-200 text-white rounded-full p-4 flex items-center justify-center"
+          onClick={() => {
+            setShowDialog(true);
+            setTaskModalDefaults({
+              date: format(selectedDate, "yyyy-MM-dd"),
+              time: undefined
+            });
+          }}
+          aria-label="Add Task"
+          title="Add Task"
+        >
+          <Plus size={28} />
+        </button>
+        <span className="mt-2 text-xs text-gray-500">Add Task</span>
+      </div>
       
       {/* Main area */}
       <div className="flex-1 flex flex-col">
@@ -210,7 +214,7 @@ const Calendar = () => {
             <Button 
               variant="outline" 
               size="sm"
-              className={viewMode === "day" ? "bg-gray-200" : ""}
+              className={viewMode === "day" ? "bg-gray-200 font-semibold shadow" : ""}
               onClick={() => setViewMode("day")}
             >
               Day
@@ -218,10 +222,18 @@ const Calendar = () => {
             <Button 
               variant="outline" 
               size="sm"
-              className={viewMode === "week" ? "bg-gray-200" : ""}
+              className={viewMode === "week" ? "bg-gray-200 font-semibold shadow" : ""}
               onClick={() => setViewMode("week")}
             >
               Week
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className={viewMode === "month" ? "bg-gray-200 font-semibold shadow" : ""}
+              onClick={() => setViewMode("month")}
+            >
+              Month
             </Button>
             <Button 
               variant="outline"
@@ -235,15 +247,24 @@ const Calendar = () => {
             <span className="font-semibold text-lg">{format(selectedDate, "MMMM d, yyyy")}</span>
           </div>
         </div>
-        {/* Time grid (main calendar) */}
-        <CalendarTimeGrid
-          weekStart={weekStart}
-          selectedDate={selectedDate}
-          tasks={allTasks}
-          onSelectDate={setSelectedDate}
-          viewMode={viewMode}
-          onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
-        />
+
+        {/* Time grid (main calendar), only render in day/week */}
+        {(viewMode === "day" || viewMode === "week") && (
+          <CalendarTimeGrid
+            weekStart={weekStart}
+            selectedDate={selectedDate}
+            tasks={allTasks}
+            onSelectDate={setSelectedDate}
+            viewMode={viewMode}
+            onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
+          />
+        )}
+        {/* Month view placeholder */}
+        {viewMode === "month" && (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-10 text-lg">
+            Month view coming soon! {/* You can implement month grid with a separate component later */}
+          </div>
+        )}
 
         {/* Dialog for Add Task */}
         <Dialog open={showDialog} onOpenChange={(open) => {
