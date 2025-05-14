@@ -1,4 +1,3 @@
-
 import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import ModeToggle from "./ModeToggle";
 const Header = () => {
   return (
     <header className="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 bg-white border-b border-gray-200 w-full sticky top-0 z-20">
-      <ModeToggle />
+      <div></div>
       <div className="flex items-center gap-2 sm:gap-4">
         <Button variant="ghost" size="icon" className="relative">
           <Bell size={20} />

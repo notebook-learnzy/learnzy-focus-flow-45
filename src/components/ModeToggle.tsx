@@ -3,9 +3,14 @@ import { useAppContext, AppMode } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BookOpen, School } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const ModeToggle = () => {
   const { mode, setMode } = useAppContext();
+  const location = useLocation();
+
+  // Only show on /academics page!
+  if (!location.pathname.startsWith("/academics")) return null;
 
   return (
     <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-lg">
