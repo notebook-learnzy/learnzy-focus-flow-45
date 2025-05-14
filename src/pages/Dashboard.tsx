@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import SummaryMetrics from "@/components/dashboard/SummaryMetrics";
 import FilterBar from "@/components/dashboard/FilterBar";
 import ActivityCharts from "@/components/dashboard/ActivityCharts";
-import RecentActivity from "@/components/dashboard/RecentActivity";
 import ActionableInsights from "@/components/dashboard/ActionableInsights";
+import StreakCard from "@/components/dashboard/StreakCard";
+import { Bolt } from "lucide-react";
 import {
   ChartPie,
   ChartBar,
@@ -13,6 +14,8 @@ import {
   User,
   Calendar
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 // Placeholder for future: hook/query to real data.
 const getMockStats = (range: "week" | "month" | "custom") => ({
@@ -36,28 +39,40 @@ const getMockStats = (range: "week" | "month" | "custom") => ({
     label: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i],
     value: Math.floor(Math.random() * 3) + 1
   })),
-  activities: [
-    { id: '1', type: "practice", title: "120 Questions Attempted", date: new Date().toISOString(), description: "Great practice in Physics!" },
-    { id: '2', type: "wellness", title: "Meditation Session", date: new Date(Date.now() - 86400000).toISOString(), description: "Completed 10 min meditation." },
-    { id: '3', type: "revision", title: "Revision on Ecology", date: new Date(Date.now() - 2 * 86400000).toISOString(), description: "Reviewed all key concepts." }
-  ] as {
-    id: string;
-    type: "practice" | "wellness" | "revision";
-    title: string;
-    date: string;
-    description: string;
-  }[],
 });
 
 const Dashboard = () => {
   const [range, setRange] = useState<"week" | "month" | "custom">("week");
 
-  // Use placeholder/mock data (replace with data query as needed)
-  const { summary, questionsChart, revisionChart, wellnessChart, activities } = getMockStats(range);
+  const { summary, questionsChart, revisionChart, wellnessChart } = getMockStats(range);
+
+  const navigate = useNavigate();
 
   return (
     <div className="container mx-auto max-w-7xl animate-fade-in">
       <h1 className="text-2xl font-bold mb-4">Dashboard Overview</h1>
+      
+      {/* Motivation and streaks */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 mb-6">
+        <StreakCard days={range === "week" ? 6 : 21} />
+        <div className="rounded-xl bg-gradient-to-r from-violet-300 via-pink-300 to-orange-200 p-5 flex flex-col justify-between shadow-md min-h-[100px] hover:scale-105 transition-transform animate-fade-in">
+          <div className="flex items-center gap-2 font-bold text-gray-900 text-lg mb-1">
+            <Bolt className="text-yellow-500 w-6 h-6" />
+            Quick Motivation
+          </div>
+          <div className="text-[15px] text-gray-700 mb-2">
+            🌟 “Success is the sum of small efforts, repeated day in and day out.” 
+            <br />
+            Ready to challenge yourself today?
+          </div>
+          <Button
+            className="w-max bg-learnzy-purple text-white font-semibold mt-1 hover:scale-105"
+            onClick={() => navigate("/practice")}
+          >
+            Try a Quiz
+          </Button>
+        </div>
+      </div>
       {/* Actionable insights section */}
       <ActionableInsights summary={summary} />
 
@@ -68,9 +83,6 @@ const Dashboard = () => {
         revisionChart={revisionChart}
         wellnessChart={wellnessChart}
       />
-      <div className="my-8">
-        <RecentActivity activities={activities} />
-      </div>
     </div>
   );
 };
