@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { chapters, questionSets, subjects } from "@/data/mockData";
@@ -44,14 +43,15 @@ const Practice = () => {
   useEffect(() => {
     const fetchSetA = async () => {
       setQuestionsLoading(true);
-      // Only for Botany subject
-      if (subject?.name === "Botany") {
-        // Fetch 10 Botany questions as demo
+      // Only for Botany subject + Cell: The Unit of Life + Set A
+      if (subject?.name === "Botany" && chapter?.name === "Cell: The Unit of Life") {
+        // Fetch 50 Botany 'Cell: The Unit of Life' questions as demo
         const { data, error } = await supabase
           .from("demo")
           .select()
           .eq("Subject", "Botany")
-          .limit(10);
+          .eq("Chapter_name", "Cell: The Unit of Life")
+          .limit(50);
 
         if (error) {
           setQuestionsLoading(false);
@@ -60,7 +60,6 @@ const Practice = () => {
             description: error.message,
             variant: "destructive",
           });
-          // fallback to mockData
           setCurrentQuestionSet(null);
           return;
         }
@@ -91,7 +90,7 @@ const Practice = () => {
         }));
 
         setCurrentQuestionSet({
-          id: `botany-setA`,
+          id: `botany-setA-cell`,
           set_type: "A",
           chapter_id: chapterId!,
           questions: mappedQuestions,
@@ -103,7 +102,6 @@ const Practice = () => {
         setQuestionsLoading(false);
         return;
       }
-
       // Default/fallback (other subject, mockData)
       if (chapterId) {
         // Find the next available set for this chapter

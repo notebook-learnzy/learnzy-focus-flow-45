@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 export type AppMode = "institute" | "self-study";
@@ -24,6 +23,10 @@ type AppContextType = {
     practice_days: number;
   };
   updateStreak: (type: keyof AppContextType["userStreaks"]) => void;
+  ritualCount: number;
+  ritualLog: RitualLog[];
+  incrementRitual: () => void;
+  logRitualResult: (log: RitualLog) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -41,6 +44,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     high_focus_days: 0,
     practice_days: 0
   });
+  const [ritualCount, setRitualCount] = useState(0);
+  const [ritualLog, setRitualLog] = useState<RitualLog[]>([]);
 
   // Apply theme based on mood or manual selection
   useEffect(() => {
@@ -76,6 +81,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const incrementRitual = () => setRitualCount(c => c + 1);
+  const logRitualResult = (log: RitualLog) => setRitualLog(l => [...l, log]);
+
   return (
     <AppContext.Provider 
       value={{ 
@@ -90,7 +98,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         themeMode,
         setThemeMode,
         userStreaks,
-        updateStreak
+        updateStreak,
+        ritualCount,
+        ritualLog,
+        incrementRitual,
+        logRitualResult
       }}
     >
       {children}
