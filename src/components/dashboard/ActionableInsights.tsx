@@ -102,23 +102,47 @@ const ActionableInsights: React.FC<ActionableInsightsProps> = ({ summary }) => {
     });
   }
 
-  // Horizontally scrollable banners:
+  // --- MOBILE-OPTIMIZED, SMOOTH SCROLLABLE BANNERS ---
   return (
-    <div className="overflow-x-auto -mx-2 pb-2">
-      <div className="flex flex-nowrap gap-4 snap-x snap-mandatory px-2">
+    <div
+      className="overflow-x-auto -mx-3 pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent"
+      style={{
+        WebkitOverflowScrolling: "touch",
+        // Hide scrollbar for iOS/Android browsers
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
+    >
+      <div
+        className="
+          flex flex-nowrap gap-3 snap-x snap-mandatory px-3
+        "
+        // Hide scrollbar for Webkit
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {actionableItems.map((item, idx) => (
           <div
             key={idx}
-            className="snap-start min-w-[330px] max-w-xs w-[90vw] sm:w-[330px] flex items-center p-4 bg-white rounded-lg shadow-sm border border-learnzy-purple/10 hover:shadow-md transition animate-fade-in mr-1"
-            style={{ flex: '0 0 auto' }}
+            className="
+              snap-start
+              w-[90vw] max-w-[370px] min-w-[255px]
+              flex items-center p-4
+              bg-white rounded-xl shadow-sm border border-learnzy-purple/10
+              hover:shadow-md transition animate-fade-in
+              mr-0 last:mr-0
+            "
+            style={{
+              flex: "0 0 auto",
+            }}
           >
-            <div className="mr-4">{item.icon}</div>
-            <div className="flex-1">
-              <div className="font-bold text-gray-900">{item.title}</div>
-              <div className="text-sm text-gray-600">{item.description}</div>
+            <div className="mr-4 shrink-0">{item.icon}</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-gray-900 text-base">{item.title}</div>
+              <div className="text-sm text-gray-600 truncate">{item.description}</div>
             </div>
             <Button
-              className="ml-4 bg-learnzy-purple text-white hover:scale-105 whitespace-nowrap"
+              className="ml-4 bg-learnzy-purple text-white text-xs font-semibold px-3 py-2 rounded-md hover:scale-105 whitespace-nowrap"
+              style={{ minWidth: 32 }}
               onClick={item.onClick}
             >
               {item.cta}
@@ -126,9 +150,12 @@ const ActionableInsights: React.FC<ActionableInsightsProps> = ({ summary }) => {
           </div>
         ))}
       </div>
+      {/* Hide scrollbar for Webkit */}
+      <style>{`
+        .scrollbar-thin::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   );
 };
 
 export default ActionableInsights;
-
