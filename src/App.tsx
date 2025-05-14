@@ -20,7 +20,9 @@ import BiologyChapters from "./pages/BiologyChapters";
 import BiologyChapterDetail from "./pages/BiologyChapterDetail";
 import MeditationRitual from "./pages/MeditationRitual";
 import PerformanceReport from "./pages/PerformanceReport";
-import MistakeNotebook from "./components/MistakeNotebook";
+import MistakeNotebook from "./pages/MistakeNotebook";
+import Social from "./pages/Social";
+import MoodCheckModal from "./components/MoodCheckModal";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -32,9 +34,10 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <MoodCheckModal />
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<Dashboard />} />
+              <Route index element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/subject/:id" element={<Subject />} />
@@ -43,7 +46,8 @@ const App = () => (
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/assistant" element={<Assistant />} />
-              <Route path="/mistake-notebook" element={<Index />} />
+              <Route path="/mistake-notebook" element={<MistakeNotebook />} />
+              <Route path="/social" element={<Social />} />
               
               {/* Updated Subject Routes */}
               <Route path="/:subjectId" element={<SubjectClasses />} />

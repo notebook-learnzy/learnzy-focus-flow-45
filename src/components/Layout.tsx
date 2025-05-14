@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
   SidebarProvider 
 } from "@/components/ui/sidebar";
-import { Calendar, BookOpen, Heart, PieChart, Settings as SettingsIcon, GraduationCap } from "lucide-react";
+import { Calendar, BookOpen, Heart, PieChart, Settings as SettingsIcon, GraduationCap, AlertTriangle, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
@@ -37,7 +37,7 @@ const Layout = () => {
                     to="/" 
                     className={cn(
                       "flex items-center gap-3 px-4 py-2 rounded-md",
-                      location.pathname === "/" ? "bg-learnzy-purple text-white" : "text-gray-700 hover:bg-learnzy-purple/10"
+                      location.pathname === "/" || location.pathname === "/dashboard" ? "bg-learnzy-purple text-white" : "text-gray-700 hover:bg-learnzy-purple/10"
                     )}
                   >
                     <BookOpen size={20} />
@@ -87,6 +87,36 @@ const Layout = () => {
                   >
                     <PieChart size={20} />
                     <span>Analytics</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link 
+                    to="/mistake-notebook" 
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md",
+                      location.pathname === "/mistake-notebook" ? "bg-learnzy-purple text-white" : "text-gray-700 hover:bg-learnzy-purple/10"
+                    )}
+                  >
+                    <AlertTriangle size={20} />
+                    <span>Mistake Notebook</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link 
+                    to="/social" 
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2 rounded-md",
+                      location.pathname === "/social" ? "bg-learnzy-purple text-white" : "text-gray-700 hover:bg-learnzy-purple/10"
+                    )}
+                  >
+                    <Users size={20} />
+                    <span>Social</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
