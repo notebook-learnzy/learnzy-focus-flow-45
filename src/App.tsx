@@ -28,6 +28,7 @@ import ClassChapters from "./pages/ClassChapters";
 import ChapterSets from "./pages/ChapterSets";
 import PreTestRitual from "./pages/PreTestRitual";
 import TestPage from "./pages/TestPage";
+import Backlog from "./pages/Backlog";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,8 @@ const App = () => (
               <Route path="/practice/:subjectId/:chapterId/set/:setId/ritual" element={<MeditationRitual />} />
               <Route path="/practice/:subjectId/:chapterId/set/:setId/report" element={<PerformanceReport />} />
               <Route path="/practice/create-test" element={<Practice />} />
+              
+              <Route path="/backlog" element={<Backlog />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

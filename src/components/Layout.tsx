@@ -1,4 +1,3 @@
-
 import { Outlet } from "react-router-dom";
 import { 
   Sidebar, 
@@ -8,7 +7,7 @@ import {
   SidebarMenuButton,
   SidebarProvider 
 } from "@/components/ui/sidebar";
-import { Calendar, BookOpen, Heart, PieChart, Settings as SettingsIcon, GraduationCap, AlertTriangle, Users } from "lucide-react";
+import { Calendar, BookOpen, Heart, PieChart, Settings as SettingsIcon, GraduationCap, AlertTriangle, Users, List } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
@@ -152,6 +151,21 @@ const Layout = () => {
                     >
                       <SettingsIcon size={20} />
                       <span>Settings</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to="/backlog"
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2 rounded-md",
+                        location.pathname === "/backlog" ? "bg-learnzy-purple text-white" : "text-gray-700 hover:bg-learnzy-purple/10"
+                      )}
+                    >
+                      <List size={20} />
+                      <span>Backlog</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

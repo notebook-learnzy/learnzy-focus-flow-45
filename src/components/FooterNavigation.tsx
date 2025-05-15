@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { BookOpen, Calendar, LayoutDashboard, Heart, Notebook, Users } from 'lucide-react';
+import { BookOpen, Calendar, LayoutDashboard, Heart, Notebook, Users, List } from 'lucide-react';
 
 const FooterNavigation = () => {
   const location = useLocation();
@@ -37,6 +36,11 @@ const FooterNavigation = () => {
       name: 'Social',
       icon: <Users className="h-6 w-6 sm:h-5 sm:w-5" />,
       path: '/social'
+    },
+    {
+      name: 'Backlog',
+      icon: <List className="h-6 w-6 sm:h-5 sm:w-5" />,
+      path: '/backlog'
     },
   ];
 
