@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import SummaryMetrics from "@/components/dashboard/SummaryMetrics";
 import FilterBar from "@/components/dashboard/FilterBar";
@@ -79,23 +80,25 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto max-w-7xl animate-fade-in">
-      <h1 className="text-2xl font-bold mb-4">Dashboard Overview</h1>
+    <div className="container max-w-full px-2 sm:px-4 md:px-6 mx-auto animate-fade-in">
+      {/* Heading */}
+      <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 mt-2">Dashboard Overview</h1>
       
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 mb-6">
+      {/* Streak + Motivation (mobile: stack) */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 mb-4 sm:mb-6">
         <StreakCard days={range === "week" ? 6 : 21} />
-        <div className="rounded-xl bg-gradient-to-r from-violet-300 via-pink-300 to-orange-200 p-5 flex flex-col justify-between shadow-md min-h-[100px] hover:scale-105 transition-transform animate-fade-in">
-          <div className="flex items-center gap-2 font-bold text-gray-900 text-lg mb-1">
+        <div className="rounded-xl bg-gradient-to-r from-violet-300 via-pink-300 to-orange-200 p-4 sm:p-5 flex flex-col justify-between shadow min-h-[100px] hover:scale-105 transition-transform animate-fade-in">
+          <div className="flex items-center gap-2 font-bold text-gray-900 text-base sm:text-lg mb-1">
             <Bolt className="text-yellow-500 w-6 h-6" />
             Quick Motivation
           </div>
-          <div className="text-[15px] text-gray-700 mb-2">
+          <div className="text-[14px] sm:text-[15px] text-gray-700 mb-2">
             🌟 “Success is the sum of small efforts, repeated day in and day out.”
             <br />
             Ready to challenge yourself today?
           </div>
           <Button
-            className="w-max bg-learnzy-purple text-white font-semibold mt-1 hover:scale-105"
+            className="w-full sm:w-max bg-learnzy-purple text-white font-semibold mt-1 hover:scale-105"
             onClick={() => navigate("/practice")}
           >
             Try a Quiz
@@ -103,36 +106,36 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* New Row: Focus Visualizer + Smart Ring Card */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="rounded-xl bg-white p-4 shadow flex flex-col items-center justify-center">
+      {/* Focus + Ring (mobile: stack) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="rounded-xl bg-white p-3 sm:p-4 shadow flex flex-col items-center justify-center">
           <FocusTrendChart />
-          <p className="mt-2 text-base text-gray-700 font-medium">Your Focus Over Time</p>
+          <p className="mt-2 text-[15px] sm:text-base text-gray-700 font-medium text-center">Your Focus Over Time</p>
         </div>
         <SmartRingCard />
       </div>
 
-      {/* Show different dashboard based on mode */}
+      {/* Institute stuff */}
       {mode === "institute" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white shadow rounded-lg p-4">
-            <h2 className="font-semibold text-lg mb-2">Assignments Due</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <div className="bg-white shadow rounded-lg p-3 sm:p-4">
+            <h2 className="font-semibold text-base sm:text-lg mb-2">Assignments Due</h2>
             <div className="space-y-2">
               {mockAssignments.map(a => (
                 <div key={a.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                  <span className="font-medium">{a.title}</span>
+                  <span className="font-medium text-sm">{a.title}</span>
                   <span className="text-xs text-gray-500">Due: {a.deadline}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-white shadow rounded-lg p-4">
-            <h2 className="font-semibold text-lg mb-2">Announcements</h2>
+          <div className="bg-white shadow rounded-lg p-3 sm:p-4">
+            <h2 className="font-semibold text-base sm:text-lg mb-2">Announcements</h2>
             <div className="space-y-2">
               {mockAnnouncements.map(ann => (
                 <div key={ann.id} className="border-b last:border-b-0 pb-2">
                   <div className="flex justify-between">
-                    <span className="font-medium">{ann.title}</span>
+                    <span className="font-medium text-sm">{ann.title}</span>
                     <span className="text-xs text-gray-400">{ann.date}</span>
                   </div>
                   <div className="text-xs text-gray-600">{ann.content}</div>
@@ -143,16 +146,21 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Insights, filter, summary, activity */}
       <ActionableInsights summary={summary} />
       <FilterBar range={range} onChange={setRange} />
       <SummaryMetrics data={summary} />
-      <ActivityCharts 
-        questionsChart={questionsChart}
-        revisionChart={revisionChart}
-        wellnessChart={wellnessChart}
-      />
+
+      <div className="mb-10">
+        <ActivityCharts 
+          questionsChart={questionsChart}
+          revisionChart={revisionChart}
+          wellnessChart={wellnessChart}
+        />
+      </div>
     </div>
   );
 };
 
 export default Dashboard;
+
