@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, Timer, ListCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import ShivPlanDialog from "./ShivPlanDialog";
 
 // Mock data — in real usage, provide as props
 const mockBacklogs = [
@@ -46,6 +48,10 @@ const statusIcon = (status: string) => {
 
 const BacklogList = () => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [planDialog, setPlanDialog] = useState<{
+    open: boolean;
+    topic: string;
+  }>({ open: false, topic: "" });
 
   return (
     <div className="bg-[#FFF7EB] border border-[#FFBD59]/30 rounded-2xl shadow-sm p-0 sm:p-2">
@@ -53,7 +59,6 @@ const BacklogList = () => {
         <div className="text-lg font-semibold text-gray-900 flex gap-2 items-center">
           <ListCheck className="w-5 h-5 text-[#FFBD59]" /> Your Backlog List
         </div>
-        {/* Placeholder for possible collapse/minimize toggle */}
       </div>
       <div className="divide-y divide-[#FFBD59]/20">
         {mockBacklogs.map((item) => (
@@ -82,7 +87,14 @@ const BacklogList = () => {
                   <Button size="sm" className="rounded-full bg-[#FFBD59] text-white hover:bg-[#fbbf24] text-xs font-semibold cursor-pointer opacity-90">
                     📅 Add to Calendar
                   </Button>
-                  <Button size="sm" variant="outline" className="rounded-full border-[#22C55E] text-[#22C55E] hover:bg-[#e9ffed] text-xs font-semibold cursor-pointer opacity-90">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-[#22C55E] text-[#22C55E] hover:bg-[#e9ffed] text-xs font-semibold cursor-pointer opacity-90"
+                    onClick={() =>
+                      setPlanDialog({ open: true, topic: item.topic })
+                    }
+                  >
                     Let Shiv Plan It
                   </Button>
                 </div>
@@ -92,6 +104,18 @@ const BacklogList = () => {
         ))}
       </div>
       <div className="p-3 text-xs text-gray-500 text-center">Tap a topic for more details and quick actions.</div>
+      {/* Shiv Plan Dialog Modal */}
+      <ShivPlanDialog
+        open={planDialog.open}
+        topic={planDialog.topic}
+        onClose={() => setPlanDialog({ open: false, topic: "" })}
+        onAcceptPlan={() => {
+          toast({
+            title: "Plan Scheduled",
+            description: `Shiv's plan for "${planDialog.topic}" has been added to your calendar!`
+          });
+        }}
+      />
     </div>
   );
 };
