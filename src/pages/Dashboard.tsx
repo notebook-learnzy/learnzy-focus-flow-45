@@ -80,14 +80,18 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="container max-w-full px-2 sm:px-4 md:px-6 mx-auto animate-fade-in">
+    <div className="w-full max-w-full px-2 sm:px-4 md:px-8 mx-auto animate-fade-in bg-learnzy-background min-h-[100dvh] pb-28 pt-3">
       {/* Heading */}
-      <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 mt-2">Dashboard Overview</h1>
+      <h1 className="text-lg sm:text-2xl font-bold mb-2 sm:mb-4 mt-2 pl-1 sm:pl-0 text-gray-900">
+        Dashboard Overview
+      </h1>
       
-      {/* Streak + Motivation (mobile: stack) */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 mb-4 sm:mb-6">
-        <StreakCard days={range === "week" ? 6 : 21} />
-        <div className="rounded-xl bg-gradient-to-r from-violet-300 via-pink-300 to-orange-200 p-4 sm:p-5 flex flex-col justify-between shadow min-h-[100px] hover:scale-105 transition-transform animate-fade-in">
+      {/* Streak + Motivation (mobile: stacked) */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-3 sm:mb-6">
+        <div className="w-full">
+          <StreakCard days={range === "week" ? 6 : 21} />
+        </div>
+        <div className="rounded-xl bg-gradient-to-r from-violet-300 via-pink-300 to-orange-200 p-3 sm:p-5 flex flex-col justify-between shadow min-h-[90px] hover:scale-105 transition-transform animate-fade-in w-full">
           <div className="flex items-center gap-2 font-bold text-gray-900 text-base sm:text-lg mb-1">
             <Bolt className="text-yellow-500 w-6 h-6" />
             Quick Motivation
@@ -98,7 +102,7 @@ const Dashboard = () => {
             Ready to challenge yourself today?
           </div>
           <Button
-            className="w-full sm:w-max bg-learnzy-purple text-white font-semibold mt-1 hover:scale-105"
+            className="w-full sm:w-max bg-learnzy-purple text-white font-semibold mt-1"
             onClick={() => navigate("/practice")}
           >
             Try a Quiz
@@ -106,13 +110,15 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Focus + Ring (mobile: stack) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div className="rounded-xl bg-white p-3 sm:p-4 shadow flex flex-col items-center justify-center">
+      {/* Focus + Ring (mobile: stacked) */}
+      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:gap-4 mb-3 sm:mb-6">
+        <div className="rounded-xl bg-white p-2 sm:p-4 shadow min-w-0 flex flex-col items-center justify-center w-full">
           <FocusTrendChart />
           <p className="mt-2 text-[15px] sm:text-base text-gray-700 font-medium text-center">Your Focus Over Time</p>
         </div>
-        <SmartRingCard />
+        <div className="w-full">
+          <SmartRingCard />
+        </div>
       </div>
 
       {/* Institute stuff */}
@@ -147,10 +153,15 @@ const Dashboard = () => {
       )}
 
       {/* Insights, filter, summary, activity */}
-      <ActionableInsights summary={summary} />
-      <FilterBar range={range} onChange={setRange} />
-      <SummaryMetrics data={summary} />
-
+      <div className="mb-3">
+        <ActionableInsights summary={summary} />
+      </div>
+      <div className="mb-2">
+        <FilterBar range={range} onChange={setRange} />
+      </div>
+      <div className="mb-3">
+        <SummaryMetrics data={summary} />
+      </div>
       <div className="mb-10">
         <ActivityCharts 
           questionsChart={questionsChart}
@@ -163,4 +174,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
