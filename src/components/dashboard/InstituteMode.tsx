@@ -1,51 +1,52 @@
 
-import React from 'react';
+import React from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, AlertCircle, GraduationCap } from "lucide-react";
-import SuggestionBanner from "@/components/SuggestionBanner";
-import FocusScoreGauge from "@/components/FocusScoreGauge";
-import SedentaryMetricsCard from "@/components/SedentaryMetricsCard";
-import SleepMetricsCard from "@/components/SleepMetricsCard";
-import CalendarWidget from "@/components/CalendarWidget";
-import { Task, Suggestion, SedentaryMetrics, SleepMetrics } from "@/types";
+import { Clock, LayoutGrid, BookText, GraduationCap } from "lucide-react";
 
-interface InstituteModeProps {
-  activeSuggestion: Suggestion;
-  tasks: Task[];
-  instituteAssignments: any[];
-  announcements: any[];
-  latestSleepMetric: SleepMetrics;
-  sedentaryMetrics: SedentaryMetrics;
-  handleOpenAssistant: () => void;
+// Types for incoming props
+interface Assignment {
+  id: string;
+  title: string;
+  deadline: string;
+}
+interface Announcement {
+  id: string;
+  title: string;
+  date: string;
+  content: string;
 }
 
-const InstituteMode = ({
-  activeSuggestion,
-  tasks,
-  instituteAssignments,
+interface InstituteModeProps {
+  assignments: Assignment[];
+  announcements: Announcement[];
+  onOpenAssistant: () => void;
+}
+
+const InstituteMode: React.FC<InstituteModeProps> = ({
+  assignments,
   announcements,
-  latestSleepMetric,
-  sedentaryMetrics,
-  handleOpenAssistant
-}: InstituteModeProps) => {
+  onOpenAssistant,
+}) => {
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Assignments Due</CardTitle>
-            </CardHeader>
-            <CardContent>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div className="md:col-span-2 space-y-4 sm:space-y-6">
+        {/* Assignments Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              <GraduationCap className="h-5 w-5 mr-2" />
+              Assigned to You
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {assignments.length ? (
               <div className="space-y-3">
-                {instituteAssignments.map((assignment) => (
-                  <div key={assignment.id} className="flex items-center justify-between border-b pb-3">
+                {assignments.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between border-b pb-3 last:border-b-0">
                     <div>
-                      <p className="font-medium">{assignment.title}</p>
-                      <p className="text-sm text-gray-500 flex items-center">
-                        <Clock size={14} className="mr-1" /> Due: {assignment.deadline}
-                      </p>
+                      <p className="text-sm font-medium">{a.title}</p>
+                      <p className="text-xs text-gray-500"><Clock size={14} className="inline mb-0.5 mr-1" />Due: {a.deadline}</p>
                     </div>
                     <Button variant="ghost" size="sm" className="text-learnzy-purple">
                       Start
@@ -53,57 +54,57 @@ const InstituteMode = ({
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Announcements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {announcements.map((announcement) => (
-                  <div key={announcement.id} className="bg-gray-50 rounded-md p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="font-medium">{announcement.title}</p>
-                      <span className="text-xs text-gray-500">
-                        {new Date(announcement.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">{announcement.content}</p>
+            ) : (
+              <div className="text-center text-gray-500 py-4">No assignments at the moment.</div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Announcements Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              <LayoutGrid className="h-5 w-5 mr-2" />
+              Announcements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {announcements.map((n) => (
+                <div key={n.id} className="p-2 bg-gray-50 rounded-md">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="font-medium">{n.title}</p>
+                    <span className="text-xs text-gray-500">{n.date}</span>
                   </div>
-                ))}
+                  <p className="text-xs text-gray-600">{n.content}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="space-y-4 sm:space-y-6">
+        {/* Shiv Assistant in institute mode */}
+        <Card className="bg-learnzy-purple/10 border-learnzy-purple/30">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="bg-learnzy-purple/20 p-2 sm:p-3 rounded-full">
+                <BookText className="h-5 w-5 text-learnzy-purple" />
               </div>
-            </CardContent>
-          </Card>
-          
-          <SuggestionBanner suggestion={activeSuggestion} />
-        </div>
-        
-        <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-learnzy-purple/10 to-learnzy-purple/5 border-learnzy-purple/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-learnzy-purple" />
-                Shiv Assistant
-              </CardTitle>
-              <CardDescription>Your personalized NEET guide</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm mb-4">Ask Shiv about your progress, revision tips, or study plans tailored for NEET preparation.</p>
-              <Button onClick={handleOpenAssistant} className="w-full">
-                Chat with Shiv
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <CalendarWidget tasks={tasks} />
-          <div className="grid grid-cols-1 gap-4">
-            <FocusScoreGauge />
-            <SleepMetricsCard metrics={latestSleepMetric} />
-            <SedentaryMetricsCard metrics={sedentaryMetrics} />
-          </div>
-        </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-sm sm:text-base">Need help with your assignments?</h3>
+                <p className="text-xs text-gray-600 mb-2">Ask Shiv Assistant for help or clarifications.</p>
+                <Button
+                  size="sm"
+                  className="bg-learnzy-purple w-full"
+                  onClick={onOpenAssistant}
+                >
+                  Open Assistant
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
