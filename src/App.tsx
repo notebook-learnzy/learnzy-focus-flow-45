@@ -19,7 +19,7 @@ import BiologyChapters from "./pages/BiologyChapters";
 import BiologyChapterDetail from "./pages/BiologyChapterDetail";
 import MeditationRitual from "./pages/MeditationRitual";
 import PerformanceReport from "./pages/PerformanceReport";
-import MistakeNotebook from "./pages/MistakeNotebook";
+import MistakeNotebook from "./components/MistakeNotebook";
 import Social from "./pages/Social";
 import MoodCheckModal from "./components/MoodCheckModal";
 import Index from "./pages/Index";
@@ -29,6 +29,9 @@ import ChapterSets from "./pages/ChapterSets";
 import PreTestRitual from "./pages/PreTestRitual";
 import TestPage from "./pages/TestPage";
 import Backlog from "./pages/Backlog";
+import TestQuestionPage from "./pages/TestQuestionPage";
+import AnalyzeMistakesPage from "./pages/AnalyzeMistakesPage";
+import PerformanceReportPage from "./pages/PerformanceReportPage";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +76,19 @@ const App = () => (
               <Route path="/practice/create-test" element={<Practice />} />
               
               <Route path="/backlog" element={<Backlog />} />
+              {/* NEW TEST QUESTION ROUTE */}
+              <Route
+                path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/test"
+                element={<TestQuestionPage />}
+              />
+              <Route
+                path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/analyze"
+                element={<AnalyzeMistakesPage />}
+              />
+              <Route
+                path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/performance"
+                element={<PerformanceReportPage />}
+              />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
