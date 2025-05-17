@@ -1,4 +1,3 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AcademicAnalyticsSection from "@/components/Performance/AcademicAnalyticsSection";
@@ -23,28 +22,13 @@ const PerformanceReportPage = () => {
             <TabsTrigger value="revision" className="flex-1">Revision</TabsTrigger>
           </TabsList>
           <TabsContent value="academics">
-            <AcademicAnalyticsSection
-              subjectId={subjectId}
-              classId={classId}
-              chapterId={chapterId}
-              setId={setId}
-            />
+            <AcademicAnalyticsSection />
           </TabsContent>
           <TabsContent value="wellness">
-            <WellnessAnalyticsSection
-              subjectId={subjectId}
-              classId={classId}
-              chapterId={chapterId}
-              setId={setId}
-            />
+            <WellnessAnalyticsSection />
           </TabsContent>
           <TabsContent value="revision">
-            <RevisionScheduleSection 
-              subjectId={subjectId} 
-              classId={classId} 
-              chapterId={chapterId}
-              setId={setId} 
-            />
+            <RevisionScheduleSection />
           </TabsContent>
         </Tabs>
       </div>
