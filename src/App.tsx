@@ -32,6 +32,9 @@ import Backlog from "./pages/Backlog";
 import TestQuestionPage from "./pages/TestQuestionPage";
 import AnalyzeMistakesPage from "./pages/AnalyzeMistakesPage";
 import PerformanceReportPage from "./pages/PerformanceReportPage";
+import RitualSelectionPage from "./pages/RitualSelectionPage";
+import RitualExperiencePage from "./pages/RitualExperiencePage";
+import RitualBenefitsPage from "./pages/RitualBenefitsPage";
 
 const queryClient = new QueryClient();
 
@@ -67,16 +70,13 @@ const App = () => (
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets" element={<ChapterSets />} />
               {/* Updated Route Structure for Practice/Test Flow */}
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/prep" element={
-                // Pre-ritual selection screen
-                <div>Select Ritual Page Placeholder (replace with your component)</div>
+                <RitualSelectionPage />
               } />
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/prep/:ritualType" element={
-                // Ritual experience (deep breathing/others)
-                <div>Perform Ritual Page Placeholder (replace with your component)</div>
+                <RitualExperiencePage />
               } />
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/prep/:ritualType/benefits" element={
-                // Benefits of ritual
-                <div>Ritual Benefits Page Placeholder (replace with your component)</div>
+                <RitualBenefitsPage />
               } />
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/test" element={<TestQuestionPage />} />
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/analyze" element={<AnalyzeMistakesPage />} />
