@@ -65,9 +65,22 @@ const App = () => (
               <Route path="/academics/:subjectId/classes/:classId" element={<ClassChapters />} />
               <Route path="/academics/:subjectId/classes/:classId/chapter/:chapterId" element={<ChapterSets />} />
               <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets" element={<ChapterSets />} />
-              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/preritual" element={<PreTestRitual />} />
-              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/test" element={<TestPage />} />
-              
+              {/* Updated Route Structure for Practice/Test Flow */}
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/prep" element={
+                // Pre-ritual selection screen
+                <div>Select Ritual Page Placeholder (replace with your component)</div>
+              } />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/prep/:ritualType" element={
+                // Ritual experience (deep breathing/others)
+                <div>Perform Ritual Page Placeholder (replace with your component)</div>
+              } />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/prep/:ritualType/benefits" element={
+                // Benefits of ritual
+                <div>Ritual Benefits Page Placeholder (replace with your component)</div>
+              } />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/test" element={<TestQuestionPage />} />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/analyze" element={<AnalyzeMistakesPage />} />
+              <Route path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/performance" element={<PerformanceReportPage />} />
               {/* Legacy Biology routes kept for now */}
               <Route path="/:subjectId/class/:classId" element={<BiologyChapters />} />
               <Route path="/:subjectId/chapter/:chapterId" element={<BiologyChapterDetail />} />

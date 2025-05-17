@@ -45,7 +45,8 @@ const ChapterSets = () => {
               onClick={() =>
                 unlocked &&
                 navigate(
-                  `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${set}/preritual`
+                  // Route to Pre-Ritual Selection, not to test directly
+                  `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${set}/prep`
                 )
               }
             >
