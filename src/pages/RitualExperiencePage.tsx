@@ -25,9 +25,18 @@ const ritualDetails: Record<string, { title: string; desc: string; emoji: string
   },
 };
 
+function getValidRitualType(ritualType?: string): string {
+  if (ritualType && ritualDetails[ritualType]) {
+    return ritualType;
+  }
+  return "breath";
+}
+
 const RitualExperiencePage = () => {
   const { subjectId, classId, chapterId, setId, ritualType } = useParams();
-  const [timeLeft, setTimeLeft] = useState(() => ritualDetails[ritualType || "breath"].time);
+  const validRitualType = getValidRitualType(ritualType);
+  const ritual = ritualDetails[validRitualType];
+  const [timeLeft, setTimeLeft] = useState(() => ritual.time);
   const isDone = timeLeft <= 0;
   const navigate = useNavigate();
 
@@ -37,11 +46,9 @@ const RitualExperiencePage = () => {
     return () => clearTimeout(timer);
   }, [timeLeft, isDone]);
 
-  const ritual = ritualDetails[ritualType || "breath"];
-
   const handleContinue = () => {
     navigate(
-      `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/prep/${ritualType}/benefits`
+      `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/prep/${validRitualType}/benefits`
     );
   };
 
@@ -65,3 +72,4 @@ const RitualExperiencePage = () => {
 };
 
 export default RitualExperiencePage;
+
