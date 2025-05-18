@@ -12,12 +12,12 @@ const BiologyChapters = () => {
 
   // Explicitly filter to include both Cell: The Unit of Life and The Living World for Botany class 11
   let filteredChapters = biologyChapters.filter(
-    chapter => chapter.class === classId
+    chapter => chapter.classId === classId
   );
   if (classId === "11") {
     filteredChapters = [
-      { id: "cell-bio", name: "Cell: The Unit of Life", class: "11", subjectId: "botany", progress: 0, lastPracticed: null },
-      { id: "the-living-world", name: "The Living World", class: "11", subjectId: "botany", progress: 0, lastPracticed: null }
+      { id: "cell-bio", name: "Cell: The Unit of Life", classId: "11", subjectId: "botany", progress: 0, lastPracticed: null },
+      { id: "the-living-world", name: "The Living World", classId: "11", subjectId: "botany", progress: 0, lastPracticed: null }
     ];
   }
 

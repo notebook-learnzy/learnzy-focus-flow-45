@@ -10,6 +10,7 @@ export type Chapter = {
   id: string;
   name: string;
   subjectId: string;
+  classId: string; // ADDED THIS LINE
   progress: number;
-  lastPracticed?: string;
+  lastPracticed?: string | null;
 };

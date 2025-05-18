@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, Check, Clock, Lock } from "lucide-react";
@@ -97,7 +96,7 @@ const BiologyChapterDetail = () => {
       <Button 
         variant="ghost" 
         className="mb-4 text-gray-500"
-        onClick={() => navigate(`/biology/class/${chapter.class}`)}
+        onClick={() => navigate(`/biology/class/${chapter.classId}`)}
       >
         <ArrowLeft size={16} className="mr-2" /> Back to Chapters
       </Button>
@@ -109,7 +108,7 @@ const BiologyChapterDetail = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">{chapter.name}</h1>
-            <p className="text-gray-500">Biology - Class {chapter.class}</p>
+            <p className="text-gray-500">Biology - Class {chapter.classId}</p>
           </div>
         </div>
         
