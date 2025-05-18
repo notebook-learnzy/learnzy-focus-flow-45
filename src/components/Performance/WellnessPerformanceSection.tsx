@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -11,25 +10,54 @@ import React from "react";
 const FOCUS_MOMENTS = [
   "calm", "focused", "stressed", "relaxed", "tired", "energized", "anxious", "neutral"
 ];
-const getRandom = (a: number, b: number) => Math.round(Math.random() * (b - a) + a);
+const SAMPLE_TOPICS = [
+  { topic: "Botanical Nomenclature", subtopic: "ICBN Rules" },
+  { topic: "Plant Kingdom", subtopic: "Bryophyta" },
+  { topic: "Living World", subtopic: "Characteristics" },
+  { topic: "Biomolecules", subtopic: "Proteins" },
+  { topic: "Cell Theory", subtopic: "Schleiden & Schwann" },
+  { topic: "Cell Organelles", subtopic: "Mitochondria" },
+];
+
+function getRandomTopicSubtopic() {
+  return SAMPLE_TOPICS[Math.floor(Math.random() * SAMPLE_TOPICS.length)];
+}
 
 function generateWellnessData(qCount = 50) {
   let wellness = [];
   for (let i = 1; i <= qCount; i++) {
-    const focus = getRandom(42, 98);
     const hrv = getRandom(62, 105);
+    const focus = Math.round(hrv * 0.85 + getRandom(-10, 8)); // HRV mostly drives focus, small variation
+    const ts = getRandomTopicSubtopic();
     wellness.push({
       q_no: i,
       focus,
       hrv,
-      state: FOCUS_MOMENTS[(focus > 80) ? 1 : (focus < 55) ? 6 : getRandom(0, FOCUS_MOMENTS.length-1)],
+      state: FOCUS_MOMENTS[
+        (focus > 80) ? 1 :
+        (focus < 55) ? 6 :
+        getRandom(0, FOCUS_MOMENTS.length-1)
+      ],
       correct: getRandom(0, 1) === 1,
+      topic: ts.topic,
+      subtopic: ts.subtopic,
     });
   }
   return wellness;
 }
 
 const WELLNESS = generateWellnessData(50);
+
+// Calculate dip insights
+const focusDips = WELLNESS.filter(q => q.focus < 60);
+const dipTopicMap = {};
+focusDips.forEach(q => {
+  const key = `${q.topic} >> ${q.subtopic}`;
+  dipTopicMap[key] = (dipTopicMap[key] || 0) + 1;
+});
+const dipRank = Object.entries(dipTopicMap)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 3);
 
 const focusAvg = Math.round(WELLNESS.reduce((t, q) => t + q.focus, 0) / WELLNESS.length);
 const hrvAvg = Math.round(WELLNESS.reduce((t, q) => t + q.hrv, 0) / WELLNESS.length);
@@ -55,6 +83,29 @@ const STATE_TO_EMOJI = {
 const WellnessPerformanceSection: React.FC = () => {
   return (
     <div>
+      {/* Top-level insight for focus dips by topic/subtopic */}
+      {focusDips.length > 0 && (
+        <div className="mb-5">
+          <div className="text-base font-semibold text-rose-600 flex items-center gap-2">
+            🌧️ Focus Dips Detected!
+          </div>
+          <div className="text-[15px] text-gray-700 mt-1 mb-1">
+            Your lowest focus moments often occurred in these topics:
+          </div>
+          <ul className="list-disc pl-6 text-[15px]">
+            {dipRank.length === 0 ? (
+              <li className="text-gray-500">No major focus dips detected!</li>
+            ) : (
+              dipRank.map(([k, count], idx) => (
+                <li key={k} className="text-rose-700 font-semibold">
+                  {k} <span className="text-gray-600 font-normal">({count} dip{count > 1 ? "s" : ""})</span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+
       {/* Smart summary header */}
       <div className="mb-6 grid md:grid-cols-3 gap-3">
         <Card className="flex-1 bg-[#FFFDFA] border-0 shadow-none">
@@ -183,20 +234,22 @@ const WellnessPerformanceSection: React.FC = () => {
         </CardContent>
       </Card>
       
-      {/* Actionable insight table */}
+      {/* Actionable insight table with new Topic/Subtopic columns and focus dip highlight */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex gap-2 items-center">Per-Question Wellness Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-auto">
-            <table className="min-w-[580px] w-full text-sm">
+            <table className="min-w-[750px] w-full text-sm">
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-2 px-2">Q#</th>
                   <th className="text-left py-2 px-2">Focus Score</th>
                   <th className="text-left py-2 px-2">HRV</th>
                   <th className="text-left py-2 px-2">Feeling</th>
+                  <th className="text-left py-2 px-2">Topic</th>
+                  <th className="text-left py-2 px-2">Subtopic</th>
                   <th className="text-left py-2 px-2">Correct?</th>
                 </tr>
               </thead>
@@ -204,21 +257,39 @@ const WellnessPerformanceSection: React.FC = () => {
                 {WELLNESS.map((row) => (
                   <tr
                     key={row.q_no}
-                    className={`border-b ${row.focus >= 80 ? "bg-green-50" : row.focus < 55 ? "bg-orange-50" : ""}`}
+                    className={
+                      "border-b " +
+                      (row.focus < 60
+                        ? "bg-rose-50"
+                        : row.focus >= 80
+                        ? "bg-green-50"
+                        : "")
+                    }
                   >
                     <td className="py-2 px-2 font-mono font-bold">Q{row.q_no}</td>
-                    <td className={cn(
-                      "py-2 px-2 font-semibold",
-                      row.focus >= 80 ? "text-green-600" : row.focus < 55 ? "text-orange-600" : "text-blue-800"
-                    )}>
+                    <td className={
+                      "py-2 px-2 font-semibold " +
+                      (row.focus < 60
+                        ? "text-rose-600 animate-pulse font-extrabold"
+                        : row.focus >= 80
+                        ? "text-green-600"
+                        : "text-blue-800")
+                    }>
                       {row.focus}
+                      {row.focus < 60 && (
+                        <span className="block text-xs text-rose-700 mt-1 font-normal">Focus Dip!</span>
+                      )}
                     </td>
                     <td className="py-2 px-2 text-blue-700 font-medium">{row.hrv} ms</td>
                     <td className="py-2 px-2">{STATE_TO_EMOJI[row.state]} <span className="ml-1 capitalize">{row.state}</span></td>
-                    <td className="py-2 px-2">{row.correct 
-                      ? <Badge className="bg-green-100 text-green-800">✔️</Badge>
-                      : <Badge className="bg-orange-100 text-orange-700">❌</Badge>
-                    }</td>
+                    <td className={"py-2 px-2 " + (row.focus < 60 ? "font-bold text-rose-700" : "")}>{row.topic}</td>
+                    <td className={"py-2 px-2 " + (row.focus < 60 ? "font-bold text-rose-700" : "")}>{row.subtopic}</td>
+                    <td className="py-2 px-2">
+                      {row.correct 
+                        ? <Badge className="bg-green-100 text-green-800">✔️</Badge>
+                        : <Badge className="bg-orange-100 text-orange-700">❌</Badge>
+                      }
+                    </td>
                   </tr>
                 ))}
               </tbody>
