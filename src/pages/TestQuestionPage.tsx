@@ -81,7 +81,7 @@ const TestQuestionPage = () => {
       session.answers[i] && session.answers[i]?.toLowerCase() === q.correct_answer?.toLowerCase()
     ).length;
     const total = questionList.length;
-    await supabase.from("session_results").insert({
+    await (supabase as any).from("session_results").insert({
       user_id: null,
       subject: subjectId,
       class_id: classId,
