@@ -90,27 +90,32 @@ export const subjects: Subject[] = [
   {
     id: "botany",
     name: "Botany",
-    icon: "leaf"
+    icon: "leaf",
+    progress: 45
   },
   {
     id: "zoology",
     name: "Zoology",
-    icon: "bug"
+    icon: "bug",
+    progress: 60
   },
   {
     id: "physics",
     name: "Physics",
-    icon: "atom"
+    icon: "atom",
+    progress: 30
   },
   {
     id: "chemistry",
     name: "Chemistry",
-    icon: "flask"
+    icon: "flask",
+    progress: 55
   },
   {
     id: "mathematics",
     name: "Mathematics",
-    icon: "calculator"
+    icon: "calculator",
+    progress: 50
   }
 ];
 
@@ -177,5 +182,58 @@ export const questionSets: QuestionSet[] = [
     interval_adjusted: true
   }
 ];
+
+// Quick mock for tasks (should match type Task from '@/types/tasks')
+export const tasks = [
+  {
+    id: "t1",
+    title: "Practice Cell Biology MCQs",
+    type: "practice",
+    date: "2025-05-18",
+    time: "16:00",
+    duration: 45,
+    completed: false,
+    chapterId: "cell-bio",
+    interval_adjusted: false,
+    description: "Practice MCQs for Cell Biology - Set A",
+    location: null,
+    color: "#FFBD59"
+  },
+  {
+    id: "t2",
+    title: "Take Zoology Quiz",
+    type: "practice",
+    date: "2025-05-18",
+    time: "18:00",
+    duration: 30,
+    completed: false,
+    chapterId: "animal-kingdom",
+    interval_adjusted: false,
+    description: "Test yourself on Animal Kingdom.",
+    location: null,
+    color: "#7e82e6"
+  },
+  {
+    id: "t3",
+    title: "Breathing Exercise",
+    type: "wellness",
+    date: "2025-05-18",
+    time: "20:00",
+    duration: 10,
+    completed: false,
+    description: "Short relaxation and breathing exercise.",
+    location: null,
+    color: "#3b82f6"
+  }
+];
+
+// Placeholders for other modules/pages using mockData
+export const suggestions = [];
+export const journalEntries = [];
+export const weeklyAccuracyData = [];
+export const focusScoreData = [];
+export const weakTopicsData = [];
+export const bloomSkillsProfile = [];
+export const actionCards = [];
 
 export const chapters = biologyChapters;
