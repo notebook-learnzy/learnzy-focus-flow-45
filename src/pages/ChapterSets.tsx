@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const setLabels = ["A", "B", "C", "D", "E", "F"];
 const defaultSetDurations: Record<string, number> = {
-  A: 25, // Set A: 25 min (for both chapters)
+  A: 25, // Set A: 25 min
   B: 50,
   C: 50,
   D: 50,
@@ -14,22 +15,19 @@ const defaultSetDurations: Record<string, number> = {
   F: 50,
 };
 
+const allChapters = [
+  { id: "cell-bio", name: "Cell: The Unit of Life" },
+  { id: "the-living-world", name: "The Living World" }
+];
+
 const ChapterSets = () => {
   const { subjectId, classId, chapterId } = useParams<{subjectId: string; classId: string; chapterId: string}>();
   const navigate = useNavigate();
 
   // For Botany 11, ensure both chapter ids
   const isBotany11 = subjectId === "botany" && classId === "11";
-  const chapters = isBotany11
-    ? [
-        { id: "cell-bio", name: "Cell: The Unit of Life" },
-        { id: "the-living-world", name: "The Living World" },
-      ]
-    : chapterId
-    ? [{ id: chapterId, name: chapterId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) }]
-    : [];
-
-  // Show sets cards for the specific chapter
+  const chapters = isBotany11 ? allChapters : (chapterId ? [allChapters.find(c=>c.id===chapterId)!] : []);
+  
   return (
     <div className="container mx-auto max-w-2xl pb-20 pt-2 px-3">
       <Button variant="ghost" className="mb-2 sm:mb-4 text-gray-500" onClick={() => navigate(-1)}>
@@ -42,11 +40,8 @@ const ChapterSets = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
             {setLabels.map((set) => {
               const unlocked = set === "A";
-              const showLivingWorldA =
-                isBotany11 && chap.id === "the-living-world" && set === "A";
-              // Both chapters: Set A -> "50 Questions", "25 min"
-              const setDesc = showLivingWorldA || (isBotany11 && chap.id === "cell-bio" && set === "A")
-                ? { q: 50, t: 25 } : { q: 50, t: defaultSetDurations[set] };
+              const showLivingWorldA = isBotany11 && chap.id === "the-living-world" && set === "A";
+              const setDesc = { q: 50, t: defaultSetDurations[set] };
               return (
                 <Card
                   key={set}

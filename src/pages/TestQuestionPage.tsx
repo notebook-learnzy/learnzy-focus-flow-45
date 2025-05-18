@@ -1,115 +1,150 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useSupabaseQuestions } from "@/hooks/useSupabaseQuestions";
-import { useQuestionSession } from "@/hooks/useQuestionSession";
 import { supabase } from "@/integrations/supabase/client";
+import RelaxStatusIndicator from "@/components/RelaxStatusIndicator";
 
-// Show real questions for the-living-world/set/a, else fallback to mock
+function mapCorrectAnswerToIdx(ans: string) {
+  if (!ans) return -1;
+  return ['a', 'b', 'c', 'd'].indexOf(ans.toLowerCase());
+}
 
 const TestQuestionPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
   const navigate = useNavigate();
-  // use chapterId as chapterKey for fetching (cell-bio, the-living-world)
-  const chapterKey = chapterId ?? "";
-  const setType = setId ?? "A";
 
-  const { data: questions, isLoading, error } = useSupabaseQuestions(chapterKey, setType);
-  // fallback: only for demo (should rarely happen for demo chapters)
-  const fallbackQuestions = [
-    {
-      q_no: 1,
-      id: "q1",
-      question_text: "Sample Q1: What is the powerhouse of the cell?",
-      option_a: "Nucleus",
-      option_b: "Mitochondria",
-      option_c: "Ribosome",
-      option_d: "Chloroplast",
-      correct_answer: "b",
-      time_to_solve: 45,
-      topic: "Cell Structure",
-      subtopic: "Mitochondria",
-      difficulty_level: "Easy"
-    },
-    // ...add as needed for fallback
-  ];
-
-  const questionList = questions && questions.length ? questions : fallbackQuestions;
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currQ, setCurrQ] = useState(0);
-  // Per-question timer and simulated focus/HRV
-  const [timer, setTimer] = useState(0);
-  const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  // Simulate HRV/focus
-  const [focusVal, setFocusVal] = useState(75 + Math.floor(Math.random() * 10));
-  const [hrv, setHRV] = useState<number[]>(Array(questionList.length).fill(65));
-  const { session, saveAnswer, markFinished, setSession } = useQuestionSession(questionList.length);
+  const [selected, setSelected] = useState<(number | undefined)[]>([]);
+  const [questionTimes, setQuestionTimes] = useState<number[]>([]);
+  const [hrvs, setHRVs] = useState<number[]>([]);
+  const [startTime, setStartTime] = useState(Date.now());
 
-  // Select answer
-  const [selected, setSelected] = useState<(string | undefined)[]>(Array(questionList.length));
   useEffect(() => {
-    setSelected(session.answers);
-  }, [session.answers]);
+    async function fetchQuestions() {
+      setIsLoading(true);
+      setError(null);
 
-  // Timer & HRV simulation per question, on currQ change
+      // Always fetch first 50 questions from Supabase
+      const { data, error } = await supabase
+        .from("chapter_1_living_world_set_a")
+        .select("*")
+        .order("q_no", { ascending: true })
+        .limit(50);
+
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      setQuestions(data || []);
+      setSelected(new Array((data || []).length).fill(undefined));
+      setQuestionTimes(new Array((data || []).length).fill(0));
+      setHRVs(new Array((data || []).length).fill(70)); // HRV baseline
+      setStartTime(Date.now());
+      setIsLoading(false);
+    }
+    fetchQuestions();
+    // eslint-disable-next-line
+  }, [chapterId, setId]);
+
   useEffect(() => {
-    setTimer(0);
-    setQuestionStartTime(Date.now());
-    const focus = Math.floor(75 + Math.random() * 15);
-    setFocusVal(focus);
-    // Simulate HRV value (60-90 randomly for demo)
-    setHRV((prev) => {
-      const copy = [...prev];
-      copy[currQ] = 60 + Math.floor(Math.random() * 30);
-      return copy;
+    // Reset timers for current question
+    setQuestionTimes(times => {
+      const newTimes = [...times];
+      newTimes[currQ] = 0;
+      return newTimes;
     });
-    const interval = setInterval(() => setTimer(Math.floor((Date.now() - questionStartTime) / 1000)), 900);
-    return () => clearInterval(interval);
-  }, [currQ, questionStartTime]);
+    setStartTime(Date.now());
+    // Simulate HRV value
+    setHRVs(hrvs => {
+      const newH = [...hrvs];
+      newH[currQ] = 60 + Math.floor(Math.random() * 30);
+      return newH;
+    });
+    // eslint-disable-next-line
+  }, [currQ]);
 
-  const handleOption = (idx: number, opt: string) => {
-    const now = Date.now();
+  useEffect(() => {
+    // Timer for current question
+    if (isLoading) return;
+    const interval = setInterval(() => {
+      setQuestionTimes(times => {
+        const newTimes = [...times];
+        newTimes[currQ] = Math.floor((Date.now() - startTime) / 1000);
+        return newTimes;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [currQ, startTime, isLoading]);
+
+  const handleOption = (idx: number) => {
     setSelected(sels => {
       const up = [...sels];
-      up[currQ] = opt;
+      up[currQ] = idx;
       return up;
     });
     // Save HRV for this question as proxy for focus
-    saveAnswer(currQ, opt, Math.floor((now - questionStartTime) / 1000), focusVal);
-    setHRV(h => {
+    setHRVs(h => {
       const hn = [...h];
       hn[currQ] = 60 + Math.floor(Math.random() * 30); // Simulate
       return hn;
     });
   };
 
-  const nextQ = () => setCurrQ((c) => Math.min(questionList.length - 1, c + 1));
+  const nextQ = () => setCurrQ((c) => Math.min(questions.length - 1, c + 1));
   const prevQ = () => setCurrQ((c) => Math.max(0, c - 1));
 
   const submitTest = async () => {
-    markFinished();
-    // Simple session results, for demo: push to state
-    const result = {
-      answers: session.answers,
-      times: session.times,
-      focus: session.focus,
-      hrv,
-      questions: questionList
-    };
+    // Compose answers, times, focus for saving
+    const results = questions.map((q, i) => ({
+      q_no: q.q_no,
+      question_id: q.id || q.q_no,
+      user_answer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : undefined,
+      correct_answer: q.correct_answer,
+      topic: q.topic,
+      subtopic: q.subtopic,
+      time_spent: questionTimes[i],
+      difficulty_level: q.difficulty_level,
+      hrv: hrvs[i],
+    }));
+
+    // Save session result
+    await (supabase as any).from("session_results").insert([
+      {
+        user_id: null,
+        subject: subjectId,
+        class_id: classId,
+        chapter_id: chapterId,
+        set_id: setId,
+        questions: results,
+        correct_count: results.filter((res) => res.user_answer === res.correct_answer).length,
+        total_count: results.length,
+      }
+    ]);
+
+    // Pass along answers & more via router state to analyze
     navigate(
       `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
-      { state: result }
+      { state: { questions, selected, questionTimes, hrvs } }
     );
   };
 
-  if (isLoading) return <div className="p-12 text-lg text-center">Loading questions...</div>;
-  if (error) return <div className="p-12 text-lg text-center text-red-600">Error loading questions: {error.message}</div>;
+  if (isLoading) return <div className="p-14 text-lg text-center">Loading questions...</div>;
+  if (error) return <div className="p-14 text-lg text-center text-red-600">Error loading questions: {error}</div>;
+
+  const q = questions[currQ];
 
   return (
     <div className="bg-[#FEF9F1] min-h-screen pt-6 pb-6 px-1 sm:px-0">
       <div className="max-w-5xl mx-auto flex flex-col gap-8 relative">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <span className="font-bold text-lg text-neutral-700">
               Test - Set {setId?.toUpperCase() || "A"}
@@ -117,43 +152,38 @@ const TestQuestionPage = () => {
             <div className="text-xs text-gray-400 mt-1">
               {(chapterId === "cell-bio" && "Cell: The Unit of Life") ||
                 (chapterId === "the-living-world" && "The Living World") ||
-                "Unknown Chapter"} • Class XI • {questionList.length} Questions
+                "Unknown Chapter"} • Class XI • {questions.length} Questions
             </div>
           </div>
-          <div className="flex items-center gap-8">
-            <div className="text-base font-medium">
-              Time on Q: <span className="font-mono">{timer}s</span>
-            </div>
-          </div>
+          <RelaxStatusIndicator />
         </div>
         <Card className="p-5 mb-6 bg-white shadow-md rounded-3xl">
           <div className="font-semibold text-gray-800 mb-4">
-            Question {questionList[currQ]?.q_no} / {questionList.length}
+            Question {q.q_no} / {questions.length}
           </div>
-          <div className="text-lg font-medium mb-8">{questionList[currQ].question_text}</div>
+          <div className="text-lg font-medium mb-6">{q.question_text}</div>
           <div>
             {["a", "b", "c", "d"].map((optKey, idx) => {
-              const optVal = questionList[currQ][`option_${optKey}` as keyof typeof questionList[0]];
+              const optVal = q[`option_${optKey}`];
               return (
                 <div
                   key={optKey}
-                  onClick={() => handleOption(currQ, optKey)}
+                  onClick={() => handleOption(idx)}
                   className={cn(
                     "p-3 border rounded-lg mb-3 cursor-pointer flex justify-between items-center hover:shadow transition-all",
-                    selected[currQ] === optKey
+                    selected[currQ] === idx
                       ? "border-[#FFBD59] bg-[#FFF7EB] text-[#e57311] font-semibold"
                       : "border-gray-200 bg-gray-50"
                   )}
                   tabIndex={0}
                   role="button"
-                  aria-pressed={selected[currQ] === optKey}
-                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleOption(currQ, optKey); }}
+                  aria-pressed={selected[currQ] === idx}
                 >
                   <span>
                     <span className="font-semibold mr-2">{String.fromCharCode(65+idx)}.</span>{optVal}
                   </span>
                   <span>
-                    {selected[currQ] === optKey && <span className="ml-2">✔️</span>}
+                    {selected[currQ] === idx && <span className="ml-2">✔️</span>}
                   </span>
                 </div>
               );
@@ -161,7 +191,7 @@ const TestQuestionPage = () => {
           </div>
           <div className="flex justify-between mt-4">
             <Button variant="outline" disabled={currQ===0} onClick={prevQ}>Previous</Button>
-            {currQ === questionList.length-1 ? (
+            {currQ === questions.length-1 ? (
               <Button className="bg-[#FFBD59]" onClick={submitTest}>Submit Test</Button>
             ) : (
               <Button onClick={nextQ}>Next</Button>
