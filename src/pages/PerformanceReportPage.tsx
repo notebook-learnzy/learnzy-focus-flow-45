@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AcademicAnalyticsSection from "@/components/Performance/AcademicAnalyticsSection";
-import WellnessAnalyticsSection from "@/components/Performance/WellnessAnalyticsSection";
+import WellnessPerformanceSection from "@/components/Performance/WellnessPerformanceSection";
 import RevisionScheduleSection from "@/components/Performance/RevisionScheduleSection";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +25,7 @@ const PerformanceReportPage = () => {
             <AcademicAnalyticsSection />
           </TabsContent>
           <TabsContent value="wellness">
-            <WellnessAnalyticsSection />
+            <WellnessPerformanceSection />
           </TabsContent>
           <TabsContent value="revision">
             <RevisionScheduleSection />

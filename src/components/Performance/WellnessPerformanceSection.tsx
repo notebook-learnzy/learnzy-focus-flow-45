@@ -1,0 +1,233 @@
+
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, ReferenceLine } from "recharts";
+import { HeartPulse, Smile, AlertCircle, Award } from "lucide-react";
+import { cn } from "@/lib/utils";
+import React from "react";
+
+// Simulate per-question data
+const FOCUS_MOMENTS = [
+  "calm", "focused", "stressed", "relaxed", "tired", "energized", "anxious", "neutral"
+];
+const getRandom = (a: number, b: number) => Math.round(Math.random() * (b - a) + a);
+
+function generateWellnessData(qCount = 50) {
+  let wellness = [];
+  for (let i = 1; i <= qCount; i++) {
+    const focus = getRandom(42, 98);
+    const hrv = getRandom(62, 105);
+    wellness.push({
+      q_no: i,
+      focus,
+      hrv,
+      state: FOCUS_MOMENTS[(focus > 80) ? 1 : (focus < 55) ? 6 : getRandom(0, FOCUS_MOMENTS.length-1)],
+      correct: getRandom(0, 1) === 1,
+    });
+  }
+  return wellness;
+}
+
+const WELLNESS = generateWellnessData(50);
+
+const focusAvg = Math.round(WELLNESS.reduce((t, q) => t + q.focus, 0) / WELLNESS.length);
+const hrvAvg = Math.round(WELLNESS.reduce((t, q) => t + q.hrv, 0) / WELLNESS.length);
+const focusMin = Math.min(...WELLNESS.map(q => q.focus));
+const focusMax = Math.max(...WELLNESS.map(q => q.focus));
+const lowestMoments = WELLNESS.slice().sort((a, b) => a.focus - b.focus).slice(0, 3);
+const highestMoments = WELLNESS.slice().sort((a, b) => b.focus - a.focus).slice(0, 3);
+
+const FOCUS_COLOR = "#8884d8";
+const HRV_COLOR = "#4ade80";
+
+const STATE_TO_EMOJI = {
+  calm: <Smile className="text-cyan-400 inline-block" size={18} />,
+  focused: <Smile className="text-blue-500 inline-block" size={18} />,
+  stressed: <AlertCircle className="text-red-400 inline-block" size={18} />,
+  relaxed: <Smile className="text-green-400 inline-block" size={18} />,
+  tired: <HeartPulse className="text-amber-500 inline-block" size={18} />,
+  energized: <Smile className="text-yellow-500 inline-block" size={18} />,
+  anxious: <AlertCircle className="text-orange-500 inline-block" size={18} />,
+  neutral: <Smile className="text-gray-400 inline-block" size={18} />,
+};
+
+const WellnessPerformanceSection: React.FC = () => {
+  return (
+    <div>
+      {/* Smart summary header */}
+      <div className="mb-6 grid md:grid-cols-3 gap-3">
+        <Card className="flex-1 bg-[#FFFDFA] border-0 shadow-none">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <HeartPulse className="text-pink-500" size={22} />
+              <CardTitle className="text-lg font-semibold">Your Focus Profile</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-[15px] mb-2 font-medium">
+              Average focus: <span className="font-bold text-blue-700">{focusAvg}/100</span>,
+              HRV: <span className="font-bold text-green-700">{hrvAvg} ms</span>
+            </div>
+            <div className="flex gap-2 text-xs mb-1">
+              <span className="bg-green-50 px-2 py-1 rounded text-green-800 font-semibold">Peak: {focusMax}</span>
+              <span className="bg-orange-50 px-2 py-1 rounded text-orange-800 font-semibold">Lowest: {focusMin}</span>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {focusAvg > 80 
+                ? "Fantastic focus! Maintain gentle breathing and keep using rituals before study."
+                : focusAvg > 65
+                  ? "Good focus, but notice dips. Short breaks and deep breaths can help prolong high focus."
+                  : "You had a few stressed moments. Try more frequent short rituals or calming breaks between studies."
+              }
+            </div>
+          </CardContent>
+        </Card>
+        {/* Moment highlight */}
+        <Card className="flex-1 bg-[#FFF7EB] border-0 shadow-none">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Award className="text-amber-400" size={21} />
+              <CardTitle className="text-base font-semibold">Top Wellness Moments</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="ml-2 list-disc text-[15px] space-y-0.5 pl-2">
+              <li>
+                <span className="font-medium text-green-800">
+                  Q{highestMoments[0].q_no} - {STATE_TO_EMOJI[highestMoments[0].state]} {highestMoments[0].state.charAt(0).toUpperCase() + highestMoments[0].state.slice(1)}</span>{" "}
+                at focus {highestMoments[0].focus}
+              </li>
+              <li>
+                <span className="font-medium text-green-800">
+                  Q{highestMoments[1].q_no} - {STATE_TO_EMOJI[highestMoments[1].state]} {highestMoments[1].state.charAt(0).toUpperCase() + highestMoments[1].state.slice(1)}</span>{" "}
+                at focus {highestMoments[1].focus}
+              </li>
+              <li>
+                <span className="font-medium text-green-800">
+                  Q{highestMoments[2].q_no} - {STATE_TO_EMOJI[highestMoments[2].state]} {highestMoments[2].state.charAt(0).toUpperCase() + highestMoments[2].state.slice(1)}</span>{" "}
+                at focus {highestMoments[2].focus}
+              </li>
+            </ul>
+            <div className="mt-2 text-xs text-gray-500">
+              These were your best moments of calm and attention!
+            </div>
+          </CardContent>
+        </Card>
+        {/* Actionable insights */}
+        <Card className="flex-1 bg-[#F2FCE2] border-0 shadow-none">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="text-orange-400" size={21} />
+              <CardTitle className="text-base font-semibold">Focus Opportunities</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="ml-2 list-disc text-[15px] space-y-0.5 pl-2">
+              <li>
+                <span className="font-medium text-orange-800">
+                  Q{lowestMoments[0].q_no} - {STATE_TO_EMOJI[lowestMoments[0].state]} {lowestMoments[0].state.charAt(0).toUpperCase() + lowestMoments[0].state.slice(1)}</span>{" "}
+                at focus {lowestMoments[0].focus}
+              </li>
+              <li>
+                <span className="font-medium text-orange-800">
+                  Q{lowestMoments[1].q_no} - {STATE_TO_EMOJI[lowestMoments[1].state]} {lowestMoments[1].state.charAt(0).toUpperCase() + lowestMoments[1].state.slice(1)}</span>{" "}
+                at focus {lowestMoments[1].focus}
+              </li>
+              <li>
+                <span className="font-medium text-orange-800">
+                  Q{lowestMoments[2].q_no} - {STATE_TO_EMOJI[lowestMoments[2].state]} {lowestMoments[2].state.charAt(0).toUpperCase() + lowestMoments[2].state.slice(1)}</span>{" "}
+                at focus {lowestMoments[2].focus}
+              </li>
+            </ul>
+            <div className="mt-2 text-xs text-gray-500">
+              Brief loss of focus around these—try a quick stretch or breath if you spot this next time.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Focus & HRV over time chart */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <HeartPulse className="text-pink-500" size={22} />
+            Focus &amp; HRV Timeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={WELLNESS}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="q_no" tickFormatter={(tick) => "Q" + tick} />
+              <YAxis yAxisId="focus" domain={[0, 100]} tickCount={6} axisLine={false} />
+              <YAxis yAxisId="hrv" orientation="right" domain={[55, 110]} hide />
+              <RechartsTooltip
+                formatter={(value: any, key: string) => {
+                  if (key === "focus") return [`${value}`, "Focus Score"];
+                  if (key === "hrv") return [`${value}ms`, "HRV"];
+                  return [value, key];
+                }}
+                labelFormatter={(label) => `Question ${label}`}
+              />
+              <Legend />
+              <ReferenceLine y={focusAvg} yAxisId="focus" label="Avg Focus" stroke="#9b87f5" strokeDasharray="3 3"/>
+              <Line yAxisId="focus" type="monotone" dataKey="focus" stroke={FOCUS_COLOR} strokeWidth={2} activeDot={{ r: 7 }} name="Focus"/>
+              <Line yAxisId="hrv" type="monotone" dataKey="hrv" stroke={HRV_COLOR} strokeDasharray="5 2" name="HRV"/>
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="text-xs mt-2 text-gray-500">
+            <span className="inline-flex items-center gap-1 mr-6"><span className="h-2 w-3 bg-[#8884d8] inline-block rounded"></span> Focus</span>
+            <span className="inline-flex items-center gap-1"><span className="h-2 w-3 bg-[#4ade80] inline-block rounded"></span> HRV</span>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Actionable insight table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex gap-2 items-center">Per-Question Wellness Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-auto">
+            <table className="min-w-[580px] w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2 px-2">Q#</th>
+                  <th className="text-left py-2 px-2">Focus Score</th>
+                  <th className="text-left py-2 px-2">HRV</th>
+                  <th className="text-left py-2 px-2">Feeling</th>
+                  <th className="text-left py-2 px-2">Correct?</th>
+                </tr>
+              </thead>
+              <tbody>
+                {WELLNESS.map((row) => (
+                  <tr
+                    key={row.q_no}
+                    className={`border-b ${row.focus >= 80 ? "bg-green-50" : row.focus < 55 ? "bg-orange-50" : ""}`}
+                  >
+                    <td className="py-2 px-2 font-mono font-bold">Q{row.q_no}</td>
+                    <td className={cn(
+                      "py-2 px-2 font-semibold",
+                      row.focus >= 80 ? "text-green-600" : row.focus < 55 ? "text-orange-600" : "text-blue-800"
+                    )}>
+                      {row.focus}
+                    </td>
+                    <td className="py-2 px-2 text-blue-700 font-medium">{row.hrv} ms</td>
+                    <td className="py-2 px-2">{STATE_TO_EMOJI[row.state]} <span className="ml-1 capitalize">{row.state}</span></td>
+                    <td className="py-2 px-2">{row.correct 
+                      ? <Badge className="bg-green-100 text-green-800">✔️</Badge>
+                      : <Badge className="bg-orange-100 text-orange-700">❌</Badge>
+                    }</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default WellnessPerformanceSection;
