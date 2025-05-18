@@ -41,11 +41,23 @@ import { toast } from "@/hooks/use-toast";
 import CalendarSidebar from "@/components/CalendarSidebar";
 import CalendarTimeGrid from "@/components/CalendarTimeGrid";
 
+const VALID_TASK_TYPES: TaskType[] = ["practice", "wellness", "custom"];
+
 const Calendar = () => {
+  // Ensure all tasks loaded have type as TaskType, not just string
+  const cleanTasks = (rawTasks: any[]): Task[] => {
+    return rawTasks
+      .filter((task) => typeof task.type === "string" && VALID_TASK_TYPES.includes(task.type))
+      .map((task) => ({
+        ...task,
+        type: task.type as TaskType,
+      }));
+  };
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("week");
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [allTasks, setAllTasks] = useState<Task[]>(tasks);
+  const [allTasks, setAllTasks] = useState<Task[]>(cleanTasks(tasks));
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
@@ -124,7 +136,7 @@ const Calendar = () => {
       return;
     }
 
-    const createdTask: Task & { description?: string; color?: string; location?: string } = {
+    const createdTask: Task = {
       id: `task-${Date.now()}`,
       title: newTask.title!,
       type: newTask.type as TaskType || "practice",
@@ -138,7 +150,7 @@ const Calendar = () => {
       location: newTask.location || ""
     };
 
-    setAllTasks([...allTasks, createdTask]);
+    setAllTasks(prev => cleanTasks([...prev, createdTask]));
 
     toast({
       title: "Task added",
