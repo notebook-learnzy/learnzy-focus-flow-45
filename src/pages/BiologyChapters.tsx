@@ -9,9 +9,18 @@ import { format } from "date-fns";
 const BiologyChapters = () => {
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
-  
-  const filteredChapters = biologyChapters.filter(chapter => chapter.class === classId);
-  
+
+  // Explicitly filter to include both Cell: The Unit of Life and The Living World for Botany class 11
+  let filteredChapters = biologyChapters.filter(
+    chapter => chapter.class === classId
+  );
+  if (classId === "11") {
+    filteredChapters = [
+      { id: "cell-bio", name: "Cell: The Unit of Life", class: "11", subjectId: "botany", progress: 0, lastPracticed: null },
+      { id: "the-living-world", name: "The Living World", class: "11", subjectId: "botany", progress: 0, lastPracticed: null }
+    ];
+  }
+
   return (
     <div className="container mx-auto max-w-7xl pb-20 pt-2 px-3">
       <Button 

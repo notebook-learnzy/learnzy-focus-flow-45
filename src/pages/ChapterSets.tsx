@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const setLabels = ["A", "B", "C", "D", "E", "F"];
 const defaultSetDurations: Record<string, number> = {
-  A: 25, // Update Set A to 25 min
+  A: 25, // Set A: 25 min (for both chapters)
   B: 50,
   C: 50,
   D: 50,
@@ -18,7 +18,7 @@ const ChapterSets = () => {
   const { subjectId, classId, chapterId } = useParams<{subjectId: string; classId: string; chapterId: string}>();
   const navigate = useNavigate();
 
-  // Provide both "Cell: The Unit of Life" and "The Living World"
+  // For Botany 11, ensure both chapter ids
   const isBotany11 = subjectId === "botany" && classId === "11";
   const chapters = isBotany11
     ? [
@@ -33,7 +33,7 @@ const ChapterSets = () => {
   return (
     <div className="container mx-auto max-w-2xl pb-20 pt-2 px-3">
       <Button variant="ghost" className="mb-2 sm:mb-4 text-gray-500" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} className="mr-2" /> Back
+        <span className="mr-2">&larr;</span> Back
       </Button>
       {chapters.map(chap => (
         <div key={chap.id}>
@@ -41,9 +41,12 @@ const ChapterSets = () => {
           <p className="mb-3 sm:mb-8 text-sm sm:text-md text-gray-500">Select a Practice Set</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
             {setLabels.map((set) => {
-              const unlocked = set === "A"; // Only unlock Set A for demo
-              // Special: For Set A in The Living World, force 25 min/50 q, otherwise fallback defaults
-              const showLivingWorldA = isBotany11 && chap.id === "the-living-world" && set === "A";
+              const unlocked = set === "A";
+              const showLivingWorldA =
+                isBotany11 && chap.id === "the-living-world" && set === "A";
+              // Both chapters: Set A -> "50 Questions", "25 min"
+              const setDesc = showLivingWorldA || (isBotany11 && chap.id === "cell-bio" && set === "A")
+                ? { q: 50, t: 25 } : { q: 50, t: defaultSetDurations[set] };
               return (
                 <Card
                   key={set}
@@ -68,10 +71,10 @@ const ChapterSets = () => {
                   <CardContent>
                     <div className="flex flex-col space-y-2">
                       <span className="text-sm text-gray-700">
-                        {showLivingWorldA ? "50 Questions" : "50 Questions"}
+                        {setDesc.q} Questions
                       </span>
                       <span className="text-xs text-gray-400">
-                        Duration: {showLivingWorldA ? 25 : defaultSetDurations[set]} min
+                        Duration: {setDesc.t} min
                       </span>
                       {!unlocked && (
                         <span className="text-xs text-red-500 mt-1 sm:mt-2">

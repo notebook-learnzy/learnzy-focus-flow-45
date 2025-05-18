@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -7,7 +6,11 @@ export function useSupabaseQuestions(chapterKey: string, setType: string) {
   return useQuery({
     queryKey: ["supabase-questions", chapterKey, setType],
     queryFn: async () => {
-      if (chapterKey === "the-living-world" && setType === "A") {
+      // For Cell: The Unit of Life Set A and The Living World Set A, fetch 50 questions from Supabase
+      if (
+        (chapterKey === "cell-bio" || chapterKey === "the-living-world") &&
+        setType === "A"
+      ) {
         const { data, error } = await supabase
           .from("chapter_1_living_world_set_a")
           .select("*")
@@ -18,7 +21,7 @@ export function useSupabaseQuestions(chapterKey: string, setType: string) {
 
         return (data || []).map((q, idx) => ({
           q_no: q.q_no,
-          id: `living-world-q${q.q_no}`,
+          id: `${chapterKey}-q${q.q_no}`,
           question_text: q.question_text,
           option_a: q.option_a,
           option_b: q.option_b,

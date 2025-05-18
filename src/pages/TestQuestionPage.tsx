@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,11 +12,12 @@ import { supabase } from "@/integrations/supabase/client";
 const TestQuestionPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
   const navigate = useNavigate();
+  // use chapterId as chapterKey for fetching (cell-bio, the-living-world)
   const chapterKey = chapterId ?? "";
   const setType = setId ?? "A";
 
   const { data: questions, isLoading, error } = useSupabaseQuestions(chapterKey, setType);
-  // fallback: only for demo
+  // fallback: only for demo (should rarely happen for demo chapters)
   const fallbackQuestions = [
     {
       q_no: 1,
@@ -38,11 +38,12 @@ const TestQuestionPage = () => {
 
   const questionList = questions && questions.length ? questions : fallbackQuestions;
   const [currQ, setCurrQ] = useState(0);
-
-  // Per-question timer and simulated focus
+  // Per-question timer and simulated focus/HRV
   const [timer, setTimer] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+  // Simulate HRV/focus
   const [focusVal, setFocusVal] = useState(75 + Math.floor(Math.random() * 10));
+  const [hrv, setHRV] = useState<number[]>(Array(questionList.length).fill(65));
   const { session, saveAnswer, markFinished, setSession } = useQuestionSession(questionList.length);
 
   // Select answer
@@ -51,12 +52,18 @@ const TestQuestionPage = () => {
     setSelected(session.answers);
   }, [session.answers]);
 
-  // Timer per question, track on currQ change
+  // Timer & HRV simulation per question, on currQ change
   useEffect(() => {
     setTimer(0);
     setQuestionStartTime(Date.now());
     const focus = Math.floor(75 + Math.random() * 15);
     setFocusVal(focus);
+    // Simulate HRV value (60-90 randomly for demo)
+    setHRV((prev) => {
+      const copy = [...prev];
+      copy[currQ] = 60 + Math.floor(Math.random() * 30);
+      return copy;
+    });
     const interval = setInterval(() => setTimer(Math.floor((Date.now() - questionStartTime) / 1000)), 900);
     return () => clearInterval(interval);
   }, [currQ, questionStartTime]);
@@ -68,7 +75,13 @@ const TestQuestionPage = () => {
       up[currQ] = opt;
       return up;
     });
+    // Save HRV for this question as proxy for focus
     saveAnswer(currQ, opt, Math.floor((now - questionStartTime) / 1000), focusVal);
+    setHRV(h => {
+      const hn = [...h];
+      hn[currQ] = 60 + Math.floor(Math.random() * 30); // Simulate
+      return hn;
+    });
   };
 
   const nextQ = () => setCurrQ((c) => Math.min(questionList.length - 1, c + 1));
@@ -76,37 +89,18 @@ const TestQuestionPage = () => {
 
   const submitTest = async () => {
     markFinished();
-    // Save result to Supabase
-    const correctCount = questionList.filter((q, i) =>
-      session.answers[i] && session.answers[i]?.toLowerCase() === q.correct_answer?.toLowerCase()
-    ).length;
-    const total = questionList.length;
-    await (supabase as any).from("session_results").insert({
-      user_id: null,
-      subject: subjectId,
-      class_id: classId,
-      chapter_id: chapterId,
-      set_id: setId,
-      started_at: new Date(session.startedAt).toISOString(),
-      ended_at: new Date().toISOString(),
-      questions: questionList.map((q, i) => ({
-        q_no: q.q_no,
-        question_id: q.id,
-        user_answer: session.answers[i],
-        correct_answer: q.correct_answer,
-        time_spent: session.times[i],
-        focus_score: session.focus[i],
-        tags: [],
-        topic: q.topic,
-        subtopic: q.subtopic,
-        difficulty_level: q.difficulty_level,
-      })),
-      correct_count: correctCount,
-      total_count: total
-    });
-    navigate(`/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`, {
-      state: { answers: session.answers, times: session.times, focus: session.focus, questions: questionList }
-    });
+    // Simple session results, for demo: push to state
+    const result = {
+      answers: session.answers,
+      times: session.times,
+      focus: session.focus,
+      hrv,
+      questions: questionList
+    };
+    navigate(
+      `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
+      { state: result }
+    );
   };
 
   if (isLoading) return <div className="p-12 text-lg text-center">Loading questions...</div>;
@@ -121,7 +115,9 @@ const TestQuestionPage = () => {
               Test - Set {setId?.toUpperCase() || "A"}
             </span>
             <div className="text-xs text-gray-400 mt-1">
-              The Living World • Class XI • {questionList.length} Questions
+              {(chapterId === "cell-bio" && "Cell: The Unit of Life") ||
+                (chapterId === "the-living-world" && "The Living World") ||
+                "Unknown Chapter"} • Class XI • {questionList.length} Questions
             </div>
           </div>
           <div className="flex items-center gap-8">
@@ -132,7 +128,7 @@ const TestQuestionPage = () => {
         </div>
         <Card className="p-5 mb-6 bg-white shadow-md rounded-3xl">
           <div className="font-semibold text-gray-800 mb-4">
-            Question {currQ+1} / {questionList.length}
+            Question {questionList[currQ]?.q_no} / {questionList.length}
           </div>
           <div className="text-lg font-medium mb-8">{questionList[currQ].question_text}</div>
           <div>
