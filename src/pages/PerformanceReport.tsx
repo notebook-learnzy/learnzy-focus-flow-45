@@ -79,11 +79,10 @@ const PerformanceReport = () => {
   useEffect(() => {
     async function getRealSession() {
       if (subjectId?.toLowerCase() === "botany") {
-        // Fetch 10 botany questions as "session"
+        // Fetch 10 sample questions from chapter_1_living_world_set_a for demo
         const { data } = await supabase
-          .from("demo")
+          .from("chapter_1_living_world_set_a")
           .select()
-          .eq("Subject", "Botany")
           .limit(10);
 
         if (data && data.length > 0) {

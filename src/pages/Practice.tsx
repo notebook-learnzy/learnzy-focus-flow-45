@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { chapters, questionSets, subjects } from "@/data/mockData";
@@ -26,7 +27,7 @@ const Practice = () => {
   const chapter = chapters.find(c => c.id === chapterId);
   const subject = chapter ? subjects.find(s => s.id === chapter.subjectId) : null;
   
-  // NEW: Load Botany questions from Supabase if this is Botany + Set A
+  // NEW: Load Botany questions from Supabase if this is Botany + Cell: The Unit of Life + Set A
   const [currentQuestionSet, setCurrentQuestionSet] = useState<QuestionSet | null>(null);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -47,10 +48,9 @@ const Practice = () => {
       if (subject?.name === "Botany" && chapter?.name === "Cell: The Unit of Life") {
         // Fetch 50 Botany 'Cell: The Unit of Life' questions as demo
         const { data, error } = await supabase
-          .from("demo")
-          .select()
-          .eq("Subject", "Botany")
-          .eq("Chapter_name", "Cell: The Unit of Life")
+          .from("chapter_1_living_world_set_a")
+          .select("*")
+          .eq("chapter_name", "Cell: The Unit of Life")
           .limit(50);
 
         if (error) {
@@ -67,24 +67,24 @@ const Practice = () => {
         // Transform DB rows to Question[] type
         const mappedQuestions = (data || []).map((q, i) => ({
           id: `db-${q.q_no}`,
-          question_text: q.Question_Text,
-          figure: undefined,
-          option_a: q.Option_A,
-          option_b: q.Option_B,
-          option_c: q.Option_C,
-          option_d: q.Option_D,
-          correct_answer: (q.Correct_Answer?.toUpperCase() ?? "A") as "A" | "B" | "C" | "D",
-          subject: q.Subject,
-          chapter_name: q.Chapter_name,
-          topic: q.Topic || "",
-          subtopic: q.Subtopic || "",
-          difficulty_level: (q.Difficulty_Level || "Easy") as DifficultyLevel,
-          question_type: (q.Question_Structure || "MCQ") as QuestionType,
-          bloom_taxonomy: (q.Bloom_Taxonomy || "Remember") as BloomTaxonomy,
-          priority_level: parseInt(q.Priority_Level || "3") as 1|2|3|4|5,
-          time_to_solve: Number(q.Time_to_Solve) || 60,
-          key_concept_tested: q.Key_Concept_Tested || "",
-          common_pitfalls: q.Common_Pitfalls || "",
+          question_text: q.question_text,
+          figure: q.figure || undefined,
+          option_a: q.option_a,
+          option_b: q.option_b,
+          option_c: q.option_c,
+          option_d: q.option_d,
+          correct_answer: (q.correct_answer?.toUpperCase() ?? "A") as "A" | "B" | "C" | "D",
+          subject: q.subject ?? "",
+          chapter_name: q.chapter_name ?? "",
+          topic: q.topic || "",
+          subtopic: q.subtopic || "",
+          difficulty_level: (q.difficulty_level || "Easy") as DifficultyLevel,
+          question_type: (q.question_type || "MCQ") as QuestionType,
+          bloom_taxonomy: (q.bloom_taxonomy || "Remember") as BloomTaxonomy,
+          priority_level: parseInt(q.priority_level ?? "3") as 1|2|3|4|5,
+          time_to_solve: Number(q.time_to_solve) || 60,
+          key_concept_tested: q.key_concept_tested || "",
+          common_pitfalls: q.common_pitfalls || "",
           creation_timestamp: new Date().toISOString(),
           last_updated_timestamp: new Date().toISOString(),
         }));
