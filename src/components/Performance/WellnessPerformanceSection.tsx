@@ -1,3 +1,4 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -6,10 +7,16 @@ import { HeartPulse, Smile, AlertCircle, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
 
+// Fix 1: Add getRandom helper
+function getRandom(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // Simulate per-question data
 const FOCUS_MOMENTS = [
   "calm", "focused", "stressed", "relaxed", "tired", "energized", "anxious", "neutral"
-];
+] as const;
+
 const SAMPLE_TOPICS = [
   { topic: "Botanical Nomenclature", subtopic: "ICBN Rules" },
   { topic: "Plant Kingdom", subtopic: "Bryophyta" },
@@ -20,24 +27,26 @@ const SAMPLE_TOPICS = [
 ];
 
 function getRandomTopicSubtopic() {
-  return SAMPLE_TOPICS[Math.floor(Math.random() * SAMPLE_TOPICS.length)];
+  return SAMPLE_TOPICS[getRandom(0, SAMPLE_TOPICS.length - 1)];
 }
 
+// Fix 2: All math is on numbers, not on possibly undefined/unknown
 function generateWellnessData(qCount = 50) {
   let wellness = [];
   for (let i = 1; i <= qCount; i++) {
     const hrv = getRandom(62, 105);
-    const focus = Math.round(hrv * 0.85 + getRandom(-10, 8)); // HRV mostly drives focus, small variation
+    const focus = Math.round(hrv * 0.85 + getRandom(-10, 8));
     const ts = getRandomTopicSubtopic();
     wellness.push({
       q_no: i,
       focus,
       hrv,
-      state: FOCUS_MOMENTS[
-        (focus > 80) ? 1 :
-        (focus < 55) ? 6 :
-        getRandom(0, FOCUS_MOMENTS.length-1)
-      ],
+      state:
+        focus > 80
+          ? "focused"
+          : focus < 55
+          ? "anxious"
+          : FOCUS_MOMENTS[getRandom(0, FOCUS_MOMENTS.length - 1)],
       correct: getRandom(0, 1) === 1,
       topic: ts.topic,
       subtopic: ts.subtopic,
@@ -48,10 +57,10 @@ function generateWellnessData(qCount = 50) {
 
 const WELLNESS = generateWellnessData(50);
 
-// Calculate dip insights
-const focusDips = WELLNESS.filter(q => q.focus < 60);
-const dipTopicMap = {};
-focusDips.forEach(q => {
+// dip analysis
+const focusDips = WELLNESS.filter((q) => typeof q.focus === "number" && q.focus < 60);
+const dipTopicMap: Record<string, number> = {};
+focusDips.forEach((q) => {
   const key = `${q.topic} >> ${q.subtopic}`;
   dipTopicMap[key] = (dipTopicMap[key] || 0) + 1;
 });
@@ -59,17 +68,23 @@ const dipRank = Object.entries(dipTopicMap)
   .sort((a, b) => b[1] - a[1])
   .slice(0, 3);
 
-const focusAvg = Math.round(WELLNESS.reduce((t, q) => t + q.focus, 0) / WELLNESS.length);
-const hrvAvg = Math.round(WELLNESS.reduce((t, q) => t + q.hrv, 0) / WELLNESS.length);
-const focusMin = Math.min(...WELLNESS.map(q => q.focus));
-const focusMax = Math.max(...WELLNESS.map(q => q.focus));
-const lowestMoments = WELLNESS.slice().sort((a, b) => a.focus - b.focus).slice(0, 3);
-const highestMoments = WELLNESS.slice().sort((a, b) => b.focus - a.focus).slice(0, 3);
+const focusAvg =
+  WELLNESS.length > 0
+    ? Math.round(WELLNESS.reduce((t, q) => t + (typeof q.focus === "number" ? q.focus : 0), 0) / WELLNESS.length)
+    : 0;
+const hrvAvg =
+  WELLNESS.length > 0
+    ? Math.round(WELLNESS.reduce((t, q) => t + (typeof q.hrv === "number" ? q.hrv : 0), 0) / WELLNESS.length)
+    : 0;
+const focusMin = Math.min(...WELLNESS.map((q) => (typeof q.focus === "number" ? q.focus : 999)));
+const focusMax = Math.max(...WELLNESS.map((q) => (typeof q.focus === "number" ? q.focus : 0)));
+const lowestMoments = WELLNESS.slice().sort((a, b) => (a.focus as number) - (b.focus as number)).slice(0, 3);
+const highestMoments = WELLNESS.slice().sort((a, b) => (b.focus as number) - (a.focus as number)).slice(0, 3);
 
 const FOCUS_COLOR = "#8884d8";
 const HRV_COLOR = "#4ade80";
 
-const STATE_TO_EMOJI = {
+const STATE_TO_EMOJI: Record<string, React.ReactNode> = {
   calm: <Smile className="text-cyan-400 inline-block" size={18} />,
   focused: <Smile className="text-blue-500 inline-block" size={18} />,
   stressed: <AlertCircle className="text-red-400 inline-block" size={18} />,
@@ -125,11 +140,11 @@ const WellnessPerformanceSection: React.FC = () => {
               <span className="bg-orange-50 px-2 py-1 rounded text-orange-800 font-semibold">Lowest: {focusMin}</span>
             </div>
             <div className="text-xs text-gray-500 mt-1">
-              {focusAvg > 80 
+              {focusAvg > 80
                 ? "Fantastic focus! Maintain gentle breathing and keep using rituals before study."
                 : focusAvg > 65
-                  ? "Good focus, but notice dips. Short breaks and deep breaths can help prolong high focus."
-                  : "You had a few stressed moments. Try more frequent short rituals or calming breaks between studies."
+                ? "Good focus, but notice dips. Short breaks and deep breaths can help prolong high focus."
+                : "You had a few stressed moments. Try more frequent short rituals or calming breaks between studies."
               }
             </div>
           </CardContent>
@@ -144,21 +159,13 @@ const WellnessPerformanceSection: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ul className="ml-2 list-disc text-[15px] space-y-0.5 pl-2">
-              <li>
-                <span className="font-medium text-green-800">
-                  Q{highestMoments[0].q_no} - {STATE_TO_EMOJI[highestMoments[0].state]} {highestMoments[0].state.charAt(0).toUpperCase() + highestMoments[0].state.slice(1)}</span>{" "}
-                at focus {highestMoments[0].focus}
-              </li>
-              <li>
-                <span className="font-medium text-green-800">
-                  Q{highestMoments[1].q_no} - {STATE_TO_EMOJI[highestMoments[1].state]} {highestMoments[1].state.charAt(0).toUpperCase() + highestMoments[1].state.slice(1)}</span>{" "}
-                at focus {highestMoments[1].focus}
-              </li>
-              <li>
-                <span className="font-medium text-green-800">
-                  Q{highestMoments[2].q_no} - {STATE_TO_EMOJI[highestMoments[2].state]} {highestMoments[2].state.charAt(0).toUpperCase() + highestMoments[2].state.slice(1)}</span>{" "}
-                at focus {highestMoments[2].focus}
-              </li>
+              {highestMoments.map((m, i) => (
+                <li key={i}>
+                  <span className="font-medium text-green-800">
+                    Q{m.q_no} - {STATE_TO_EMOJI[m.state as keyof typeof STATE_TO_EMOJI]} {m.state.charAt(0).toUpperCase() + m.state.slice(1)}</span>{" "}
+                    at focus {m.focus}
+                </li>
+              ))}
             </ul>
             <div className="mt-2 text-xs text-gray-500">
               These were your best moments of calm and attention!
@@ -175,21 +182,13 @@ const WellnessPerformanceSection: React.FC = () => {
           </CardHeader>
           <CardContent>
             <ul className="ml-2 list-disc text-[15px] space-y-0.5 pl-2">
-              <li>
-                <span className="font-medium text-orange-800">
-                  Q{lowestMoments[0].q_no} - {STATE_TO_EMOJI[lowestMoments[0].state]} {lowestMoments[0].state.charAt(0).toUpperCase() + lowestMoments[0].state.slice(1)}</span>{" "}
-                at focus {lowestMoments[0].focus}
-              </li>
-              <li>
-                <span className="font-medium text-orange-800">
-                  Q{lowestMoments[1].q_no} - {STATE_TO_EMOJI[lowestMoments[1].state]} {lowestMoments[1].state.charAt(0).toUpperCase() + lowestMoments[1].state.slice(1)}</span>{" "}
-                at focus {lowestMoments[1].focus}
-              </li>
-              <li>
-                <span className="font-medium text-orange-800">
-                  Q{lowestMoments[2].q_no} - {STATE_TO_EMOJI[lowestMoments[2].state]} {lowestMoments[2].state.charAt(0).toUpperCase() + lowestMoments[2].state.slice(1)}</span>{" "}
-                at focus {lowestMoments[2].focus}
-              </li>
+              {lowestMoments.map((m, i) => (
+                <li key={i}>
+                  <span className="font-medium text-orange-800">
+                    Q{m.q_no} - {STATE_TO_EMOJI[m.state as keyof typeof STATE_TO_EMOJI]} {m.state.charAt(0).toUpperCase() + m.state.slice(1)}</span>{" "}
+                    at focus {m.focus}
+                </li>
+              ))}
             </ul>
             <div className="mt-2 text-xs text-gray-500">
               Brief loss of focus around these—try a quick stretch or breath if you spot this next time.
@@ -197,7 +196,7 @@ const WellnessPerformanceSection: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Focus & HRV over time chart */}
       <Card className="mb-8">
         <CardHeader>
@@ -233,7 +232,7 @@ const WellnessPerformanceSection: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Actionable insight table with new Topic/Subtopic columns and focus dip highlight */}
       <Card>
         <CardHeader>
@@ -281,11 +280,13 @@ const WellnessPerformanceSection: React.FC = () => {
                       )}
                     </td>
                     <td className="py-2 px-2 text-blue-700 font-medium">{row.hrv} ms</td>
-                    <td className="py-2 px-2">{STATE_TO_EMOJI[row.state]} <span className="ml-1 capitalize">{row.state}</span></td>
+                    <td className="py-2 px-2">
+                      {STATE_TO_EMOJI[row.state as keyof typeof STATE_TO_EMOJI]} <span className="ml-1 capitalize">{row.state}</span>
+                    </td>
                     <td className={"py-2 px-2 " + (row.focus < 60 ? "font-bold text-rose-700" : "")}>{row.topic}</td>
                     <td className={"py-2 px-2 " + (row.focus < 60 ? "font-bold text-rose-700" : "")}>{row.subtopic}</td>
                     <td className="py-2 px-2">
-                      {row.correct 
+                      {row.correct
                         ? <Badge className="bg-green-100 text-green-800">✔️</Badge>
                         : <Badge className="bg-orange-100 text-orange-700">❌</Badge>
                       }
