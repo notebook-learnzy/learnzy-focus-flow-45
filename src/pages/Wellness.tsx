@@ -10,6 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WellnessRewards from "@/components/WellnessRewards";
 import SleepVisualization from "@/components/SleepVisualization";
 import SedentaryActivity from "@/components/SedentaryActivity";
+import WellnessFilterBar from "@/components/Wellness/WellnessFilterBar";
+import PersonalizedSchedulingCard from "@/components/Wellness/PersonalizedSchedulingCard";
+import StressResilienceCard from "@/components/Wellness/StressResilienceCard";
+import FatigueManagementCard from "@/components/Wellness/FatigueManagementCard";
+import PerformanceReadinessCard from "@/components/Wellness/PerformanceReadinessCard";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -17,6 +22,10 @@ const Wellness = () => {
   const [journalText, setJournalText] = useState("");
   const [moodTag, setMoodTag] = useState("");
   const [entries, setEntries] = useState(journalEntries);
+  
+  // NEW: filter state
+  const [tabFilter, setTabFilter] = useState<"week" | "month" | "custom">("week");
+  const [activeTab, setActiveTab] = useState("journal");
   
   const wellnessActivities = [
     {
@@ -106,15 +115,24 @@ const Wellness = () => {
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-2xl font-bold mb-6">Wellness Hub</h1>
       
-      <Tabs defaultValue="journal">
-        <TabsList className="mb-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6 flex-wrap">
           <TabsTrigger value="journal">Journal</TabsTrigger>
           <TabsTrigger value="metrics">Health Metrics</TabsTrigger>
           <TabsTrigger value="activities">Activities</TabsTrigger>
+          <TabsTrigger value="stress">Stress Management</TabsTrigger>
         </TabsList>
       
-        <TabsContent value="journal">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <TabsContent value="journal" className="animate-fade-in">
+          {/* Filter bar + responsive card grid on mobile */}
+          <WellnessFilterBar selected={tabFilter} setSelected={setTabFilter} />
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+            <PersonalizedSchedulingCard />
+            <StressResilienceCard />
+            <FatigueManagementCard />
+            <PerformanceReadinessCard />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <div className="md:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
@@ -294,6 +312,19 @@ const Wellness = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="stress" className="animate-fade-in">
+          <WellnessFilterBar selected={tabFilter} setSelected={setTabFilter} />
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+            <PersonalizedSchedulingCard />
+            <StressResilienceCard />
+            <FatigueManagementCard />
+            <PerformanceReadinessCard />
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground">
+            All insights are based on simulated HRV, sleep, and stress analytics typical for learners your age.
           </div>
         </TabsContent>
       </Tabs>
