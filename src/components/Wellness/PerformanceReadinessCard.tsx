@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChart } from "lucide-react";
@@ -26,7 +25,7 @@ export default function PerformanceReadinessCard() {
           Based on HRV, sleep, and practice metrics. A score above 85 suggests readiness for exams or major study sessions.
         </div>
         <div className="text-xs text-blue-600">
-          <b>Did you know?</b> Students showing >10pt drop in HRV over 3 weeks are 23% more likely to see performance decline!
+          <b>Did you know?</b> Students showing &gt;10pt drop in HRV over 3 weeks are 23% more likely to see performance decline!
         </div>
       </CardContent>
     </Card>
