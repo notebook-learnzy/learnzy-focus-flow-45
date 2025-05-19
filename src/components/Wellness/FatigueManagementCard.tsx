@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Sleep, Clock } from "lucide-react";
+import { Bed, Clock } from "lucide-react";
 
 function getSimulatedSleep(hours = 7): [number, string] {
   // Simulate sleep between 5.5 and 8 hours and recovery
@@ -16,7 +16,7 @@ export default function FatigueManagementCard() {
   return (
     <Card className="mb-4">
       <CardHeader className="flex gap-2 items-center pb-1">
-        <Sleep className="text-learnzy-purple" size={20} />
+        <Bed className="text-learnzy-purple" size={20} />
         <CardTitle className="text-base font-semibold">Fatigue Management</CardTitle>
       </CardHeader>
       <CardContent>
@@ -34,3 +34,4 @@ export default function FatigueManagementCard() {
     </Card>
   );
 }
+
