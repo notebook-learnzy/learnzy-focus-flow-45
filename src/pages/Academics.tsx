@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, LayoutGrid, BookOpen, BookText, Brain, Atom } from "lucide-react";
+import { Calendar, LayoutGrid, BookOpen, BookText, Brain, Atom, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { subjects, tasks } from "@/data/mockData";
 import SubjectCard from "@/components/SubjectCard";
@@ -105,23 +105,38 @@ const Academics = () => {
           <ModeToggle />
         </div>
       </div>
-      {mode === "self-study" ? (
-        <SelfStudyMode
-          neetSubjects={neetSubjects}
-          todayTasks={todayTasks}
-          lowAccuracyTopics={lowAccuracyTopics}
-          onSubjectClick={handleSubjectClick}
-          onCreateTest={handleCreateTest}
-          onOpenAssistant={handleOpenAssistant}
-          navigate={navigate}
-        />
-      ) : (
-        <InstituteMode
-          assignments={mockAssignments}
-          announcements={mockAnnouncements}
-          onOpenAssistant={handleOpenAssistant}
-        />
-      )}
+      {/* Backlog Shortcut */}
+      <div className="mb-4 flex items-center gap-4">
+        <div
+          className="flex items-center gap-2 bg-[#FFF7EB] border border-[#FFBD59] text-gray-700 px-4 py-3 rounded-xl shadow hover:shadow-lg cursor-pointer transition hover:bg-[#FFE8B2]"
+          onClick={() => navigate('/backlog')}
+          role="button"
+        >
+          <List size={24} className="text-[#FFBD59]" />
+          <span className="font-bold">Backlog Center</span>
+          <span className="ml-2 text-xs text-gray-500">AI fix for overdue study topics</span>
+        </div>
+      </div>
+      {/* Existing self-study or institute mode blocks */}
+      {
+        mode === "self-study" ? (
+          <SelfStudyMode
+            neetSubjects={neetSubjects}
+            todayTasks={todayTasks}
+            lowAccuracyTopics={lowAccuracyTopics}
+            onSubjectClick={handleSubjectClick}
+            onCreateTest={handleCreateTest}
+            onOpenAssistant={handleOpenAssistant}
+            navigate={navigate}
+          />
+        ) : (
+          <InstituteMode
+            assignments={mockAssignments}
+            announcements={mockAnnouncements}
+            onOpenAssistant={handleOpenAssistant}
+          />
+        )
+      }
     </div>
   );
 };

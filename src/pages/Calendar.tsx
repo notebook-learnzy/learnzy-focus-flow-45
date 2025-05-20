@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 import CalendarSidebar from "@/components/CalendarSidebar";
 import CalendarTimeGrid from "@/components/CalendarTimeGrid";
@@ -59,6 +60,33 @@ const Calendar = () => {
   const [weekStart, setWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [allTasks, setAllTasks] = useState<Task[]>(cleanTasks(tasks));
   const [showDialog, setShowDialog] = useState(false);
+  const [revisionEvents, setRevisionEvents] = useState<any[]>([]);
+  
+  useEffect(() => {
+    supabase
+      .from("scheduled_revisions")
+      .select("*")
+      .order("scheduled_date", { ascending: true })
+      .then(({ data }) => setRevisionEvents(data || []));
+    // Realtime: subscribe to changes (for auto updating)
+    const channel = supabase
+      .channel('revisions')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'scheduled_revisions',
+      }, payload => {
+        supabase
+          .from("scheduled_revisions")
+          .select("*")
+          .order("scheduled_date", { ascending: true })
+          .then(({ data }) => setRevisionEvents(data || []));
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    }
+  }, []);
 
   useEffect(() => {
     // Set week start based on selected date
@@ -66,32 +94,6 @@ const Calendar = () => {
       setWeekStart(startOfWeek(selectedDate, { weekStartsOn: 1 }));
     }
   }, [selectedDate, viewMode]);
-  
-  const getTasksForDate = (date: Date | undefined): Task[] => {
-    if (!date) return [];
-    const dateString = format(date, "yyyy-MM-dd");
-    return allTasks.filter(task => task.date === dateString);
-  };
-  
-  const getTaskDotColor = (type: TaskType) => {
-    switch (type) {
-      case "practice": return "bg-learnzy-orange";
-      case "wellness": return "bg-learnzy-mint";
-      default: return "bg-gray-300";
-    }
-  };
-  
-  const selectedDateTasks = getTasksForDate(selectedDate);
-  
-  const nextWeek = () => {
-    setWeekStart(addWeeks(weekStart, 1));
-    setSelectedDate(addWeeks(selectedDate, 1));
-  };
-  
-  const prevWeek = () => {
-    setWeekStart(subWeeks(weekStart, 1));
-    setSelectedDate(subWeeks(selectedDate, 1));
-  };
   
   // For FAB floating
   
@@ -189,6 +191,36 @@ const Calendar = () => {
     toast({
       title: "Task removed",
     });
+  };
+
+  // For mini task dots in the calendar, include revisionEvents
+  const getTasksForDate = (date: Date | undefined): Task[] => {
+    if (!date) return [];
+    const dateString = format(date, "yyyy-MM-dd");
+    // merge normal tasks & revision events (as "practice" type)
+    const merged = [
+      ...allTasks,
+      ...revisionEvents.map(r => ({
+        id: `revision-${r.id}`,
+        title: `Revise Set ${r.set_id ?? "?"}`,
+        type: "practice",
+        date: r.scheduled_date,
+        time: r.scheduled_time ?? "18:00",
+        duration: 45,
+        completed: false
+      }))
+    ];
+    return merged.filter(task => task.date === dateString);
+  };
+
+  const nextWeek = () => {
+    setWeekStart(addWeeks(weekStart, 1));
+    setSelectedDate(addWeeks(selectedDate, 1));
+  };
+  
+  const prevWeek = () => {
+    setWeekStart(subWeeks(weekStart, 1));
+    setSelectedDate(subWeeks(selectedDate, 1));
   };
 
   return (

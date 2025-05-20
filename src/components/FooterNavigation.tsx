@@ -37,11 +37,6 @@ const FooterNavigation = () => {
       icon: <Users className="h-6 w-6 sm:h-5 sm:w-5" />,
       path: '/social'
     },
-    {
-      name: 'Backlog',
-      icon: <List className="h-6 w-6 sm:h-5 sm:w-5" />,
-      path: '/backlog'
-    },
   ];
 
   return (

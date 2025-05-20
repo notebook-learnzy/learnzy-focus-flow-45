@@ -339,6 +339,78 @@ export type Database = {
         }
         Relationships: []
       }
+      ideal_journey: {
+        Row: {
+          chapter_id: string
+          day_number: number
+          description: string | null
+          extra: Json | null
+          id: string
+          ideal_date: string | null
+          subject: string
+          task_title: string
+        }
+        Insert: {
+          chapter_id: string
+          day_number: number
+          description?: string | null
+          extra?: Json | null
+          id?: string
+          ideal_date?: string | null
+          subject: string
+          task_title: string
+        }
+        Update: {
+          chapter_id?: string
+          day_number?: number
+          description?: string | null
+          extra?: Json | null
+          id?: string
+          ideal_date?: string | null
+          subject?: string
+          task_title?: string
+        }
+        Relationships: []
+      }
+      scheduled_revisions: {
+        Row: {
+          chapter_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          scheduled_date: string
+          scheduled_time: string | null
+          set_id: string | null
+          status: string | null
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date: string
+          scheduled_time?: string | null
+          set_id?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date?: string
+          scheduled_time?: string | null
+          set_id?: string | null
+          status?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
