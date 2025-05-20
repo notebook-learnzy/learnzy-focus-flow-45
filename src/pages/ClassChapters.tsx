@@ -9,26 +9,49 @@ import { cn } from "@/lib/utils";
 const chaptersBySubjectAndClass: Record<string, Record<string, { id: string, name: string }[]>> = {
   botany: {
     "11": [
-      { id: "cell-bio", name: "Cell: The Unit of Life" },
+      { id: "the-living-world", name: "The Living World" },
+      { id: "biological-classification", name: "Biological Classification" },
+      { id: "plant-kingdom", name: "Plant Kingdom" },
       { id: "plant-morphology", name: "Morphology of Flowering Plants" },
+      { id: "plant-anatomy", name: "Anatomy of Flowering Plants" },
+      { id: "cell-bio", name: "Cell: The Unit of Life" },
+      { id: "biomolecules", name: "Biomolecules" },
+      { id: "cell-cycle", name: "Cell Cycle and Cell Division" },
+      { id: "transport-plants", name: "Transport in Plants" },
+      { id: "mineral-nutrition", name: "Mineral Nutrition" },
       { id: "photosynthesis", name: "Photosynthesis in Higher Plants" },
+      { id: "respiration-plants", name: "Respiration in Plants" },
+      { id: "plant-growth", name: "Plant Growth and Development" }
     ],
     "12": [
-      { id: "reproduction", name: "Reproduction in Flowering Plants" },
-      { id: "genetics", name: "Principles of Inheritance and Variation" },
-      { id: "ecology", name: "Ecosystem" },
+      { id: "reproduction-organisms", name: "Reproduction in Organisms" },
+      { id: "sexual-reproduction-flowering", name: "Sexual Reproduction in Flowering Plants" },
+      { id: "inheritance-variation", name: "Principles of Inheritance and Variation" },
+      { id: "molecular-inheritance", name: "Molecular Basis of Inheritance" },
+      { id: "microbes-human-welfare", name: "Microbes in Human Welfare" },
+      { id: "biotechnology-principles", name: "Biotechnology: Principles and Processes" },
+      { id: "biotechnology-applications", name: "Biotechnology and Its Applications" },
+      { id: "organisms-populations", name: "Organisms and Populations" },
+      { id: "ecosystem", name: "Ecosystem" },
+      { id: "biodiversity", name: "Biodiversity and Conservation" },
     ]
   },
   zoology: {
     "11": [
-      { id: "animal-kingdom", name: "Animal Kingdom" },
-      { id: "structural-org", name: "Structural Organisation in Animals" },
       { id: "digestion", name: "Digestion and Absorption" },
+      { id: "breathing-gas-exchange", name: "Breathing and Exchange of Gases" },
+      { id: "body-fluids-circulation", name: "Body Fluids and Circulation" },
+      { id: "excretory-products", name: "Excretory Products and Their Elimination" },
+      { id: "locomotion-movement", name: "Locomotion and Movement" },
+      { id: "neural-control", name: "Neural Control and Coordination" },
+      { id: "chemical-coordination", name: "Chemical Coordination and Integration" },
     ],
     "12": [
       { id: "human-reproduction", name: "Human Reproduction" },
-      { id: "genetics-z", name: "Principles of Inheritance and Variation" },
+      { id: "reproductive-health", name: "Reproductive Health" },
       { id: "evolution", name: "Evolution" },
+      { id: "human-health-disease", name: "Human Health and Disease" },
+      { id: "food-production", name: "Strategies for Enhancement in Food Production" },
     ]
   },
   physics: {
