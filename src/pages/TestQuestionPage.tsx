@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,17 @@ function mapCorrectAnswerToIdx(ans: string) {
   if (!ans) return -1;
   return ['a', 'b', 'c', 'd'].indexOf(ans.toLowerCase());
 }
+
+const getChapterTitle = (chapterId: string | undefined) => {
+  switch (chapterId) {
+    case "cell-bio":
+      return "Cell: The Unit of Life";
+    case "the-living-world":
+      return "The Living World";
+    default:
+      return "Unknown Chapter";
+  }
+};
 
 const TestQuestionPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
@@ -69,14 +81,12 @@ const TestQuestionPage = () => {
   }, [chapterId, setId]);
 
   useEffect(() => {
-    // Reset timers for current question
     setQuestionTimes(times => {
       const newTimes = [...times];
       newTimes[currQ] = 0;
       return newTimes;
     });
     setStartTime(Date.now());
-    // Simulate HRV value
     setHRVs(hrvs => {
       const newH = [...hrvs];
       newH[currQ] = 60 + Math.floor(Math.random() * 30);
@@ -86,7 +96,6 @@ const TestQuestionPage = () => {
   }, [currQ]);
 
   useEffect(() => {
-    // Timer for current question
     if (isLoading) return;
     const interval = setInterval(() => {
       setQuestionTimes(times => {
@@ -104,7 +113,6 @@ const TestQuestionPage = () => {
       up[currQ] = idx;
       return up;
     });
-    // Save HRV for this question as proxy for focus
     setHRVs(h => {
       const hn = [...h];
       hn[currQ] = 60 + Math.floor(Math.random() * 30); // Simulate
@@ -116,7 +124,6 @@ const TestQuestionPage = () => {
   const prevQ = () => setCurrQ((c) => Math.max(0, c - 1));
 
   const submitTest = async () => {
-    // Compose answers, times, focus for saving
     const results = questions.map((q, i) => ({
       q_no: q.q_no,
       question_id: q.id || q.q_no,
@@ -129,7 +136,6 @@ const TestQuestionPage = () => {
       hrv: hrvs[i],
     }));
 
-    // Save session result
     await (supabase as any).from("session_results").insert([
       {
         user_id: null,
@@ -143,7 +149,6 @@ const TestQuestionPage = () => {
       }
     ]);
 
-    // Pass along answers & more via router state to analyze
     navigate(
       `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
       { state: { questions, selected, questionTimes, hrvs } }
@@ -164,9 +169,7 @@ const TestQuestionPage = () => {
               Test - Set {setId?.toUpperCase() || "A"}
             </span>
             <div className="text-xs text-gray-400 mt-1">
-              {(chapterId === "cell-bio" && "Cell: The Unit of Life") ||
-                (chapterId === "the-living-world" && "The Living World") ||
-                "Unknown Chapter"} • Class XI • {questions.length} Questions
+              {getChapterTitle(chapterId)} • Class XI • {questions.length} Questions
             </div>
           </div>
           <RelaxStatusIndicator />
@@ -217,3 +220,4 @@ const TestQuestionPage = () => {
   );
 };
 export default TestQuestionPage;
+
