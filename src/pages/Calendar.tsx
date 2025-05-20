@@ -193,234 +193,251 @@ const Calendar = () => {
     });
   };
 
-  // For mini task dots in the calendar, include revisionEvents
-  const getTasksForDate = (date: Date | undefined): Task[] => {
-    if (!date) return [];
-    const dateString = format(date, "yyyy-MM-dd");
-    // merge normal tasks & revision events (as "practice" type)
-    const merged = [
-      ...allTasks,
-      ...revisionEvents.map(r => ({
-        id: `revision-${r.id}`,
-        title: `Revise Set ${r.set_id ?? "?"}`,
-        type: "practice",
+// For mini task dots in the calendar, include revisionEvents
+const getTasksForDate = (date: Date | undefined): Task[] => {
+  if (!date) return [];
+  const dateString = format(date, "yyyy-MM-dd");
+  // Merge allTasks and revisionEvents (revisionEvents are mapped to practice TaskType)
+  const merged: Task[] = [
+    ...allTasks,
+    ...revisionEvents
+      .filter(r => !!r.scheduled_date)
+      .map(r => ({
+        id: `revision-${r.id ?? ""}`,
+        title: r.set_id
+          ? `Revise Set ${r.set_id}`
+          : "Revision Session",
+        type: "practice" as TaskType, // Fix: force TaskType
         date: r.scheduled_date,
-        time: r.scheduled_time ?? "18:00",
+        time: r.scheduled_time || "18:00",
         duration: 45,
-        completed: false
-      }))
-    ];
-    return merged.filter(task => task.date === dateString);
-  };
+        completed: false,
+        chapterId: r.chapter_id, // optional, for later
+        description: r.notes || "",
+        color: "#b377fa", // subtle purple for revision, can update later
+        location: "",
+      })),
+  ];
+  return merged.filter(task => task.date === dateString);
+};
 
-  const nextWeek = () => {
-    setWeekStart(addWeeks(weekStart, 1));
-    setSelectedDate(addWeeks(selectedDate, 1));
-  };
-  
-  const prevWeek = () => {
-    setWeekStart(subWeeks(weekStart, 1));
-    setSelectedDate(subWeeks(selectedDate, 1));
-  };
+// ... keep existing code (rest of hooks/logic) the same ...
 
-  return (
-    <div className="flex w-full min-h-[700px] relative">
-      {/* Sidebar (hid on mobile) */}
-      <CalendarSidebar
-        selectedDate={selectedDate}
-        onSelectDate={setSelectedDate}
-        onCreate={() => setShowDialog(true)}
-      />
-
-      {/* Floating Add Task button */}
-      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center">
-        <button
-          className="shadow-xl bg-learnzy-purple hover:bg-learnzy-purple/90 transition-colors duration-200 text-white rounded-full p-4 flex items-center justify-center"
-          onClick={() => {
-            setShowDialog(true);
-            setTaskModalDefaults({
-              date: format(selectedDate, "yyyy-MM-dd"),
-              time: undefined
-            });
-          }}
-          aria-label="Add Task"
-          title="Add Task"
-        >
-          <Plus size={28} />
-        </button>
-        <span className="mt-2 text-xs text-gray-500">Add Task</span>
-      </div>
-      
-      {/* Main area */}
-      <div className="flex-1 flex flex-col">
-        <div className="flex justify-between items-center px-4 pt-4 pb-2 border-b bg-white">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={viewMode === "day" ? "bg-gray-200 font-semibold shadow" : ""}
-              onClick={() => setViewMode("day")}
-            >
-              Day
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={viewMode === "week" ? "bg-gray-200 font-semibold shadow" : ""}
-              onClick={() => setViewMode("week")}
-            >
-              Week
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={viewMode === "month" ? "bg-gray-200 font-semibold shadow" : ""}
-              onClick={() => setViewMode("month")}
-            >
-              Month
-            </Button>
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedDate(new Date())}
-            >
-              Today
-            </Button>
-          </div>
-          <div>
-            <span className="font-semibold text-lg">{format(selectedDate, "MMMM d, yyyy")}</span>
-          </div>
+return (
+  <div className="flex w-full min-h-[700px] relative bg-[#F8F7FB]">
+    {/* Sidebar (hid on mobile) */}
+    <CalendarSidebar
+      selectedDate={selectedDate}
+      onSelectDate={setSelectedDate}
+      onCreate={() => setShowDialog(true)}
+    />
+    {/* Floating Add Task button */}
+    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center">
+      <button
+        className="shadow-xl bg-learnzy-purple hover:bg-learnzy-purple/90 transition-colors duration-200 text-white rounded-full p-4 flex items-center justify-center"
+        onClick={() => {
+          setShowDialog(true);
+          setTaskModalDefaults({
+            date: format(selectedDate, "yyyy-MM-dd"),
+            time: undefined
+          });
+        }}
+        aria-label="Add Task"
+        title="Add Task"
+        style={{
+          boxShadow: "0 6px 24px 0 rgba(112,66,220,0.16)" // Nice purple shadow
+        }}
+      >
+        <Plus size={28} />
+      </button>
+      <span className="mt-2 text-xs text-gray-500">Add Task</span>
+    </div>
+    {/* Main area */}
+    <div className="flex-1 flex flex-col rounded-2xl border ml-0 md:ml-[20px] shadow-lg overflow-hidden bg-white">
+      <div className="flex justify-between items-center px-6 pt-4 pb-2 border-b bg-white shadow-sm">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className={viewMode === "day" ? "bg-gray-200 font-semibold shadow" : ""}
+            onClick={() => setViewMode("day")}
+          >
+            Day
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={viewMode === "week" ? "bg-gray-200 font-semibold shadow" : ""}
+            onClick={() => setViewMode("week")}
+          >
+            Week
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={viewMode === "month" ? "bg-gray-200 font-semibold shadow" : ""}
+            onClick={() => setViewMode("month")}
+          >
+            Month
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSelectedDate(new Date())}
+          >
+            Today
+          </Button>
         </div>
-
-        {/* Time grid (main calendar), only render in day/week */}
-        {(viewMode === "day" || viewMode === "week") && (
-          <CalendarTimeGrid
-            weekStart={weekStart}
-            selectedDate={selectedDate}
-            tasks={allTasks}
-            onSelectDate={setSelectedDate}
-            viewMode={viewMode}
-            onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
-          />
-        )}
-        {/* Month view placeholder */}
-        {viewMode === "month" && (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-10 text-lg">
-            Month view coming soon! {/* You can implement month grid with a separate component later */}
-          </div>
-        )}
-
-        {/* Dialog for Add Task */}
-        <Dialog open={showDialog} onOpenChange={(open) => {
-          setShowDialog(open);
-          if (!open) setTaskModalDefaults({});
-        }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Task</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
+        <div>
+          <span className="font-semibold text-lg">{format(selectedDate, "MMMM d, yyyy")}</span>
+        </div>
+      </div>
+      {/* Time grid (main calendar), only render in day/week */}
+      {(viewMode === "day" || viewMode === "week") && (
+        <CalendarTimeGrid
+          weekStart={weekStart}
+          selectedDate={selectedDate}
+          tasks={[
+            // merge both
+            ...allTasks,
+            ...revisionEvents.map(r => ({
+              id: `revision-${r.id ?? ""}`,
+              title: r.set_id
+                ? `Revise Set ${r.set_id}`
+                : "Revision Session",
+              type: "practice" as TaskType,
+              date: r.scheduled_date,
+              time: r.scheduled_time || "18:00",
+              duration: 45,
+              completed: false,
+              chapterId: r.chapter_id,
+              description: r.notes || "",
+              color: "#b377fa",
+              location: "",
+            })),
+          ]}
+          onSelectDate={setSelectedDate}
+          viewMode={viewMode}
+          onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
+        />
+      )}
+      {/* Month view placeholder */}
+      {viewMode === "month" && (
+        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-10 text-lg">
+          Month view coming soon! {/* You can implement month grid with a separate component later */}
+        </div>
+      )}
+      {/* Dialog for Add Task */}
+      <Dialog open={showDialog} onOpenChange={(open) => {
+        setShowDialog(open);
+        if (!open) setTaskModalDefaults({});
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Task</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Task Title*</label>
+              <Input 
+                value={newTask.title} 
+                onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                placeholder="Enter task title"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Input 
+                value={newTask.description}
+                onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                placeholder="Details (optional)"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Location</label>
+              <Input 
+                value={newTask.location}
+                onChange={(e) => setNewTask({...newTask, location: e.target.value})}
+                placeholder="Where? (optional)"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Task Type</label>
+              <Select
+                value={newTask.type as string}
+                onValueChange={(value) => setNewTask({...newTask, type: value as TaskType})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select task type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="practice">Practice</SelectItem>
+                  <SelectItem value="wellness">Wellness</SelectItem>
+                  <SelectItem value="custom">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {newTask.type === "practice" && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Task Title*</label>
-                <Input 
-                  value={newTask.title} 
-                  onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                  placeholder="Enter task title"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Input 
-                  value={newTask.description}
-                  onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                  placeholder="Details (optional)"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Location</label>
-                <Input 
-                  value={newTask.location}
-                  onChange={(e) => setNewTask({...newTask, location: e.target.value})}
-                  placeholder="Where? (optional)"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Task Type</label>
+                <label className="text-sm font-medium">Chapter</label>
                 <Select
-                  value={newTask.type as string}
-                  onValueChange={(value) => setNewTask({...newTask, type: value as TaskType})}
+                  value={newTask.chapterId}
+                  onValueChange={(value) => setNewTask({...newTask, chapterId: value})}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select task type" />
+                    <SelectValue placeholder="Select chapter" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="practice">Practice</SelectItem>
-                    <SelectItem value="wellness">Wellness</SelectItem>
-                    <SelectItem value="custom">Other</SelectItem>
+                    {chapters.map(chapter => (
+                      <SelectItem key={chapter.id} value={chapter.id}>{chapter.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              
-              {newTask.type === "practice" && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Chapter</label>
-                  <Select
-                    value={newTask.chapterId}
-                    onValueChange={(value) => setNewTask({...newTask, chapterId: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select chapter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {chapters.map(chapter => (
-                        <SelectItem key={chapter.id} value={chapter.id}>{chapter.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date*</label>
-                  <Input 
-                    type="date"
-                    value={newTask.date}
-                    onChange={(e) => setNewTask({...newTask, date: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Time*</label>
-                  <Input 
-                    type="time"
-                    value={newTask.time}
-                    onChange={(e) => setNewTask({...newTask, time: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Duration (minutes)*</label>
+                <label className="text-sm font-medium">Date*</label>
                 <Input 
-                  type="number"
-                  value={newTask.duration}
-                  onChange={(e) => setNewTask({...newTask, duration: Number(e.target.value)})}
-                  min={5}
-                  max={240}
+                  type="date"
+                  value={newTask.date}
+                  onChange={(e) => setNewTask({...newTask, date: e.target.value})}
                   required
                 />
               </div>
-              {/* Future: can add color picker etc */}
-              <Button className="w-full bg-learnzy-purple" onClick={handleAddTask}>
-                Add Task
-              </Button>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Time*</label>
+                <Input 
+                  type="time"
+                  value={newTask.time}
+                  onChange={(e) => setNewTask({...newTask, time: e.target.value})}
+                  required
+                />
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Duration (minutes)*</label>
+              <Input 
+                type="number"
+                value={newTask.duration}
+                onChange={(e) => setNewTask({...newTask, duration: Number(e.target.value)})}
+                min={5}
+                max={240}
+                required
+              />
+            </div>
+            {/* Future: can add color picker etc */}
+            <Button className="w-full bg-learnzy-purple" onClick={handleAddTask}>
+              Add Task
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
+  </div>
+);
 };
 
 export default Calendar;
