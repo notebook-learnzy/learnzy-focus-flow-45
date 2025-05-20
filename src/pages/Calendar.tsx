@@ -62,30 +62,30 @@ const Calendar = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [revisionEvents, setRevisionEvents] = useState<any[]>([]);
   
+  // --- Fetch scheduled revisions from Supabase for REAL DATA (not mock) ---
   useEffect(() => {
-    supabase
-      .from("scheduled_revisions")
-      .select("*")
-      .order("scheduled_date", { ascending: true })
-      .then(({ data }) => setRevisionEvents(data || []));
-    // Realtime: subscribe to changes (for auto updating)
+    let ignore = false;
+    async function fetchRevisions() {
+      const { data } = await supabase
+        .from("scheduled_revisions")
+        .select("*")
+        .order("scheduled_date", { ascending: true });
+      if (!ignore) setRevisionEvents(data || []);
+    }
+    fetchRevisions();
+    // Sub for realtime updates, update on change
     const channel = supabase
       .channel('revisions')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'scheduled_revisions',
-      }, payload => {
-        supabase
-          .from("scheduled_revisions")
-          .select("*")
-          .order("scheduled_date", { ascending: true })
-          .then(({ data }) => setRevisionEvents(data || []));
-      })
+      }, () => fetchRevisions())
       .subscribe();
     return () => {
+      ignore = true;
       supabase.removeChannel(channel);
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -197,7 +197,7 @@ const Calendar = () => {
 const getTasksForDate = (date: Date | undefined): Task[] => {
   if (!date) return [];
   const dateString = format(date, "yyyy-MM-dd");
-  // Merge allTasks and revisionEvents (revisionEvents are mapped to practice TaskType)
+  // Merge allTasks and ALL revision events from Supabase (not just demo)
   const merged: Task[] = [
     ...allTasks,
     ...revisionEvents
@@ -220,8 +220,6 @@ const getTasksForDate = (date: Date | undefined): Task[] => {
   ];
   return merged.filter(task => task.date === dateString);
 };
-
-// ... keep existing code (rest of hooks/logic) the same ...
 
 return (
   <div className="flex w-full min-h-[700px] relative bg-[#F8F7FB]">

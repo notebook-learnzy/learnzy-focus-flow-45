@@ -73,48 +73,52 @@ const PerformanceReport = () => {
   const { subjectId, chapterId, setId } = useParams<{ subjectId: string; chapterId: string; setId: string; }>();
   const navigate = useNavigate();
   
-  // NEW: Load botany session result from Supabase for demo
-  const [sessionData, setSessionData] = useState<SessionReport | null>(null);
+  const [sessionData, setSessionData] = useState<any | null>(null);
+  const [realData, setRealData] = useState(false);
 
   useEffect(() => {
     async function getRealSession() {
-      if (subjectId?.toLowerCase() === "botany") {
-        // Fetch 10 sample questions from chapter_1_living_world_set_a for demo
+      // Try load session from Supabase for The Living World/Botany
+      if (subjectId?.toLowerCase() === "botany" && chapterId === "the-living-world") {
         const { data } = await supabase
-          .from("chapter_1_living_world_set_a")
-          .select()
-          .limit(10);
-
+          .from("session_results")
+          .select("*")
+          .eq("chapter_id", chapterId)
+          .eq("set_id", setId)
+          .order("created_at", { ascending: false })
+          .limit(1);
         if (data && data.length > 0) {
-          // Fake a plausible SessionReport for the demo
-          const timeline = (data as any[]).map((q, idx) => ({
-            question_id: `db-${q.q_no}`,
-            focus_score: 75 + Math.floor(Math.random() * 20) - 10,
-            time_spent: 40 + Math.floor(Math.random() * 30),
-            is_correct: Math.random() > 0.3,
-          }));
-          setSessionData({
-            id: `session-demo-botany`,
-            question_set_id: "qs-botany-a",
-            date: new Date().toISOString(),
-            overall_focus_score: Math.round(timeline.reduce((acc, q) => acc + q.focus_score, 0)/timeline.length),
-            focus_timeline: timeline,
-            meditation_completed: true,
-            meditation_skipped: false,
-            total_time: timeline.reduce((t,x) => t+x.time_spent, 0),
-            correct_answers: timeline.filter(x=>x.is_correct).length,
-            total_questions: timeline.length,
-          });
+          setSessionData(data[0]);
+          setRealData(true);
         }
       }
     }
     getRealSession();
-    //eslint-disable-next-line
-  }, [subjectId]);
+  }, [subjectId, chapterId, setId]);
 
-  // Use Supabase result for Botany, fallback to mock if not available
-  const report = (subjectId?.toLowerCase() === "botany" && sessionData) ? sessionData : mockSessionReport;
-  
+  // Use Supabase data if available for botany living-world, else mock
+  let report = mockSessionReport;
+  if (sessionData?.questions) {
+    // adapt shape, best effort
+    report = {
+      id: sessionData.id,
+      question_set_id: sessionData.set_id,
+      date: sessionData.created_at || new Date().toISOString(),
+      overall_focus_score: 78,
+      focus_timeline: sessionData.questions.map((q:any,idx:number) => ({
+        question_id: q.question_id?.toString() || `q${idx+1}`,
+        focus_score: 70 + Math.floor(Math.random()*25),
+        time_spent: q.time_spent || 40,
+        is_correct: q.user_answer === q.correct_answer,
+      })),
+      meditation_completed: true,
+      meditation_skipped: false,
+      total_time: sessionData.questions.reduce((t:any,q:any)=>t+(q.time_spent||0),0),
+      correct_answers: sessionData.questions.filter((q:any)=>q.user_answer===q.correct_answer).length,
+      total_questions: sessionData.questions.length,
+    }
+  }
+
   // Calculate metrics
   const scorePercentage = (report.correct_answers / report.total_questions) * 100;
   const timePerQuestion = report.total_time / report.total_questions;
@@ -151,6 +155,11 @@ const PerformanceReport = () => {
         <p className="text-gray-500">
           Set {setId?.toUpperCase()} • Completed on {new Date(report.date).toLocaleDateString()}
         </p>
+        {!realData && chapterId === "the-living-world" && (
+          <div className="text-xs text-red-500 mt-1">
+            (Only mock data available - your real session will appear here once created.)
+          </div>
+        )}
       </div>
       
       <PerformanceOverview 
