@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,21 @@ const TestQuestionPage = () => {
   const [questionTimes, setQuestionTimes] = useState<number[]>([]);
   const [hrvs, setHRVs] = useState<number[]>([]);
   const [startTime, setStartTime] = useState(Date.now());
+
+  // Only allow "the-living-world" chapter to proceed with real questions
+  if (chapterId !== "the-living-world") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1] px-2">
+        <Card className="p-8 text-center bg-white shadow-lg">
+          <h2 className="text-xl font-semibold mb-6">Coming Soon</h2>
+          <p>Practice set for this chapter will be available once data is uploaded.</p>
+          <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
+            Go Back
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   useEffect(() => {
     async function fetchQuestions() {

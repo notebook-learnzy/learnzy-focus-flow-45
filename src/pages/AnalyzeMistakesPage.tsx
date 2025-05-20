@@ -1,4 +1,3 @@
-
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +38,20 @@ const AnalyzeMistakesPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  // Only Living World chapter is supported
+  if (chapterId !== "the-living-world") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1]">
+        <Card className="p-8 text-center bg-white shadow-lg">
+          <h2 className="text-xl font-semibold mb-6">Coming Soon</h2>
+          <p>Mistake analysis for this chapter is not yet available.</p>
+          <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
+            Go Back
+          </Button>
+        </Card>
+      </div>
+    );
+  }
   const selected = (location.state?.selected ?? [undefined, undefined, undefined]) as (number|undefined)[];
   // Mistakes: if answer incorrect or unattempted
   const mistakeIndexes = mockQuestions.map(

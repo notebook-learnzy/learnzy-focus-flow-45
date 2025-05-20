@@ -1,8 +1,10 @@
+
 import { useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AcademicAnalyticsSection from "@/components/Performance/AcademicAnalyticsSection";
 import WellnessPerformanceSection from "@/components/Performance/WellnessPerformanceSection";
 import RevisionScheduleSection from "@/components/Performance/RevisionScheduleSection";
+import QualityScoreAndScheduler from "@/components/Performance/QualityScoreAndScheduler";
 import { Button } from "@/components/ui/button";
 
 const PerformanceReportPage = () => {
@@ -28,12 +30,11 @@ const PerformanceReportPage = () => {
             <WellnessPerformanceSection />
           </TabsContent>
           <TabsContent value="revision">
-            <RevisionScheduleSection />
+            <QualityScoreAndScheduler chapterId={chapterId} setId={setId} />
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 };
-
 export default PerformanceReportPage;
