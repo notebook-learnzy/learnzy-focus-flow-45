@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +44,7 @@ const chaptersBySubjectAndClass: Record<string, Record<string, { id: string, nam
       { id: "locomotion-movement", name: "Locomotion and Movement" },
       { id: "neural-control", name: "Neural Control and Coordination" },
       { id: "chemical-coordination", name: "Chemical Coordination and Integration" },
+      { id: "tissues", name: "STRUCTURAL ORGANISATION IN ANIMALS" },   // NEW CHAPTER ADDED
     ],
     "12": [
       { id: "human-reproduction", name: "Human Reproduction" },
