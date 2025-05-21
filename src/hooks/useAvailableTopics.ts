@@ -9,10 +9,17 @@ export async function useAvailableTopics(chapterId: string): Promise<string[]> {
   for (let setId of setIds) {
     const table = getSupabaseTableName(chapterId, setId);
     const { data, error } = await supabase.from(table as any).select("topic");
-    if (data && Array.isArray(data)) {
-      const topics: string[] = data.map(row => typeof row.topic === "string" ? row.topic : "").filter(Boolean);
-      allTopicSets.push(topics);
+
+    if (error || !Array.isArray(data)) {
+      continue; // skip this set if error or data isn't an array
     }
+
+    const topics: string[] = data
+      .filter(row => typeof row === "object" && row !== null && "topic" in row && typeof row.topic === "string")
+      .map(row => row.topic as string)
+      .filter(Boolean);
+
+    allTopicSets.push(topics);
   }
 
   // Flatten, dedup, and sort topics
