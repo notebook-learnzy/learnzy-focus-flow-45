@@ -72,52 +72,9 @@ const getFocusSegmentData = (focusTimeline: FocusData[]) => {
 const PerformanceReport = () => {
   const { subjectId, chapterId, setId } = useParams<{ subjectId: string; chapterId: string; setId: string; }>();
   const navigate = useNavigate();
-  
-  const [sessionData, setSessionData] = useState<any | null>(null);
-  const [realData, setRealData] = useState(false);
 
-  useEffect(() => {
-    async function getRealSession() {
-      // Try load session from Supabase for The Living World/Botany
-      if (subjectId?.toLowerCase() === "botany" && chapterId === "the-living-world") {
-        const { data } = await supabase
-          .from("session_results")
-          .select("*")
-          .eq("chapter_id", chapterId)
-          .eq("set_id", setId)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        if (data && data.length > 0) {
-          setSessionData(data[0]);
-          setRealData(true);
-        }
-      }
-    }
-    getRealSession();
-  }, [subjectId, chapterId, setId]);
-
-  // Use Supabase data if available for botany living-world, else mock
+  // Only use mockSessionReport, since no session_results table
   let report = mockSessionReport;
-  if (sessionData?.questions) {
-    // adapt shape, best effort
-    report = {
-      id: sessionData.id,
-      question_set_id: sessionData.set_id,
-      date: sessionData.created_at || new Date().toISOString(),
-      overall_focus_score: 78,
-      focus_timeline: sessionData.questions.map((q:any,idx:number) => ({
-        question_id: q.question_id?.toString() || `q${idx+1}`,
-        focus_score: 70 + Math.floor(Math.random()*25),
-        time_spent: q.time_spent || 40,
-        is_correct: q.user_answer === q.correct_answer,
-      })),
-      meditation_completed: true,
-      meditation_skipped: false,
-      total_time: sessionData.questions.reduce((t:any,q:any)=>t+(q.time_spent||0),0),
-      correct_answers: sessionData.questions.filter((q:any)=>q.user_answer===q.correct_answer).length,
-      total_questions: sessionData.questions.length,
-    }
-  }
 
   // Calculate metrics
   const scorePercentage = (report.correct_answers / report.total_questions) * 100;
@@ -155,16 +112,14 @@ const PerformanceReport = () => {
         <p className="text-gray-500">
           Set {setId?.toUpperCase()} • Completed on {new Date(report.date).toLocaleDateString()}
         </p>
-        {!realData && chapterId === "the-living-world" && (
-          <div className="text-xs text-red-500 mt-1">
-            (Only mock data available - your real session will appear here once created.)
-          </div>
-        )}
+        <div className="text-xs text-red-500 mt-1">
+          (Demo: Only mock data available - no real session found in database.)
+        </div>
       </div>
       
       <PerformanceOverview 
         score={report.correct_answers}
-        accuracy={Math.round(scorePercentage)}
+        accuracy={Math.round((report.correct_answers / report.total_questions) * 100)}
         totalScore={report.total_questions * 4} // Assuming 4 points per question
         timeSpent={report.total_time}
         correct={report.correct_answers}
@@ -173,7 +128,7 @@ const PerformanceReport = () => {
       />
       <TimePerQuestionChart 
         focusTimeline={report.focus_timeline}
-        avgTime={Math.round(timePerQuestion)}
+        avgTime={Math.round(report.total_time / report.total_questions)}
         slowerCount={10}
         fasterCount={report.total_questions - 10}
         deviations={[

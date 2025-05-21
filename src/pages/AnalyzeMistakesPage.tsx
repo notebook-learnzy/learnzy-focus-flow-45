@@ -1,8 +1,9 @@
+
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+// import { supabase } from "@/integrations/supabase/client"; // Not needed as session_results table does not exist
 
 const mistakeTags = [
   "Didn't Revise Concept", "Misread Question", "Time Pressure", "Silly Mistake", "Careless Error", "Need Practice"
@@ -12,30 +13,11 @@ const AnalyzeMistakesPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [session, setSession] = useState<any | null>(null);
+  // const [session, setSession] = useState<any | null>(null); // Remove since no session_results table
   const [tags, setTags] = useState<{[qid:string]: string[]}>({});
-  const [loading, setLoading] = useState(false);
-  // Supports only The Living World for Supabase fetch
-  useEffect(() => {
-    async function fetchSession() {
-      if (chapterId === "the-living-world") {
-        setLoading(true);
-        // Try fetch result for user: session_results based on chapter/set (fake, for demo, first found)
-        const { data } = await supabase
-          .from("session_results")
-          .select("*")
-          .eq("chapter_id", chapterId)
-          .eq("set_id", setId)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        if (data && data.length > 0) setSession(data[0]);
-        setLoading(false);
-      }
-    }
-    fetchSession();
-  }, [chapterId, setId]);
+  const [loading] = useState(false); // No supabase fetch, so always false
 
-  // Fallback mock data in case no session found
+  // Fallback mock data (not replaced with real, as no session_results table)
   const mockQuestions = [
     {
       id: "q1",
@@ -59,22 +41,13 @@ const AnalyzeMistakesPage = () => {
 
   let analyzedQuestions = mockQuestions;
   let selected = (location.state?.selected ?? [undefined, undefined, undefined]) as (number|undefined)[];
-  if (session && session.questions) {
-    analyzedQuestions = session.questions.map((q:any, idx:number) => ({
-      id: q.question_id?.toString() || `q${idx+1}`,
-      text: q.question_text || `Q${idx+1}`,
-      options: [q.option_a, q.option_b, q.option_c, q.option_d],
-      answer: ['a','b','c','d'].indexOf(q.correct_answer?.toLowerCase?.()),
-    }));
-    selected = session.questions.map((q:any) => q.user_answer ? ['a','b','c','d'].indexOf(q.user_answer?.toLowerCase?.()) : undefined);
-  }
 
   // Mistakes: if answer incorrect or unattempted
   const mistakeIndexes = analyzedQuestions.map(
     (q, idx) =>
       selected[idx] === undefined || selected[idx] !== q.answer
   );
-  const incorrectIds = analyzedQuestions.filter((_,i)=>mistakeIndexes[i]).map(q=>q.id);
+  // const incorrectIds = analyzedQuestions.filter((_,i)=>mistakeIndexes[i]).map(q=>q.id);
 
   const handleTag = (qid: string, tag: string) => {
     setTags(prev => ({
@@ -94,19 +67,8 @@ const AnalyzeMistakesPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1]">Loading...</div>
   );
 
-  if (!session && chapterId === "the-living-world") {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1]">
-        <Card className="p-8 text-center bg-white shadow-lg">
-          <h2 className="text-xl font-semibold mb-6">Mock Data Displayed</h2>
-          <p>Could not find any real session results.<br/>You're seeing example questions for demo purposes.</p>
-          <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
-            Go Back
-          </Button>
-        </Card>
-      </div>
-    );
-  }
+  // Remove non-existent session/fallback
+  // if (!session && chapterId === "the-living-world") {}
 
   return (
     <div className="min-h-screen bg-[#FEF9F1] py-10 px-2">
@@ -116,6 +78,10 @@ const AnalyzeMistakesPage = () => {
           <p className="mb-6 text-gray-500">
             Review incorrect or unattempted questions. Tag common reasons—it will help Shiv guide your revision!
           </p>
+          {/* Always using mockQuestions */}
+          <div className="mb-4 text-xs text-red-500">
+            (Demo: Only mock data shown. No real session found for this chapter/set.)
+          </div>
           {analyzedQuestions.map((q, idx) => {
             if (!mistakeIndexes[idx]) return null;
             return (
