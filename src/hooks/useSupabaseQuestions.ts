@@ -33,9 +33,9 @@ export function useSupabaseQuestions(chapterKey: string, setType: string) {
     queryKey: ["supabase-questions", chapterKey, setType],
     queryFn: async () => {
       const tableName = getSupabaseTableName(chapterKey, setType);
-      // Try to select from the table if it exists (if not, will throw error)
+      // Use "as any" to satisfy TS restrictions on dynamic table names.
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .select("*")
         .order("q_no", { ascending: true })
         .limit(50);
