@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,26 +7,41 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import RelaxStatusIndicator from "@/components/RelaxStatusIndicator";
 
-// Helper to convert chapter and set to the correct Supabase table name
+// Utility to convert a human/route chapter key to a Supabase table name.
+// Handles all Botany & Zoology class 11 chapters and sets (A/B/C...).
 function getSupabaseTableName(chapterKey: string, setType: string) {
-  // Zoology: tissues
-  if (chapterKey === "tissues") {
-    return `chapter_7_tissues_set_${setType.toLowerCase()}`;
+  // These mappings are based on your table-naming scheme.
+  // Add/adjust for chapters with special keys/numbers if necessary.
+  // Standard fallback:
+  // chapter_{N}_{chapter_key}_set_{setType}
+  // When in doubt, use the chapterKey + setType + a mapping dictionary if needed.
+
+  // If you have more "special" cases, add them here:
+  const tableMap: Record<string, string> = {
+    // Zoology 11
+    "tissues": "chapter_7_tissues_set_", // STRUCTURAL ORGANISATION IN ANIMALS
+    "body-fluids-circulation": "chapter_3_body_fluids_circulation_set_",
+    // Botany 11
+    "the-living-world": "chapter_1_living_world_set_",
+    "biological-classification": "chapter_2_biological_classification_set_",
+    "plant-kingdom": "chapter_3_plant_kingdom_set_",
+    "plant-morphology": "chapter_5_morphology_of_flowering_plant_set_",
+    "plant-anatomy": "chapter_6_anatomy_of_flowering_plant_set_",
+    "cell-bio": "chapter_8_cell_bio_set_",
+    "biomolecules": "chapter_9_biomolecules_set_",
+    "cell-cycle": "chapter_10_cell_cycle_set_",
+    "transport-plants": "chapter_11_transport_plants_set_",
+    "mineral-nutrition": "chapter_12_mineral_nutrition_set_",
+    "photosynthesis": "chapter_13_photosynthesis_set_",
+    "respiration-plants": "chapter_14_respiration_plants_set_",
+    "plant-growth": "chapter_15_plant_growth_set_",
+    // Expand as needed!
+  };
+
+  if (tableMap[chapterKey]) {
+    return `${tableMap[chapterKey]}${setType.toLowerCase()}`;
   }
-  if (chapterKey === "the-living-world") {
-    return `chapter_1_living_world_set_${setType.toLowerCase()}`;
-  }
-  if (chapterKey === "biological-classification") {
-    return `chapter_2_biological_classification_set_${setType.toLowerCase()}`;
-  }
-  if (chapterKey === "plant-kingdom") {
-    return `chapter_3_plant_kingdom_set_${setType.toLowerCase()}`;
-  }
-  if (chapterKey === "body-fluids-circulation") {
-    return `chapter_3_body_fluids_circulation_set_${setType.toLowerCase()}`;
-  }
-  // Add more explicit mappings as needed for other chapters!
-  // Fallback for generic
+  // Fallback for generic (for chapters without a special mapping)
   return `chapter_${chapterKey}_set_${setType.toLowerCase()}`;
 }
 
@@ -33,17 +49,6 @@ function mapCorrectAnswerToIdx(ans: string) {
   if (!ans) return -1;
   return ['a', 'b', 'c', 'd'].indexOf(ans.toLowerCase());
 }
-
-const getChapterTitle = (chapterId: string | undefined) => {
-  switch (chapterId) {
-    case "cell-bio":
-      return "Cell: The Unit of Life";
-    case "the-living-world":
-      return "The Living World";
-    default:
-      return "Unknown Chapter";
-  }
-};
 
 const TestQuestionPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
@@ -58,6 +63,21 @@ const TestQuestionPage = () => {
   const [hrvs, setHRVs] = useState<number[]>([]);
   const [startTime, setStartTime] = useState(Date.now());
 
+  // NEW: User authentication state
+  const [userId, setUserId] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Listen for user session
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   useEffect(() => {
     async function fetchQuestions() {
       setIsLoading(true);
@@ -71,7 +91,6 @@ const TestQuestionPage = () => {
       }
       const tableName = getSupabaseTableName(chapterId, setId);
 
-      // Use dynamic table lookup
       const { data, error } = await supabase
         .from(tableName as any)
         .select("*")
@@ -138,7 +157,7 @@ const TestQuestionPage = () => {
     });
     setHRVs(h => {
       const hn = [...h];
-      hn[currQ] = 60 + Math.floor(Math.random() * 30); // Simulate
+      hn[currQ] = 60 + Math.floor(Math.random() * 30); // Simulate metric
       return hn;
     });
   };
@@ -146,7 +165,16 @@ const TestQuestionPage = () => {
   const nextQ = () => setCurrQ((c) => Math.min(questions.length - 1, c + 1));
   const prevQ = () => setCurrQ((c) => Math.max(0, c - 1));
 
+  const [saving, setSaving] = useState(false);
+
   const submitTest = async () => {
+    if (!userId) {
+      setAuthError("Please log in to save your test results and access analytics.");
+      return;
+    }
+    setSaving(true);
+    setAuthError(null);
+
     const results = questions.map((q, i) => ({
       q_no: q.q_no,
       question_id: q.id || q.q_no,
@@ -159,9 +187,9 @@ const TestQuestionPage = () => {
       hrv: hrvs[i],
     }));
 
-    await (supabase as any).from("session_results").insert([
+    const { error } = await supabase.from("session_results").insert([
       {
-        user_id: null,
+        user_id: userId,
         subject: subjectId,
         class_id: classId,
         chapter_id: chapterId,
@@ -171,6 +199,12 @@ const TestQuestionPage = () => {
         total_count: results.length,
       }
     ]);
+    setSaving(false);
+
+    if (error) {
+      setAuthError("Failed to save results: " + error.message);
+      return;
+    }
 
     navigate(
       `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
@@ -178,18 +212,21 @@ const TestQuestionPage = () => {
     );
   };
 
-  if (isLoading) return <div className="p-14 text-lg text-center">Loading questions...</div>;
-  if (error) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1] px-2">
-      <Card className="p-8 text-center bg-white shadow-lg">
-        <h2 className="text-xl font-semibold mb-6">Whoops</h2>
-        <p>{error}</p>
-        <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
-          Go Back
-        </Button>
-      </Card>
-    </div>
-  );
+  if (isLoading)
+    return <div className="p-14 text-lg text-center">Loading questions...</div>;
+
+  if (error)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1] px-2">
+        <Card className="p-8 text-center bg-white shadow-lg">
+          <h2 className="text-xl font-semibold mb-6">Whoops</h2>
+          <p>{error}</p>
+          <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
+            Go Back
+          </Button>
+        </Card>
+      </div>
+    );
   if (!questions.length) return null;
 
   const q = questions[currQ];
@@ -243,11 +280,22 @@ const TestQuestionPage = () => {
           <div className="flex justify-between mt-4">
             <Button variant="outline" disabled={currQ===0} onClick={prevQ}>Previous</Button>
             {currQ === questions.length-1 ? (
-              <Button className="bg-[#FFBD59]" onClick={submitTest}>Submit Test</Button>
+              <Button className="bg-[#FFBD59]" onClick={submitTest} disabled={saving}>
+                {saving ? "Saving..." : "Submit Test"}
+              </Button>
             ) : (
               <Button onClick={nextQ}>Next</Button>
             )}
           </div>
+          {authError &&
+            <div className="mt-4 text-center text-red-600 text-sm">{authError} <br/>
+              {!userId && (
+                <Button size="sm" className="mt-2 bg-[#FFBD59]" onClick={() => navigate("/auth")}>
+                  Login/Signup
+                </Button>
+              )}
+            </div>
+          }
         </Card>
       </div>
     </div>
@@ -255,3 +303,4 @@ const TestQuestionPage = () => {
 };
 
 export default TestQuestionPage;
+

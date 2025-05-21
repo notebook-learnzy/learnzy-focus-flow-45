@@ -2388,6 +2388,45 @@ export type Database = {
         }
         Relationships: []
       }
+      session_results: {
+        Row: {
+          chapter_id: string
+          class_id: string
+          correct_count: number | null
+          id: string
+          inserted_at: string
+          questions: Json | null
+          set_id: string
+          subject: string
+          total_count: number | null
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          class_id: string
+          correct_count?: number | null
+          id?: string
+          inserted_at?: string
+          questions?: Json | null
+          set_id: string
+          subject: string
+          total_count?: number | null
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          class_id?: string
+          correct_count?: number | null
+          id?: string
+          inserted_at?: string
+          questions?: Json | null
+          set_id?: string
+          subject?: string
+          total_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
