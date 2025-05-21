@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { useAppContext } from "@/contexts/AppContext";
+import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
 
 const randomRituals = [
   {
@@ -32,6 +33,9 @@ const PreTestRitual = () => {
   }>();
   const navigate = useNavigate();
   const { incrementRitual, logRitualResult } = useAppContext?.() ?? {};
+  const custom = useCustomPracticeTest();
+  const isCustom =
+    window.location.pathname.includes("/sets/custom/preritual");
 
   const [timeLeft, setTimeLeft] = useState(60);
   const [ritualIdx] = useState(Math.floor(Math.random() * randomRituals.length));
@@ -50,9 +54,12 @@ const PreTestRitual = () => {
       title: "Pre-ritual completed!",
       description: "Great! You're now ready to start your test in a calm state. This was logged for your progress tracking.",
     });
-    navigate(
-      `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/test`
-    );
+
+    if (isCustom) {
+      window.location.assign(`/academics/custom/test`);
+    } else {
+      navigate(`/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/test`);
+    }
   };
   const handleSkip = () => {
     logRitualResult?.({ result: "skipped", date: new Date() });
@@ -61,9 +68,11 @@ const PreTestRitual = () => {
       description: "Try completing next time for better focus! It was logged to your calendar.",
       variant: "destructive",
     });
-    navigate(
-      `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/test`
-    );
+    if (isCustom) {
+      window.location.assign(`/academics/custom/test`);
+    } else {
+      navigate(`/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/test`);
+    }
   };
   const ritual = randomRituals[ritualIdx];
   return (

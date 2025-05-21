@@ -10,6 +10,8 @@ import { useAppContext } from "@/contexts/AppContext";
 import ModeToggle from "@/components/ModeToggle";
 import SelfStudyMode from "@/components/dashboard/SelfStudyMode";
 import InstituteMode from "@/components/dashboard/InstituteMode";
+import CustomPracticeTestModal from "@/components/CustomPracticeTestModal";
+import { CustomPracticeTestProvider } from "@/contexts/CustomPracticeTestContext";
 
 // Mock assignments and announcements for institute mode
 const mockAssignments = [
@@ -44,6 +46,7 @@ const Academics = () => {
   const { mode } = useAppContext();
   const navigate = useNavigate();
   const today = new Date();
+  const [showCustomModal, setShowCustomModal] = React.useState(false);
 
   // Get today's tasks
   const todayTasks = tasks.filter(task =>
@@ -98,46 +101,54 @@ const Academics = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl pb-[72px] pt-2 px-2 sm:px-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
-        <h1 className="text-2xl font-bold text-center sm:text-left">Academics</h1>
-        <div className="flex justify-center sm:justify-end">
-          <ModeToggle />
+    <CustomPracticeTestProvider>
+      <div className="container mx-auto max-w-7xl pb-[72px] pt-2 px-2 sm:px-6">
+        <div className="flex justify-end mb-4">
+          <Button className="bg-[#FFBD59]" onClick={() => setShowCustomModal(true)}>
+            Create Custom Practice Test
+          </Button>
         </div>
-      </div>
-      {/* Backlog Shortcut */}
-      <div className="mb-4 flex items-center gap-4">
-        <div
-          className="flex items-center gap-2 bg-[#FFF7EB] border border-[#FFBD59] text-gray-700 px-4 py-3 rounded-xl shadow hover:shadow-lg cursor-pointer transition hover:bg-[#FFE8B2]"
-          onClick={() => navigate('/backlog')}
-          role="button"
-        >
-          <List size={24} className="text-[#FFBD59]" />
-          <span className="font-bold">Backlog Center</span>
-          <span className="ml-2 text-xs text-gray-500">AI fix for overdue study topics</span>
+        <CustomPracticeTestModal open={showCustomModal} onOpenChange={setShowCustomModal} />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+          <h1 className="text-2xl font-bold text-center sm:text-left">Academics</h1>
+          <div className="flex justify-center sm:justify-end">
+            <ModeToggle />
+          </div>
         </div>
+        {/* Backlog Shortcut */}
+        <div className="mb-4 flex items-center gap-4">
+          <div
+            className="flex items-center gap-2 bg-[#FFF7EB] border border-[#FFBD59] text-gray-700 px-4 py-3 rounded-xl shadow hover:shadow-lg cursor-pointer transition hover:bg-[#FFE8B2]"
+            onClick={() => navigate('/backlog')}
+            role="button"
+          >
+            <List size={24} className="text-[#FFBD59]" />
+            <span className="font-bold">Backlog Center</span>
+            <span className="ml-2 text-xs text-gray-500">AI fix for overdue study topics</span>
+          </div>
+        </div>
+        {/* Existing self-study or institute mode blocks */}
+        {
+          mode === "self-study" ? (
+            <SelfStudyMode
+              neetSubjects={neetSubjects}
+              todayTasks={todayTasks}
+              lowAccuracyTopics={lowAccuracyTopics}
+              onSubjectClick={handleSubjectClick}
+              onCreateTest={handleCreateTest}
+              onOpenAssistant={handleOpenAssistant}
+              navigate={navigate}
+            />
+          ) : (
+            <InstituteMode
+              assignments={mockAssignments}
+              announcements={mockAnnouncements}
+              onOpenAssistant={handleOpenAssistant}
+            />
+          )
+        }
       </div>
-      {/* Existing self-study or institute mode blocks */}
-      {
-        mode === "self-study" ? (
-          <SelfStudyMode
-            neetSubjects={neetSubjects}
-            todayTasks={todayTasks}
-            lowAccuracyTopics={lowAccuracyTopics}
-            onSubjectClick={handleSubjectClick}
-            onCreateTest={handleCreateTest}
-            onOpenAssistant={handleOpenAssistant}
-            navigate={navigate}
-          />
-        ) : (
-          <InstituteMode
-            assignments={mockAssignments}
-            announcements={mockAnnouncements}
-            onOpenAssistant={handleOpenAssistant}
-          />
-        )
-      }
-    </div>
+    </CustomPracticeTestProvider>
   );
 };
 

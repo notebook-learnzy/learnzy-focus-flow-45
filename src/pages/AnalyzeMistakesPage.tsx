@@ -1,9 +1,8 @@
-
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-// import { supabase } from "@/integrations/supabase/client"; // Not needed as session_results table does not exist
+import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
 
 const mistakeTags = [
   "Didn't Revise Concept", "Misread Question", "Time Pressure", "Silly Mistake", "Careless Error", "Need Practice"
@@ -13,7 +12,6 @@ const AnalyzeMistakesPage = () => {
   const { subjectId, classId, chapterId, setId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  // const [session, setSession] = useState<any | null>(null); // Remove since no session_results table
   const [tags, setTags] = useState<{[qid:string]: string[]}>({});
   const [loading] = useState(false); // No supabase fetch, so always false
 
@@ -58,9 +56,22 @@ const AnalyzeMistakesPage = () => {
     }))
   };
 
+  const isCustom = window.location.pathname === "/academics/custom/analyze";
+  const custom = useCustomPracticeTest();
+
+  if (isCustom && custom.session && custom.session.results) {
+    // Use actual custom test results
+    analyzedQuestions = custom.session.questions;
+    selected = custom.session.results.selected;
+  }
+
   const finish = () => {
-    // Save tags -- skip for demo
-    navigate(`/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/performance`);
+    // Save tags if needed -- skip for demo
+    if (isCustom) {
+      window.location.assign(`/academics/custom/performance`);
+    } else {
+      navigate(`/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/performance`);
+    }
   };
 
   if (loading) return (

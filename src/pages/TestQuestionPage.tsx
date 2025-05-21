@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import RelaxStatusIndicator from "@/components/RelaxStatusIndicator";
+import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
 
 // Utility to convert a human/route chapter key to a Supabase table name.
 // Handles all Botany & Zoology class 11 chapters and sets (A/B/C...).
@@ -77,6 +77,21 @@ const TestQuestionPage = () => {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  const isCustom = window.location.pathname === "/academics/custom/test";
+  const customPractice = useCustomPracticeTest();
+
+  useEffect(() => {
+    if (isCustom && customPractice.session) {
+      setQuestions(customPractice.session.questions);
+      setSelected(new Array(customPractice.session.questions.length).fill(undefined));
+      setQuestionTimes(new Array(customPractice.session.questions.length).fill(0));
+      setHRVs(new Array(customPractice.session.questions.length).fill(70));
+      setStartTime(Date.now());
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line
+  }, [isCustom, customPractice.session]);
 
   useEffect(() => {
     async function fetchQuestions() {
@@ -168,48 +183,73 @@ const TestQuestionPage = () => {
   const [saving, setSaving] = useState(false);
 
   const submitTest = async () => {
-    if (!userId) {
-      setAuthError("Please log in to save your test results and access analytics.");
-      return;
-    }
-    setSaving(true);
-    setAuthError(null);
-
-    const results = questions.map((q, i) => ({
-      q_no: q.q_no,
-      question_id: q.id || q.q_no,
-      user_answer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : undefined,
-      correct_answer: q.correct_answer,
-      topic: q.topic,
-      subtopic: q.subtopic,
-      time_spent: questionTimes[i],
-      difficulty_level: q.difficulty_level,
-      hrv: hrvs[i],
-    }));
-
-    const { error } = await supabase.from("session_results").insert([
-      {
-        user_id: userId,
-        subject: subjectId,
-        class_id: classId,
-        chapter_id: chapterId,
-        set_id: setId,
-        questions: results,
-        correct_count: results.filter((res) => res.user_answer === res.correct_answer).length,
-        total_count: results.length,
+    if (!isCustom) {
+      if (!userId) {
+        setAuthError("Please log in to save your test results and access analytics.");
+        return;
       }
-    ]);
-    setSaving(false);
+      setSaving(true);
+      setAuthError(null);
 
-    if (error) {
-      setAuthError("Failed to save results: " + error.message);
-      return;
+      const results = questions.map((q, i) => ({
+        q_no: q.q_no,
+        question_id: q.id || q.q_no,
+        user_answer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : undefined,
+        correct_answer: q.correct_answer,
+        topic: q.topic,
+        subtopic: q.subtopic,
+        time_spent: questionTimes[i],
+        difficulty_level: q.difficulty_level,
+        hrv: hrvs[i],
+      }));
+
+      const { error } = await supabase.from("session_results").insert([
+        {
+          user_id: userId,
+          subject: subjectId,
+          class_id: classId,
+          chapter_id: chapterId,
+          set_id: setId,
+          questions: results,
+          correct_count: results.filter((res) => res.user_answer === res.correct_answer).length,
+          total_count: results.length,
+        }
+      ]);
+      setSaving(false);
+
+      if (error) {
+        setAuthError("Failed to save results: " + error.message);
+        return;
+      }
+
+      navigate(
+        `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
+        { state: { questions, selected, questionTimes, hrvs } }
+      );
+    } else {
+      setSaving(true);
+      // store results in context only (no userId)
+      const results = questions.map((q, i) => ({
+        q_no: q.q_no,
+        question_id: q.id || q.q_no,
+        user_answer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : undefined,
+        correct_answer: q.correct_answer,
+        topic: q.topic,
+        subtopic: q.subtopic,
+        time_spent: questionTimes[i],
+        difficulty_level: q.difficulty_level,
+        hrv: hrvs[i],
+      }));
+      customPractice.setCustomResults({
+        questions,
+        selected,
+        questionTimes,
+        hrvs,
+        results,
+      });
+      setSaving(false);
+      window.location.assign(`/academics/custom/analyze`);
     }
-
-    navigate(
-      `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
-      { state: { questions, selected, questionTimes, hrvs } }
-    );
   };
 
   if (isLoading)
@@ -303,4 +343,3 @@ const TestQuestionPage = () => {
 };
 
 export default TestQuestionPage;
-
