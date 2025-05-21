@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,29 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import RelaxStatusIndicator from "@/components/RelaxStatusIndicator";
+
+// Helper to convert chapter and set to the correct Supabase table name
+function getSupabaseTableName(chapterKey: string, setType: string) {
+  // Zoology: tissues
+  if (chapterKey === "tissues") {
+    return `chapter_7_tissues_set_${setType.toLowerCase()}`;
+  }
+  if (chapterKey === "the-living-world") {
+    return `chapter_1_living_world_set_${setType.toLowerCase()}`;
+  }
+  if (chapterKey === "biological-classification") {
+    return `chapter_2_biological_classification_set_${setType.toLowerCase()}`;
+  }
+  if (chapterKey === "plant-kingdom") {
+    return `chapter_3_plant_kingdom_set_${setType.toLowerCase()}`;
+  }
+  if (chapterKey === "body-fluids-circulation") {
+    return `chapter_3_body_fluids_circulation_set_${setType.toLowerCase()}`;
+  }
+  // Add more explicit mappings as needed for other chapters!
+  // Fallback for generic
+  return `chapter_${chapterKey}_set_${setType.toLowerCase()}`;
+}
 
 function mapCorrectAnswerToIdx(ans: string) {
   if (!ans) return -1;
@@ -36,35 +58,36 @@ const TestQuestionPage = () => {
   const [hrvs, setHRVs] = useState<number[]>([]);
   const [startTime, setStartTime] = useState(Date.now());
 
-  // Only allow "the-living-world" chapter to proceed with real questions
-  if (chapterId !== "the-living-world") {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1] px-2">
-        <Card className="p-8 text-center bg-white shadow-lg">
-          <h2 className="text-xl font-semibold mb-6">Coming Soon</h2>
-          <p>Practice set for this chapter will be available once data is uploaded.</p>
-          <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
-            Go Back
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
   useEffect(() => {
     async function fetchQuestions() {
       setIsLoading(true);
       setError(null);
 
-      // Always fetch first 50 questions from Supabase
+      if (!chapterId || !setId) {
+        setQuestions([]);
+        setIsLoading(false);
+        setError("Missing chapter or set information.");
+        return;
+      }
+      const tableName = getSupabaseTableName(chapterId, setId);
+
+      // Use dynamic table lookup
       const { data, error } = await supabase
-        .from("chapter_1_living_world_set_a")
+        .from(tableName as any)
         .select("*")
         .order("q_no", { ascending: true })
         .limit(50);
 
       if (error) {
         setError(error.message);
+        setQuestions([]);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setError("No questions found for this set yet.");
+        setQuestions([]);
         setIsLoading(false);
         return;
       }
@@ -156,7 +179,18 @@ const TestQuestionPage = () => {
   };
 
   if (isLoading) return <div className="p-14 text-lg text-center">Loading questions...</div>;
-  if (error) return <div className="p-14 text-lg text-center text-red-600">Error loading questions: {error}</div>;
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FEF9F1] px-2">
+      <Card className="p-8 text-center bg-white shadow-lg">
+        <h2 className="text-xl font-semibold mb-6">Whoops</h2>
+        <p>{error}</p>
+        <Button className="mt-8 bg-[#FFBD59]" onClick={() => navigate(-1)}>
+          Go Back
+        </Button>
+      </Card>
+    </div>
+  );
+  if (!questions.length) return null;
 
   const q = questions[currQ];
 
@@ -169,7 +203,7 @@ const TestQuestionPage = () => {
               Test - Set {setId?.toUpperCase() || "A"}
             </span>
             <div className="text-xs text-gray-400 mt-1">
-              {getChapterTitle(chapterId)} • Class XI • {questions.length} Questions
+              {chapterId || "Chapter"} • Class {classId ? classId.toUpperCase() : "XI"} • {questions.length} Questions
             </div>
           </div>
           <RelaxStatusIndicator />
@@ -219,5 +253,5 @@ const TestQuestionPage = () => {
     </div>
   );
 };
-export default TestQuestionPage;
 
+export default TestQuestionPage;
