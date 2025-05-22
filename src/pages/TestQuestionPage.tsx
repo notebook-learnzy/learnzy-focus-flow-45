@@ -190,12 +190,12 @@ const TestQuestionPage = () => {
     }));
 
     if (!isCustom) {
-      // Always use user_id "test1"
-      const testUserId = "test1";
+      // Always use user_id as a valid UUID for test purposes
+      const testUserId = "00000000-0000-0000-0000-000000000001";
       const { data, error } = await supabase
         .from("test_sessions")
         .insert([{
-          user_id: testUserId, // always use "test1"
+          user_id: testUserId, // always use a valid UUID
           subject: subjectId ?? "",
           class_id: classId ?? "",
           chapter_id: chapterId ?? "",
