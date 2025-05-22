@@ -1,8 +1,8 @@
 
-import { useMemo } from "react";
+import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { Card, CardContent } from "@/components/ui/card";
-import { PieChart } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { PieChart, ChevronDown, ChevronUp } from "lucide-react";
 
 // Accepts real `questions` prop
 export default function AcademicAnalyticsSection({ questions }: { questions: any[] }) {
@@ -27,8 +27,18 @@ export default function AcademicAnalyticsSection({ questions }: { questions: any
     idealTime: 30, // Could compute better later
     chapter: q.Chapter_name || q.chapter_name || "",
     isCorrect: q.isCorrect,
+    topic: q.Topic || q.topic || "",
     // Add other analytics if needed
   }));
+
+  // Collapse state for chapter -> topics
+  const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
+  const toggleChapter = (ch: string) => {
+    setOpenChapters((prev) => ({ ...prev, [ch]: !prev[ch] }));
+  };
+
+  // Find all unique chapters
+  const chapters = [...new Set(barData.map(q => q.chapter))].filter(Boolean);
 
   return (
     <div>
@@ -91,19 +101,75 @@ export default function AcademicAnalyticsSection({ questions }: { questions: any
               <th className="px-2 py-1 text-left">Tag/Chapter</th>
               <th className="px-2 py-1">Accuracy</th>
               <th className="px-2 py-1">Questions</th>
+              <th className="px-2 py-1"></th>
             </tr>
           </thead>
           <tbody>
-            {[...new Set(barData.map(q=>q.chapter))].map((ch) => {
+            {chapters.map((ch) => {
               const chapterQs = barData.filter(q => q.chapter === ch);
               const correctCount = chapterQs.filter(q => q.isCorrect).length;
               const acc = chapterQs.length ? Math.round((correctCount/chapterQs.length)*100) : 0;
+              // Topic-wise breakdown
+              const topics = [...new Set(chapterQs.map(q => q.topic).filter(Boolean))];
               return (
-                <tr key={ch}>
-                  <td className="px-2 py-1">{ch}</td>
-                  <td className="px-2 py-1">{acc}%</td>
-                  <td className="px-2 py-1">{chapterQs.length}</td>
-                </tr>
+                <>
+                  <tr key={ch} className="border-b group hover:bg-[#f5f6fb]">
+                    <td className="px-2 py-1 font-medium flex items-center">
+                      <button
+                        className="mr-1 focus:outline-none"
+                        onClick={() => toggleChapter(ch)}
+                        aria-label={openChapters[ch] ? "Collapse" : "Expand"}
+                      >
+                        {openChapters[ch] ? (
+                          <ChevronUp size={18} className="text-gray-500" />
+                        ) : (
+                          <ChevronDown size={18} className="text-gray-500" />
+                        )}
+                      </button>
+                      {ch || <span className="italic text-gray-400">Unknown</span>}
+                    </td>
+                    <td className="px-2 py-1">{acc}%</td>
+                    <td className="px-2 py-1">{chapterQs.length}</td>
+                    <td />
+                  </tr>
+                  {/* Dropdown topic-wise breakdown */}
+                  {openChapters[ch] && topics.length > 0 && (
+                    <tr>
+                      <td colSpan={4} className="pb-2">
+                        <div className="bg-[#f9fafc] rounded-xl p-2 ml-4">
+                          <div className="text-xs font-semibold mb-2 text-gray-600">Topic-wise Analysis</div>
+                          <table className="text-xs w-full">
+                            <thead>
+                              <tr className="text-[13px] text-gray-500">
+                                <th className="px-2 py-1 text-left">Topic</th>
+                                <th className="px-2 py-1">Accuracy</th>
+                                <th className="px-2 py-1">Questions</th>
+                                <th className="px-2 py-1">Avg Time</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {topics.map(topic => {
+                                const topicQs = chapterQs.filter(q => q.topic === topic);
+                                const correctTopic = topicQs.filter(q => q.isCorrect).length;
+                                const avgTopicTime = topicQs.length
+                                  ? Math.round(topicQs.reduce((t, q) => t + (q.yourTime ?? 0), 0) / topicQs.length)
+                                  : 0;
+                                return (
+                                  <tr key={topic}>
+                                    <td className="px-2 py-1">{topic || <span className="italic text-gray-400">Unknown</span>}</td>
+                                    <td className="px-2 py-1">{topicQs.length ? Math.round((correctTopic/topicQs.length)*100) : 0}%</td>
+                                    <td className="px-2 py-1">{topicQs.length}</td>
+                                    <td className="px-2 py-1">{avgTopicTime}s</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               );
             })}
           </tbody>
