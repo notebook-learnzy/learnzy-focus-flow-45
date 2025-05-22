@@ -1,12 +1,24 @@
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { usePreAnalysisState } from "@/hooks/usePreAnalysisState";
 import React, { useState } from "react";
 
+// Utility to get query params from location.search
+function useQueryParam(name: string): string | undefined {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  return params.get(name) ?? undefined;
+}
+
 const AnalyzeMistakesPage = () => {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  // Try to get from params, then fallback to query param
+  const params = useParams<{ sessionId?: string }>();
+  const sessionId =
+    params.sessionId ||
+    useQueryParam("sessionId");
+
   const navigate = useNavigate();
   // Use the real-time pre-analysis state hook
   const {
@@ -112,3 +124,4 @@ const AnalyzeMistakesPage = () => {
 };
 
 export default AnalyzeMistakesPage;
+
