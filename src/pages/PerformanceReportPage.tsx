@@ -1,15 +1,17 @@
+
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { getTagStats } from "@/utils/tagsManagement";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import AcademicAnalyticsSection from "@/components/Performance/AcademicAnalyticsSection";
+import WellnessAnalyticsSection from "@/components/Performance/WellnessAnalyticsSection";
+import RevisionScheduleSection from "@/components/Performance/RevisionScheduleSection";
 
-// Type guard
+// Type guard for session data
 function hasQuestionsData(maybe: any): maybe is { questions_data: unknown } {
   return !!maybe && typeof maybe === "object" && typeof maybe.questions_data !== "undefined";
 }
-
 function safeQuestionsData(raw: any): any[] {
   if (Array.isArray(raw)) return raw;
   if (typeof raw === "string") {
@@ -23,21 +25,25 @@ function safeQuestionsData(raw: any): any[] {
   }
   return [];
 }
+function useQueryParam(name: string): string | undefined {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  return params.get(name) ?? undefined;
+}
 
-// Minimal structure for academic analytics demo using latest test_sessions
+// Page uses the actual attempt data.
 const PerformanceReportPage = () => {
-  // Accept sessionId from params OR query param
-  const params = useParams<{ sessionId?: string }>();
+  // Try to get sessionId from params or query
+  const params = useParams<{ sessionId?: string; subjectId?: string; classId?: string; chapterId?: string; setId?: string }>();
   const location = useLocation();
-  function useQueryParam(name: string): string | undefined {
-    const params = new URLSearchParams(location.search);
-    return params.get(name) ?? undefined;
-  }
   const sessionId =
     params.sessionId ||
     useQueryParam("sessionId");
 
+  // For "nice back" navigation
   const navigate = useNavigate();
+
+  // Load data from test_sessions
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<any[]>([]);
   const [scores, setScores] = useState({
@@ -45,7 +51,6 @@ const PerformanceReportPage = () => {
     total: 0,
     unattempted: 0,
   });
-  const [tagStats, setTagStats] = useState<{ tag: string; count: number }[]>([]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -68,12 +73,12 @@ const PerformanceReportPage = () => {
           total: qdata.length,
           unattempted,
         });
-        setTagStats(getTagStats(qdata));
       }
       setLoading(false);
     }
     fetchSession();
 
+    // Listen for changes to session info
     const sub = supabase
       .channel("test_sessions_performance")
       .on(
@@ -95,7 +100,6 @@ const PerformanceReportPage = () => {
               total: qdata.length,
               unattempted,
             });
-            setTagStats(getTagStats(qdata));
           }
         }
       )
@@ -108,52 +112,45 @@ const PerformanceReportPage = () => {
   }, [sessionId]);
 
   if (!sessionId) {
-    return <div>No sessionId provided. Please make sure you navigated from the Analyze page after completing a test.</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1] text-lg">No sessionId provided. Please complete a test and click "Analyze" to access your performance report.</div>;
   }
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1]">Loading...</div>;
 
+  // Split page into the three requested sections
   return (
     <div className="bg-[#FEF9F1] min-h-screen py-10 px-1">
       <div className="max-w-5xl mx-auto">
-        <Button variant="outline" onClick={() => navigate("/academics")} className="mb-6">
+        {/* Back button */}
+        <Button variant="outline" onClick={() => navigate("/academics") } className="mb-6">
           ← Back to Academics
         </Button>
-        <h2 className="text-lg font-bold text-[#FFBD59] mb-2">Performance Summary</h2>
-        <div className="mb-6">
-          <div className="mb-2">Score: {scores.correct}/{scores.total}</div>
-          <div className="mb-2 text-gray-500">Unattempted: {scores.unattempted}</div>
+        {/* Title and quick stats */}
+        <h2 className="text-2xl font-bold text-[#FFBD59] mb-2">Performance Report</h2>
+        <div className="mb-5 flex flex-wrap gap-3 items-center">
+          <div className="font-semibold text-md">Score:
+            <span className="text-[#7356FF] ml-2">{scores.correct}/{scores.total}</span>
+          </div>
+          <div className="text-gray-500 text-sm ml-2">Unattempted: {scores.unattempted}</div>
         </div>
+
+        {/* Tabs for flow between analytics */}
         <Tabs defaultValue="academic" className="w-full">
           <TabsList className="flex mb-4 bg-white rounded-xl shadow">
-            <TabsTrigger value="academic" className="flex-1">Academic Analysis</TabsTrigger>
-            <TabsTrigger value="mistake-patterns" className="flex-1">Mistake Patterns</TabsTrigger>
+            <TabsTrigger value="academic" className="flex-1">Academic Analytics</TabsTrigger>
+            <TabsTrigger value="wellness" className="flex-1">Mental Wellness</TabsTrigger>
+            <TabsTrigger value="revision" className="flex-1">Revision Plan</TabsTrigger>
           </TabsList>
+          {/* Section 1: Academic */}
           <TabsContent value="academic">
-            <div>
-              {/* Topic/chapter breakdown or time analysis can be added here */}
-              <div className="font-bold mb-2">Live Questions:</div>
-              <ul className="list-disc pl-6 mb-4">
-                {questions.map((q, i) => (
-                  <li key={q.id} className="mb-2">
-                    Q{i + 1}{q.isCorrect ? " (Correct)" : !q.userAnswer ? " (Unattempted)" : " (Incorrect)"}: {q.question_text}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <AcademicAnalyticsSection questions={questions} />
           </TabsContent>
-          <TabsContent value="mistake-patterns">
-            <div>
-              <div className="font-bold mb-2">Tag Frequency</div>
-              <ul className="pl-4 mb-2">
-                {tagStats.length === 0 ? (
-                  <li className="text-gray-400">No tags yet.</li>
-                ) : (
-                  tagStats.map(({ tag, count }) =>
-                    <li key={tag}>{tag}: <span className="font-bold">{count}</span></li>
-                  )
-                )}
-              </ul>
-            </div>
+          {/* Section 2: Wellness */}
+          <TabsContent value="wellness">
+            <WellnessAnalyticsSection questions={questions} />
+          </TabsContent>
+          {/* Section 3: Revision */}
+          <TabsContent value="revision">
+            <RevisionScheduleSection />
           </TabsContent>
         </Tabs>
       </div>
