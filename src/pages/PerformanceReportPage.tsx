@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getTagStats } from "@/utils/tagsManagement";
@@ -26,7 +26,17 @@ function safeQuestionsData(raw: any): any[] {
 
 // Minimal structure for academic analytics demo using latest test_sessions
 const PerformanceReportPage = () => {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  // Accept sessionId from params OR query param
+  const params = useParams<{ sessionId?: string }>();
+  const location = useLocation();
+  function useQueryParam(name: string): string | undefined {
+    const params = new URLSearchParams(location.search);
+    return params.get(name) ?? undefined;
+  }
+  const sessionId =
+    params.sessionId ||
+    useQueryParam("sessionId");
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -97,7 +107,9 @@ const PerformanceReportPage = () => {
     };
   }, [sessionId]);
 
-  if (!sessionId) return <div>No sessionId provided.</div>;
+  if (!sessionId) {
+    return <div>No sessionId provided. Please make sure you navigated from the Analyze page after completing a test.</div>;
+  }
   if (loading) return <div>Loading...</div>;
 
   return (

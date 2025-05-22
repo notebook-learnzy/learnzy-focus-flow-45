@@ -102,6 +102,8 @@ const App = () => (
                 path="/academics/:subjectId/classes/:classId/chapters/:chapterId/sets/:setId/performance"
                 element={<PerformanceReportPage />}
               />
+              {/* Performance shortcut for /academics/session/:sessionId/performance */}
+              <Route path="/academics/session/:sessionId/performance" element={<PerformanceReportPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
