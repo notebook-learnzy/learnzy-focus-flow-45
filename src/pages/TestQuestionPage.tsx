@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import RelaxStatusIndicator from "@/components/RelaxStatusIndicator";
 import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
+import { createTestSession, completeTestSession } from "@/utils/testSessionUtils";
 
 // Utility to convert a human/route chapter key to a Supabase table name.
 // Handles all Botany & Zoology class 11 chapters and sets (A/B/C...).
@@ -71,7 +72,7 @@ const TestQuestionPage = () => {
 
   // Utility: builds questions_data as per your schema spec
   function buildQuestionsData(questions: any[]) {
-    return questions.map((q, i) => {
+    return questions.map((q: any, i: number) => {
       const options = [
         { id: "A", text: q.option_a },
         { id: "B", text: q.option_b },
@@ -102,7 +103,7 @@ const TestQuestionPage = () => {
         Option_C: q.option_c,
         Option_D: q.option_d,
         options,
-      }
+      };
     });
   }
 
@@ -210,57 +211,33 @@ const TestQuestionPage = () => {
   // Add: Save test session at the start
   useEffect(() => {
     if (isCustom || !questions.length || sessionId) return;
-    // Always use this user_id for testing as a valid UUID!
+    // Use the valid dummy user_id for test/dev
     const testUserId = "00000000-0000-0000-0000-000000000001";
-    const now = new Date().toISOString();
-
-    async function saveInitialSession() {
-      // Prepare session fields matching schema from your instructions
-      const row = {
-        user_id: testUserId,
-        subject: subjectId ?? "",
-        class_id: classId ?? "",
-        chapter_id: chapterId ?? "",
-        set_id: setId ?? "",
-        start_time: now,
-        end_time: null,
-        score: null,
-        total_questions: questions.length,
-        // Copy session-level metadata from first question
-        chapter_name: questions[0]?.chapter_name ?? "",
-        topic: questions[0]?.topic ?? "",
-        subtopic: questions[0]?.subtopic ?? "",
-        difficulty_level: questions[0]?.difficulty_level ?? "",
-        question_structure: questions[0]?.question_type ?? "",
-        bloom_taxonomy: questions[0]?.bloom_taxonomy ?? "",
-        priority_level: questions[0]?.priority_level ?? "",
-        time_to_solve: questions[0]?.time_to_solve ?? null,
-        key_concept_tested: questions[0]?.key_concept_tested ?? "",
-        common_pitfalls: questions[0]?.common_pitfalls ?? "",
-        // Populate questions_data in your required structure (userAnswer/isCorrect/tags/timeTaken default/empty for now)
-        questions_data: buildQuestionsData(questions),
-      };
-      // Insert new session, get id
-      const { data, error } = await supabase
-        .from("test_sessions")
-        .insert([row])
-        .select("id")
-        .single();
-      if (error || !data?.id) {
-        setError("Failed to save initial session. Please try again.");
-      } else {
-        setSessionId(data.id);
+    async function doCreateSession() {
+      try {
+        const questionsData = buildQuestionsData(questions);
+        const firstQ = questions[0] || {};
+        const id = await createTestSession({
+          user_id: testUserId,
+          subject: subjectId ?? "",
+          class_id: classId ?? "",
+          chapter_id: chapterId ?? "",
+          set_id: setId ?? "",
+          questionsData,
+          firstQuestionMeta: firstQ,
+        });
+        setSessionId(id);
+      } catch (error: any) {
+        setError("Failed to save initial session. Please try again. " + error.message);
       }
     }
-    saveInitialSession();
+    doCreateSession();
     // eslint-disable-next-line
   }, [questions, isCustom]);
 
   // --- UPDATED SUBMIT HANDLER ---
   const submitTest = async () => {
     setSaving(true);
-
-    const now = new Date().toISOString();
 
     // Build latest questions_data as per your schema (with updated user answers, tags, etc)
     const updatedQuestionsData = questions.map((q, i) => {
@@ -281,7 +258,7 @@ const TestQuestionPage = () => {
         userAnswer,
         isCorrect: !!isCorrect,
         timeTaken: questionTimes[i],
-        tags: [], // leave empty for now
+        tags: [],
         Subject: q.subject,
         Chapter_name: q.chapter_name,
         Topic: q.topic,
@@ -298,45 +275,28 @@ const TestQuestionPage = () => {
         Option_C: q.option_c,
         Option_D: q.option_d,
         options,
-      }
+      };
     });
 
-    // Compute score (percentage)
-    const totalCorrect = updatedQuestionsData.filter(q => q.isCorrect).length;
-    const score = Math.round((totalCorrect / questions.length) * 100);
-
     if (!isCustom && sessionId) {
-      // Update the session entry with completion fields
-      const patch = {
-        end_time: now,
-        score,
-        questions_data: updatedQuestionsData,
-        total_correct: totalCorrect,
-        total_incorrect: updatedQuestionsData.filter(q => q.userAnswer && !q.isCorrect).length,
-        total_unattempted: updatedQuestionsData.filter(q => !q.userAnswer).length,
-        total_time: questionTimes.reduce((total, t) => total + (t || 0), 0),
-      };
-
-      const { error } = await supabase
-        .from("test_sessions")
-        .update(patch)
-        .eq("id", sessionId);
-
-      setSaving(false);
-
-      if (error) {
-        setError("Failed to finalize and save results. Please try again.");
+      try {
+        await completeTestSession({
+          sessionId,
+          questionsData: updatedQuestionsData,
+          questionTimes,
+        });
+        setSaving(false);
+        navigate(
+          `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze?sessionId=${sessionId}`,
+          { state: { sessionId: sessionId } }
+        );
+      } catch (error: any) {
+        setSaving(false);
+        setError("Failed to finalize and save results. " + error.message);
         return;
       }
-
-      // Redirect to analyze mistakes page with sessionId
-      navigate(
-        `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze?sessionId=${sessionId}`,
-        { state: { sessionId: sessionId } }
-      );
     } else if (isCustom) {
       setSaving(true);
-      // Practice test, use existing logic
       customPractice.setCustomResults({
         questions,
         selected,
@@ -345,7 +305,6 @@ const TestQuestionPage = () => {
         results: updatedQuestionsData,
       });
       setSaving(false);
-      // For custom, send to a separate analyze page (if needed)
       window.location.assign(`/academics/custom/analyze`);
     }
   };
