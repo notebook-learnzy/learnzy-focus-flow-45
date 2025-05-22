@@ -63,21 +63,6 @@ const TestQuestionPage = () => {
   const [hrvs, setHRVs] = useState<number[]>([]);
   const [startTime, setStartTime] = useState(Date.now());
 
-  // NEW: User authentication state
-  const [userId, setUserId] = useState<string | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  // Listen for user session
-  useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      setUserId(session?.user?.id ?? null);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserId(session?.user?.id ?? null);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
   const isCustom = window.location.pathname === "/academics/custom/test";
   const customPractice = useCustomPracticeTest();
 
@@ -184,13 +169,7 @@ const TestQuestionPage = () => {
 
   const submitTest = async () => {
     if (!isCustom) {
-      if (!userId) {
-        setAuthError("Please log in to save your test results and access analytics.");
-        return;
-      }
       setSaving(true);
-      setAuthError(null);
-
       const results = questions.map((q, i) => ({
         q_no: q.q_no,
         question_id: q.id || q.q_no,
@@ -205,7 +184,6 @@ const TestQuestionPage = () => {
 
       const { error } = await supabase.from("session_results").insert([
         {
-          user_id: userId,
           subject: subjectId,
           class_id: classId,
           chapter_id: chapterId,
@@ -228,7 +206,6 @@ const TestQuestionPage = () => {
       );
     } else {
       setSaving(true);
-      // store results in context only (no userId)
       const results = questions.map((q, i) => ({
         q_no: q.q_no,
         question_id: q.id || q.q_no,
@@ -327,15 +304,6 @@ const TestQuestionPage = () => {
               <Button onClick={nextQ}>Next</Button>
             )}
           </div>
-          {authError &&
-            <div className="mt-4 text-center text-red-600 text-sm">{authError} <br/>
-              {!userId && (
-                <Button size="sm" className="mt-2 bg-[#FFBD59]" onClick={() => navigate("/auth")}>
-                  Login/Signup
-                </Button>
-              )}
-            </div>
-          }
         </Card>
       </div>
     </div>
