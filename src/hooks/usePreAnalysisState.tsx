@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTagOptions } from "@/utils/tagsManagement";
@@ -55,12 +56,19 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
         .eq("id", sessionId)
         .maybeSingle();
       if (!ignore) {
-        if (data && typeof data.questions_data !== "undefined") {
+        if (
+          data &&
+          typeof data.questions_data !== "undefined" &&
+          typeof data.id === "string" &&
+          typeof data.user_id === "string"
+        ) {
+          const questionList = safeQuestionsData(data.questions_data);
           setSession({
-            ...data,
-            questions_data: safeQuestionsData(data.questions_data)
+            id: data.id,
+            user_id: data.user_id,
+            questions_data: questionList
           });
-          setQuestions(safeQuestionsData(data.questions_data));
+          setQuestions(questionList);
         }
         setLoading(false);
       }
@@ -79,12 +87,19 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          if (payload.new && typeof payload.new.questions_data !== "undefined") {
+          if (
+            payload.new &&
+            typeof payload.new.questions_data !== "undefined" &&
+            typeof payload.new.id === "string" &&
+            typeof payload.new.user_id === "string"
+          ) {
+            const questionList = safeQuestionsData(payload.new.questions_data);
             setSession({
-              ...payload.new,
-              questions_data: safeQuestionsData(payload.new.questions_data)
+              id: payload.new.id,
+              user_id: payload.new.user_id,
+              questions_data: questionList
             });
-            setQuestions(safeQuestionsData(payload.new.questions_data));
+            setQuestions(questionList);
           }
         }
       )

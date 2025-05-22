@@ -14,9 +14,16 @@ export async function useAvailableTopics(chapterId: string): Promise<string[]> {
       continue; // skip this set if error or data isn't an array
     }
 
+    // Collect only rows that are objects, not null, and have a valid string topic
     const topics: string[] = data
-      .filter(row => row && typeof row === "object" && row !== null && "topic" in row && typeof (row as any).topic === "string")
-      .map(row => (row as { topic: string }).topic)
+      .filter(
+        (row): row is { topic: string } =>
+          row !== null &&
+          typeof row === "object" &&
+          "topic" in row &&
+          typeof (row as any).topic === "string"
+      )
+      .map((row) => row.topic)
       .filter(Boolean);
 
     allTopicSets.push(topics);
@@ -29,7 +36,6 @@ export async function useAvailableTopics(chapterId: string): Promise<string[]> {
 
 // App table name logic copied from TestQuestionPage
 function getSupabaseTableName(chapterKey: string, setType: string) {
-  // Use same logic as your codebase's
   const tableMap: Record<string, string> = {
     "tissues": "chapter_7_tissues_set_",
     "body-fluids-circulation": "chapter_3_body_fluids_circulation_set_",
@@ -50,4 +56,3 @@ function getSupabaseTableName(chapterKey: string, setType: string) {
   if (tableMap[chapterKey]) return `${tableMap[chapterKey]}${setType.toLowerCase()}`;
   return `chapter_${chapterKey}_set_${setType.toLowerCase()}`;
 }
-
