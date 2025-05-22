@@ -24,20 +24,29 @@ export interface UsePreAnalysisStateProps {
 }
 
 function safeQuestionsData(raw: any): QuestionData[] {
-  // If it's already an array, just return
   if (Array.isArray(raw)) return raw as QuestionData[];
-  // If it's a string, try to parse
   if (typeof raw === "string") {
     try {
       const arr = JSON.parse(raw);
       if (Array.isArray(arr)) return arr as QuestionData[];
     } catch {}
   }
-  // If it's a JSON value or something else, attempt conversion
   if (raw && typeof raw === "object" && "length" in raw) {
     return Array.from(raw) as QuestionData[];
   }
   return [];
+}
+
+function hasSessionPayload(
+  maybe: any
+): maybe is { questions_data: unknown; id: string; user_id: string } {
+  return (
+    maybe &&
+    typeof maybe === "object" &&
+    typeof maybe.questions_data !== "undefined" &&
+    typeof maybe.id === "string" &&
+    typeof maybe.user_id === "string"
+  );
 }
 
 export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
@@ -50,28 +59,21 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
     setLoading(true);
     let ignore = false;
     async function fetchSession() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("test_sessions")
         .select("*")
         .eq("id", sessionId)
         .maybeSingle();
-      if (!ignore) {
-        if (
-          data &&
-          typeof data.questions_data !== "undefined" &&
-          typeof data.id === "string" &&
-          typeof data.user_id === "string"
-        ) {
-          const questionList = safeQuestionsData(data.questions_data);
-          setSession({
-            id: data.id,
-            user_id: data.user_id,
-            questions_data: questionList
-          });
-          setQuestions(questionList);
-        }
-        setLoading(false);
+      if (!ignore && hasSessionPayload(data)) {
+        const questionList = safeQuestionsData(data.questions_data);
+        setSession({
+          id: data.id,
+          user_id: data.user_id,
+          questions_data: questionList
+        });
+        setQuestions(questionList);
       }
+      setLoading(false);
     }
     fetchSession();
 
@@ -87,12 +89,7 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          if (
-            payload.new &&
-            typeof payload.new.questions_data !== "undefined" &&
-            typeof payload.new.id === "string" &&
-            typeof payload.new.user_id === "string"
-          ) {
+          if (payload.new && hasSessionPayload(payload.new)) {
             const questionList = safeQuestionsData(payload.new.questions_data);
             setSession({
               id: payload.new.id,

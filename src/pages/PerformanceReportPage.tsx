@@ -1,10 +1,14 @@
-
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getTagStats } from "@/utils/tagsManagement";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+// Type guard
+function hasQuestionsData(maybe: any): maybe is { questions_data: unknown } {
+  return !!maybe && typeof maybe === "object" && typeof maybe.questions_data !== "undefined";
+}
 
 function safeQuestionsData(raw: any): any[] {
   if (Array.isArray(raw)) return raw;
@@ -44,11 +48,7 @@ const PerformanceReportPage = () => {
         .select("questions_data")
         .eq("id", sessionId)
         .maybeSingle();
-      if (
-        data &&
-        typeof data.questions_data !== "undefined" &&
-        !ignore
-      ) {
+      if (data && hasQuestionsData(data) && !ignore) {
         const qdata = safeQuestionsData(data.questions_data);
         setQuestions(qdata);
         const correct = qdata.filter((q: any) => q.isCorrect).length;
@@ -75,10 +75,7 @@ const PerformanceReportPage = () => {
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          if (
-            payload.new &&
-            typeof payload.new.questions_data !== "undefined"
-          ) {
+          if (payload.new && hasQuestionsData(payload.new)) {
             const qdata = safeQuestionsData(payload.new.questions_data);
             setQuestions(qdata);
             const correct = qdata.filter((q: any) => q.isCorrect).length;

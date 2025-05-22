@@ -1,10 +1,22 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+type TopicRow = { topic: string };
+
 // Returns a promise of unique sorted topic strings for a chapter (across sets a-e)
 export async function useAvailableTopics(chapterId: string): Promise<string[]> {
   const setIds = ["a", "b", "c", "d", "e"];
   const allTopicSets: string[][] = [];
+
+  function isTopicRow(row: any): row is TopicRow {
+    // Explicitly check that row is an object and has a valid 'topic'
+    return (
+      typeof row === "object" &&
+      row !== null &&
+      Object.prototype.hasOwnProperty.call(row, "topic") &&
+      typeof row.topic === "string"
+    );
+  }
 
   for (let setId of setIds) {
     const table = getSupabaseTableName(chapterId, setId);
@@ -14,18 +26,12 @@ export async function useAvailableTopics(chapterId: string): Promise<string[]> {
       continue; // skip this set if error or data isn't an array
     }
 
-    // Collect only rows that are objects, not null, and have a valid string topic
-    const topics: string[] = data
-      .filter(
-        (row): row is { topic: string } =>
-          row !== null &&
-          typeof row === "object" &&
-          "topic" in row &&
-          typeof (row as any).topic === "string"
-      )
-      .map((row) => row.topic)
-      .filter(Boolean);
-
+    const topics: string[] = [];
+    for (const row of data) {
+      if (isTopicRow(row) && row.topic) {
+        topics.push(row.topic);
+      }
+    }
     allTopicSets.push(topics);
   }
 
@@ -56,3 +62,4 @@ function getSupabaseTableName(chapterKey: string, setType: string) {
   if (tableMap[chapterKey]) return `${tableMap[chapterKey]}${setType.toLowerCase()}`;
   return `chapter_${chapterKey}_set_${setType.toLowerCase()}`;
 }
+
