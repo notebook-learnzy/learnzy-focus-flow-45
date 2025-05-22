@@ -1,60 +1,132 @@
+
 import { useNavigate, useParams } from "react-router-dom";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import AcademicAnalyticsSection from "@/components/Performance/AcademicAnalyticsSection";
-import WellnessPerformanceSection from "@/components/Performance/WellnessPerformanceSection";
-import RevisionScheduleSection from "@/components/Performance/RevisionScheduleSection";
-import QualityScoreAndScheduler from "@/components/Performance/QualityScoreAndScheduler";
 import { Button } from "@/components/ui/button";
-import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { getTagStats } from "@/utils/tagsManagement";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
+// Minimal structure for academic analytics demo using latest test_sessions
 const PerformanceReportPage = () => {
-  const { subjectId, classId, chapterId, setId } = useParams();
+  const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const isCustom = window.location.pathname === "/academics/custom/performance";
-  const custom = useCustomPracticeTest();
+  const [loading, setLoading] = useState(true);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [scores, setScores] = useState({
+    correct: 0,
+    total: 0,
+    unattempted: 0,
+  });
+  const [tagStats, setTagStats] = useState<{ tag: string; count: number }[]>([]);
 
-  if (isCustom && custom.session && custom.session.results) {
-    const res = custom.session.results;
-    const totalQuestions = custom.session.questions.length;
-    const correctCount = res.results.filter((r: any) => r.user_answer === r.correct_answer).length;
-    return (
-      <div className="bg-[#FEF9F1] min-h-screen py-10 px-1">
-        <div className="max-w-5xl mx-auto">
-          <Button variant="outline" onClick={() => window.location.assign("/academics")} className="mb-6">
-            ← Back to Academics
-          </Button>
-          <h2 className="text-lg font-bold text-[#FFBD59] mb-2">Custom Practice Test Performance</h2>
-          <div className="mb-4">Questions: {totalQuestions}, Correct: {correctCount}</div>
-          {/* Render summary as appropriate */}
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!sessionId) return;
+    setLoading(true);
+    let ignore = false;
+
+    async function fetchSession() {
+      const { data } = await supabase
+        .from("test_sessions")
+        .select("questions_data")
+        .eq("id", sessionId)
+        .maybeSingle();
+      if (data && !ignore) {
+        setQuestions(data.questions_data ?? []);
+        const correct = (data.questions_data ?? []).filter((q: any) => q.isCorrect).length;
+        const unattempted = (data.questions_data ?? []).filter((q: any) => !q.userAnswer).length;
+        setScores({
+          correct,
+          total: (data.questions_data ?? []).length,
+          unattempted,
+        });
+        setTagStats(getTagStats(data.questions_data ?? []));
+      }
+      setLoading(false);
+    }
+    fetchSession();
+
+    const sub = supabase
+      .channel("test_sessions_performance")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "test_sessions",
+          filter: `id=eq.${sessionId}`,
+        },
+        (payload) => {
+          if (payload.new?.questions_data) {
+            setQuestions(payload.new.questions_data);
+            const correct = payload.new.questions_data.filter((q: any) => q.isCorrect).length;
+            const unattempted = payload.new.questions_data.filter((q: any) => !q.userAnswer).length;
+            setScores({
+              correct,
+              total: payload.new.questions_data.length,
+              unattempted,
+            });
+            setTagStats(getTagStats(payload.new.questions_data));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      ignore = true;
+      supabase.removeChannel(sub);
+    };
+  }, [sessionId]);
+
+  if (!sessionId) return <div>No sessionId provided.</div>;
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="bg-[#FEF9F1] min-h-screen py-10 px-1">
       <div className="max-w-5xl mx-auto">
-        <Button variant="outline" onClick={() => navigate(-1)} className="mb-6">
-          ← Back
+        <Button variant="outline" onClick={() => navigate("/academics")} className="mb-6">
+          ← Back to Academics
         </Button>
-        <Tabs defaultValue="academics" className="w-full">
+        <h2 className="text-lg font-bold text-[#FFBD59] mb-2">Performance Summary</h2>
+        <div className="mb-6">
+          <div className="mb-2">Score: {scores.correct}/{scores.total}</div>
+          <div className="mb-2 text-gray-500">Unattempted: {scores.unattempted}</div>
+        </div>
+        <Tabs defaultValue="academic" className="w-full">
           <TabsList className="flex mb-4 bg-white rounded-xl shadow">
-            <TabsTrigger value="academics" className="flex-1">Academic</TabsTrigger>
-            <TabsTrigger value="wellness" className="flex-1">Wellness</TabsTrigger>
-            <TabsTrigger value="revision" className="flex-1">Revision</TabsTrigger>
+            <TabsTrigger value="academic" className="flex-1">Academic Analysis</TabsTrigger>
+            <TabsTrigger value="mistake-patterns" className="flex-1">Mistake Patterns</TabsTrigger>
           </TabsList>
-          <TabsContent value="academics">
-            <AcademicAnalyticsSection />
+          <TabsContent value="academic">
+            <div>
+              {/* Topic/chapter breakdown or time analysis can be added here */}
+              <div className="font-bold mb-2">Live Questions:</div>
+              <ul className="list-disc pl-6 mb-4">
+                {questions.map((q, i) => (
+                  <li key={q.id} className="mb-2">
+                    Q{i + 1}{q.isCorrect ? " (Correct)" : !q.userAnswer ? " (Unattempted)" : " (Incorrect)"}: {q.question_text}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </TabsContent>
-          <TabsContent value="wellness">
-            <WellnessPerformanceSection />
-          </TabsContent>
-          <TabsContent value="revision">
-            <QualityScoreAndScheduler chapterId={chapterId} setId={setId} />
+          <TabsContent value="mistake-patterns">
+            <div>
+              <div className="font-bold mb-2">Tag Frequency</div>
+              <ul className="pl-4 mb-2">
+                {tagStats.length === 0 ? (
+                  <li className="text-gray-400">No tags yet.</li>
+                ) : (
+                  tagStats.map(({ tag, count }) =>
+                    <li key={tag}>{tag}: <span className="font-bold">{count}</span></li>
+                  )
+                )}
+              </ul>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 };
+
 export default PerformanceReportPage;

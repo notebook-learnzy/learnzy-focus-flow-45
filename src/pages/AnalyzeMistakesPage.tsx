@@ -1,132 +1,109 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
-
-const mistakeTags = [
-  "Didn't Revise Concept", "Misread Question", "Time Pressure", "Silly Mistake", "Careless Error", "Need Practice"
-];
+import { usePreAnalysisState } from "@/hooks/usePreAnalysisState";
+import React, { useState } from "react";
 
 const AnalyzeMistakesPage = () => {
-  const { subjectId, classId, chapterId, setId } = useParams();
+  const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [tags, setTags] = useState<{[qid:string]: string[]}>({});
-  const [loading] = useState(false); // No supabase fetch, so always false
+  // Use the real-time pre-analysis state hook
+  const {
+    loading,
+    incorrectQuestions,
+    unattemptedQuestions,
+    handleTagToggle,
+    tagOptions,
+    questions,
+  } = usePreAnalysisState({ sessionId: sessionId! });
 
-  // Fallback mock data (not replaced with real, as no session_results table)
-  const mockQuestions = [
-    {
-      id: "q1",
-      text: "Sample Q1: What is the powerhouse of the cell?",
-      options: ["Nucleus", "Mitochondria", "Ribosome", "Chloroplast"],
-      answer: 1,
-    },
-    {
-      id: "q2",
-      text: "Sample Q2: DNA is mainly present in?",
-      options: ["Mitochondria", "Nucleus", "Cytoplasm", "Cell Membrane"],
-      answer: 1,
-    },
-    {
-      id: "q3",
-      text: "Sample Q3: Which cell organelle has its own DNA?",
-      options: ["Lysosome", "Golgi", "Mitochondria", "Ribosome"],
-      answer: 2,
-    },
-  ];
+  const [showUnattempted, setShowUnattempted] = useState(false);
 
-  let analyzedQuestions = mockQuestions;
-  let selected = (location.state?.selected ?? [undefined, undefined, undefined]) as (number|undefined)[];
-
-  // Mistakes: if answer incorrect or unattempted
-  const mistakeIndexes = analyzedQuestions.map(
-    (q, idx) =>
-      selected[idx] === undefined || selected[idx] !== q.answer
-  );
-  // const incorrectIds = analyzedQuestions.filter((_,i)=>mistakeIndexes[i]).map(q=>q.id);
-
-  const handleTag = (qid: string, tag: string) => {
-    setTags(prev => ({
-      ...prev,
-      [qid]: prev[qid]?.includes(tag)
-        ? prev[qid].filter(t => t !== tag)
-        : [...(prev[qid]||[]), tag]
-    }))
-  };
-
-  const isCustom = window.location.pathname === "/academics/custom/analyze";
-  const custom = useCustomPracticeTest();
-
-  if (isCustom && custom.session && custom.session.results) {
-    // Use actual custom test results
-    analyzedQuestions = custom.session.questions;
-    selected = custom.session.results.selected;
+  if (!sessionId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1]">
+        No sessionId provided.
+      </div>
+    );
   }
 
-  const finish = () => {
-    // Save tags if needed -- skip for demo
-    if (isCustom) {
-      window.location.assign(`/academics/custom/performance`);
-    } else {
-      navigate(`/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/performance`);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1]">
+        Loading...
+      </div>
+    );
+  }
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1]">Loading...</div>
-  );
-
-  // Remove non-existent session/fallback
-  // if (!session && chapterId === "the-living-world") {}
+  const reviewList = showUnattempted ? unattemptedQuestions : incorrectQuestions;
 
   return (
     <div className="min-h-screen bg-[#FEF9F1] py-10 px-2">
       <div className="max-w-3xl mx-auto">
         <Card className="p-6 mb-8 bg-white shadow-lg">
           <h2 className="text-lg font-bold mb-2 text-[#FFBD59]">Analyze Your Mistakes</h2>
-          <p className="mb-6 text-gray-500">
-            Review incorrect or unattempted questions. Tag common reasons—it will help Shiv guide your revision!
-          </p>
-          {/* Always using mockQuestions */}
-          <div className="mb-4 text-xs text-red-500">
-            (Demo: Only mock data shown. No real session found for this chapter/set.)
+          <div className="mb-4 flex gap-3">
+            <Button
+              variant={!showUnattempted ? "default" : "outline"}
+              onClick={() => setShowUnattempted(false)}
+            >
+              Incorrect
+            </Button>
+            <Button
+              variant={showUnattempted ? "default" : "outline"}
+              onClick={() => setShowUnattempted(true)}
+            >
+              Unattempted
+            </Button>
           </div>
-          {analyzedQuestions.map((q, idx) => {
-            if (!mistakeIndexes[idx]) return null;
-            return (
+          {reviewList.length === 0 ? (
+            <div className="py-10 text-center text-gray-400">
+              No {showUnattempted ? "unattempted" : "incorrect"} questions.
+            </div>
+          ) : (
+            reviewList.map((q, idx) => (
               <div className="mb-8" key={q.id}>
                 <div className="mb-1 text-sm font-medium text-gray-700">
-                  Q{idx+1}. {q.text}
+                  Q{idx + 1}. {q.question_text}
                 </div>
-                <div className="mb-2">
-                  <div>
-                    <span className="mr-2 text-xs text-gray-500">Your Answer: </span>
-                    <span className="font-medium">{selected[idx] !== undefined ? q.options[selected[idx]!] : "Unattempted"}</span>
+                {q.userAnswer !== undefined && (
+                  <div className="mb-2">
+                    <span className="mr-2 text-xs text-gray-500">
+                      Your Answer:
+                    </span>
+                    <span className="font-medium">
+                      {q.userAnswer !== null && q.userAnswer !== undefined
+                        ? q.userAnswer
+                        : "Unattempted"}
+                    </span>
                   </div>
-                  <div>
-                    <span className="mr-2 text-xs text-gray-500">Correct: </span>
-                    <span className="font-semibold text-green-600">{q.options[q.answer]}</span>
-                  </div>
-                </div>
+                )}
                 <div className="flex flex-wrap gap-2 my-3">
-                  {mistakeTags.map(tag => (
+                  {tagOptions.map((tag) => (
                     <Button
                       key={tag}
-                      variant={tags[q.id]?.includes(tag) ? "default" : "outline"}
-                      className={tags[q.id]?.includes(tag) ? "bg-[#FFBD59] border-[#FFBD59]" : ""}
+                      variant={q.tags?.includes(tag) ? "default" : "outline"}
+                      className={
+                        q.tags?.includes(tag) ? "bg-[#FFBD59] border-[#FFBD59]" : ""
+                      }
                       size="sm"
-                      onClick={() => handleTag(q.id, tag)}
-                    >{tag}</Button>
+                      onClick={() => handleTagToggle(q.id, tag)}
+                    >
+                      {tag}
+                    </Button>
                   ))}
                 </div>
               </div>
-            );
-          })}
-
-          <Button className="mt-4 w-full bg-[#FFBD59]" onClick={finish}>
-            Complete and Link to Mistake Notebook
+            ))
+          )}
+          <Button
+            className="mt-4 w-full bg-[#FFBD59]"
+            onClick={() =>
+              navigate(`/academics/session/${sessionId}/performance`)
+            }
+          >
+            Complete and View Performance
           </Button>
         </Card>
       </div>
