@@ -50,3 +50,4 @@ function getSupabaseTableName(chapterKey: string, setType: string) {
   if (tableMap[chapterKey]) return `${tableMap[chapterKey]}${setType.toLowerCase()}`;
   return `chapter_${chapterKey}_set_${setType.toLowerCase()}`;
 }
+

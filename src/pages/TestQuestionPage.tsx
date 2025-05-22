@@ -191,9 +191,12 @@ const TestQuestionPage = () => {
 
     if (!isCustom) {
       // Insert a row into test_sessions (not session_results)
+      // Supply a dummy user_id (as RLS/auth is not being used)
+      const dummyUserId = "00000000-0000-0000-0000-000000000000";
       const { data, error } = await supabase
         .from("test_sessions")
         .insert([{
+          user_id: dummyUserId,
           subject: subjectId ?? "",
           class_id: classId ?? "",
           chapter_id: chapterId ?? "",

@@ -44,7 +44,7 @@ const PerformanceReportPage = () => {
         .select("questions_data")
         .eq("id", sessionId)
         .maybeSingle();
-      if (data && !ignore) {
+      if (data && typeof data.questions_data !== "undefined" && !ignore) {
         const qdata = safeQuestionsData(data.questions_data);
         setQuestions(qdata);
         const correct = qdata.filter((q: any) => q.isCorrect).length;
@@ -71,7 +71,7 @@ const PerformanceReportPage = () => {
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          if (payload.new?.questions_data) {
+          if (payload.new?.questions_data !== undefined) {
             const qdata = safeQuestionsData(payload.new.questions_data);
             setQuestions(qdata);
             const correct = qdata.filter((q: any) => q.isCorrect).length;

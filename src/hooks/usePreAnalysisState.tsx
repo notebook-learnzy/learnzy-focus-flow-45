@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getTagOptions } from "@/utils/tagsManagement";
@@ -56,7 +55,7 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
         .eq("id", sessionId)
         .maybeSingle();
       if (!ignore) {
-        if (data) {
+        if (data && typeof data.questions_data !== "undefined") {
           setSession({
             ...data,
             questions_data: safeQuestionsData(data.questions_data)
@@ -80,7 +79,7 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          if (payload.new && payload.new.questions_data) {
+          if (payload.new && typeof payload.new.questions_data !== "undefined") {
             setSession({
               ...payload.new,
               questions_data: safeQuestionsData(payload.new.questions_data)

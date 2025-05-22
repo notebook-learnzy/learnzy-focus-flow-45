@@ -25,7 +25,7 @@ export async function updateQuestionTags(
     .select("questions_data")
     .eq("id", sessionId)
     .maybeSingle();
-  if (!session) return;
+  if (!session || typeof session.questions_data === "undefined") return;
   let questions: any[] = [];
   if (Array.isArray(session.questions_data)) {
     questions = session.questions_data;
@@ -40,9 +40,11 @@ export async function updateQuestionTags(
   if (idx === -1) return;
 
   questions[idx].tags = updatedTags;
+  // Dummy user_id placeholder since RLS requires it
+  const dummyUserId = "00000000-0000-0000-0000-000000000000";
   await supabase
     .from("test_sessions")
-    .update({ questions_data: questions })
+    .update({ questions_data: questions, user_id: dummyUserId })
     .eq("id", sessionId);
 }
 
