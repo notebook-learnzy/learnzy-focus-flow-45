@@ -216,7 +216,6 @@ const TestQuestionPage = () => {
     async function doCreateSession() {
       try {
         const questionsData = buildQuestionsData(questions);
-        const firstQ = questions[0] || {};
         const id = await createTestSession({
           user_id: testUserId,
           subject: subjectId ?? "",
@@ -224,7 +223,6 @@ const TestQuestionPage = () => {
           chapter_id: chapterId ?? "",
           set_id: setId ?? "",
           questionsData,
-          firstQuestionMeta: firstQ,
         });
         setSessionId(id);
       } catch (error: any) {
