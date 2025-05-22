@@ -103,26 +103,11 @@ const Academics = () => {
   return (
     <CustomPracticeTestProvider>
       <div className="container mx-auto max-w-7xl pb-[72px] pt-2 px-2 sm:px-6">
-        {/* Prepare for NEET + Custom Practice Card */}
-        <div className="mb-6">
-          <div className="font-bold flex items-center gap-2 mb-2 text-xl">
-            <span role="img" aria-label="brain">🧠</span>
-            Prepare for NEET
-          </div>
-          <div className="p-5 bg-[#f5f6fd] rounded-lg flex flex-col sm:flex-row items-center sm:items-start gap-4">
-            <div className="flex-1">
-              <div className="font-semibold text-lg mb-0.5">Create Custom Practice Test</div>
-              <div className="text-gray-500 text-sm">Select any topic and create a customized test to enhance your preparation</div>
-            </div>
-            <Button
-              className="bg-[#8d5cf6] hover:bg-[#722ad5] text-white font-semibold px-6 py-2"
-              onClick={() => setShowCustomModal(true)}
-            >
-              Create Test
-            </Button>
-          </div>
+        <div className="flex justify-end mb-4">
+          <Button className="bg-[#FFBD59]" onClick={() => setShowCustomModal(true)}>
+            Create Custom Practice Test
+          </Button>
         </div>
-        {/* Custom Practice Test Modal */}
         <CustomPracticeTestModal open={showCustomModal} onOpenChange={setShowCustomModal} />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
           <h1 className="text-2xl font-bold text-center sm:text-left">Academics</h1>
