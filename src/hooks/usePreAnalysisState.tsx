@@ -23,12 +23,28 @@ export interface UsePreAnalysisStateProps {
   sessionId: string;
 }
 
+function safeQuestionsData(raw: any): QuestionData[] {
+  // If it's already an array, just return
+  if (Array.isArray(raw)) return raw as QuestionData[];
+  // If it's a string, try to parse
+  if (typeof raw === "string") {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr as QuestionData[];
+    } catch {}
+  }
+  // If it's a JSON value or something else, attempt conversion
+  if (raw && typeof raw === "object" && "length" in raw) {
+    return Array.from(raw) as QuestionData[];
+  }
+  return [];
+}
+
 export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
   const [session, setSession] = useState<TestSession | null>(null);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch session from Supabase
   useEffect(() => {
     if (!sessionId) return;
     setLoading(true);
@@ -41,13 +57,17 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
         .maybeSingle();
       if (!ignore) {
         if (data) {
-          setSession(data);
-          setQuestions(data.questions_data || []);
+          setSession({
+            ...data,
+            questions_data: safeQuestionsData(data.questions_data)
+          });
+          setQuestions(safeQuestionsData(data.questions_data));
         }
         setLoading(false);
       }
     }
     fetchSession();
+
     // Listen for row changes and update in real-time
     const sub = supabase
       .channel("test_sessions_row")
@@ -61,8 +81,11 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
         },
         (payload) => {
           if (payload.new && payload.new.questions_data) {
-            setSession(payload.new);
-            setQuestions(payload.new.questions_data || []);
+            setSession({
+              ...payload.new,
+              questions_data: safeQuestionsData(payload.new.questions_data)
+            });
+            setQuestions(safeQuestionsData(payload.new.questions_data));
           }
         }
       )
@@ -72,7 +95,6 @@ export function usePreAnalysisState({ sessionId }: UsePreAnalysisStateProps) {
       ignore = true;
       supabase.removeChannel(sub);
     };
-    // eslint-disable-next-line
   }, [sessionId]);
 
   // Tag toggle logic

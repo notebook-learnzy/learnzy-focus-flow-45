@@ -15,8 +15,8 @@ export async function useAvailableTopics(chapterId: string): Promise<string[]> {
     }
 
     const topics: string[] = data
-      .filter(row => typeof row === "object" && row !== null && "topic" in row && typeof row.topic === "string")
-      .map(row => row.topic as string)
+      .filter(row => row && typeof row === "object" && row !== null && "topic" in row && typeof (row as any).topic === "string")
+      .map(row => (row as { topic: string }).topic)
       .filter(Boolean);
 
     allTopicSets.push(topics);

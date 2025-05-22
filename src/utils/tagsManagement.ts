@@ -26,7 +26,16 @@ export async function updateQuestionTags(
     .eq("id", sessionId)
     .maybeSingle();
   if (!session) return;
-  const questions: any[] = session.questions_data || [];
+  let questions: any[] = [];
+  if (Array.isArray(session.questions_data)) {
+    questions = session.questions_data;
+  } else if (typeof session.questions_data === "string") {
+    try {
+      questions = JSON.parse(session.questions_data);
+    } catch {
+      questions = [];
+    }
+  }
   const idx = questions.findIndex((q) => q.id === qId);
   if (idx === -1) return;
 

@@ -6,6 +6,20 @@ import { getTagStats } from "@/utils/tagsManagement";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+function safeQuestionsData(raw: any): any[] {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    } catch {}
+  }
+  if (raw && typeof raw === "object" && "length" in raw) {
+    return Array.from(raw);
+  }
+  return [];
+}
+
 // Minimal structure for academic analytics demo using latest test_sessions
 const PerformanceReportPage = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -31,15 +45,16 @@ const PerformanceReportPage = () => {
         .eq("id", sessionId)
         .maybeSingle();
       if (data && !ignore) {
-        setQuestions(data.questions_data ?? []);
-        const correct = (data.questions_data ?? []).filter((q: any) => q.isCorrect).length;
-        const unattempted = (data.questions_data ?? []).filter((q: any) => !q.userAnswer).length;
+        const qdata = safeQuestionsData(data.questions_data);
+        setQuestions(qdata);
+        const correct = qdata.filter((q: any) => q.isCorrect).length;
+        const unattempted = qdata.filter((q: any) => !q.userAnswer).length;
         setScores({
           correct,
-          total: (data.questions_data ?? []).length,
+          total: qdata.length,
           unattempted,
         });
-        setTagStats(getTagStats(data.questions_data ?? []));
+        setTagStats(getTagStats(qdata));
       }
       setLoading(false);
     }
@@ -57,15 +72,16 @@ const PerformanceReportPage = () => {
         },
         (payload) => {
           if (payload.new?.questions_data) {
-            setQuestions(payload.new.questions_data);
-            const correct = payload.new.questions_data.filter((q: any) => q.isCorrect).length;
-            const unattempted = payload.new.questions_data.filter((q: any) => !q.userAnswer).length;
+            const qdata = safeQuestionsData(payload.new.questions_data);
+            setQuestions(qdata);
+            const correct = qdata.filter((q: any) => q.isCorrect).length;
+            const unattempted = qdata.filter((q: any) => !q.userAnswer).length;
             setScores({
               correct,
-              total: payload.new.questions_data.length,
+              total: qdata.length,
               unattempted,
             });
-            setTagStats(getTagStats(payload.new.questions_data));
+            setTagStats(getTagStats(qdata));
           }
         }
       )
