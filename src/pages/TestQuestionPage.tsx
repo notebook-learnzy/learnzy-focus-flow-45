@@ -167,56 +167,62 @@ const TestQuestionPage = () => {
 
   const [saving, setSaving] = useState(false);
 
+  // --- UPDATED SUBMIT HANDLER (no auth) ---
   const submitTest = async () => {
-    if (!isCustom) {
-      setSaving(true);
-      const results = questions.map((q, i) => ({
-        q_no: q.q_no,
-        question_id: q.id || q.q_no,
-        user_answer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : undefined,
-        correct_answer: q.correct_answer,
-        topic: q.topic,
-        subtopic: q.subtopic,
-        time_spent: questionTimes[i],
-        difficulty_level: q.difficulty_level,
-        hrv: hrvs[i],
-      }));
+    setSaving(true);
 
-      const { error } = await supabase.from("session_results").insert([
-        {
-          subject: subjectId,
-          class_id: classId,
-          chapter_id: chapterId,
-          set_id: setId,
-          questions: results,
-          correct_count: results.filter((res) => res.user_answer === res.correct_answer).length,
-          total_count: results.length,
-        }
-      ]);
+    // Build results data for each question
+    const results = questions.map((q, i) => ({
+      id: q.id || q.q_no?.toString() || `${i}`,
+      q_no: q.q_no,
+      question_text: q.question_text,
+      userAnswer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : null,
+      correct_answer: q.correct_answer,
+      isCorrect: selected[i] !== undefined &&
+        ['a', 'b', 'c', 'd'][selected[i]!] === (q.correct_answer?.toLowerCase() || "")
+        ? true : false,
+      topic: q.topic,
+      subtopic: q.subtopic,
+      time_spent: questionTimes[i],
+      difficulty_level: q.difficulty_level,
+      hrv: hrvs[i],
+      tags: [], // start blank
+    }));
+
+    if (!isCustom) {
+      // Insert a row into test_sessions (not session_results)
+      const { data, error } = await supabase
+        .from("test_sessions")
+        .insert([{
+          subject: subjectId ?? "",
+          class_id: classId ?? "",
+          chapter_id: chapterId ?? "",
+          set_id: setId ?? "",
+          total_questions: results.length,
+          total_correct: results.filter(r => r.isCorrect).length,
+          total_incorrect: results.filter(r => r.userAnswer && !r.isCorrect).length,
+          total_unattempted: results.filter(r => !r.userAnswer).length,
+          total_time: questionTimes.reduce((total, t) => total + (t || 0), 0),
+          session_type: "practice",
+          questions_data: results,
+        }])
+        .select("id")
+        .single();
       setSaving(false);
 
-      if (error) {
-        setAuthError("Failed to save results: " + error.message);
+      if (error || !data?.id) {
+        setError("Failed to save results. Please try again.");
         return;
       }
 
+      // Redirect to analyze mistakes page with sessionId
       navigate(
-        `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze`,
-        { state: { questions, selected, questionTimes, hrvs } }
+        `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze?sessionId=${data.id}`,
+        { state: { sessionId: data.id } }
       );
     } else {
       setSaving(true);
-      const results = questions.map((q, i) => ({
-        q_no: q.q_no,
-        question_id: q.id || q.q_no,
-        user_answer: selected[i] !== undefined ? ['a', 'b', 'c', 'd'][selected[i]!] : undefined,
-        correct_answer: q.correct_answer,
-        topic: q.topic,
-        subtopic: q.subtopic,
-        time_spent: questionTimes[i],
-        difficulty_level: q.difficulty_level,
-        hrv: hrvs[i],
-      }));
+      // Practice test, use existing logic
       customPractice.setCustomResults({
         questions,
         selected,
@@ -225,6 +231,7 @@ const TestQuestionPage = () => {
         results,
       });
       setSaving(false);
+      // For custom, send to a separate analyze page (if needed)
       window.location.assign(`/academics/custom/analyze`);
     }
   };
