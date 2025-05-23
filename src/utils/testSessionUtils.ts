@@ -43,8 +43,6 @@ export async function createTestSession({
   set_id: string;
   questionsData: QuestionDataBlock[];
 }) {
-  const now = new Date().toISOString();
-  // Only allowed fields
   const row = {
     user_id,
     subject,
@@ -52,8 +50,7 @@ export async function createTestSession({
     chapter_id,
     set_id,
     total_questions: questionsData.length,
-    questions_data: questionsData as any, // Cast to any for supabase-js Json
-    // 'created_at' and 'updated_at' are auto-set if defined in Supabase table
+    questions_data: questionsData as any,
   };
   const { data, error } = await supabase
     .from("test_sessions")
@@ -64,32 +61,46 @@ export async function createTestSession({
   return data.id as string;
 }
 
-// Finalize test session
+// Finalize test session with SM2 integration
 export async function completeTestSession({
   sessionId,
   questionsData,
   questionTimes,
+  chapterId,
+  setId,
 }: {
   sessionId: string;
   questionsData: QuestionDataBlock[];
   questionTimes: number[];
+  chapterId?: string;
+  setId?: string;
 }) {
-  // NOTE: All analytic metadata must go inside questions_data JSON!
   const totalCorrect = questionsData.filter(q => q.isCorrect).length;
   const total = questionsData.length;
-  const score = Math.round((totalCorrect / total) * 100);
+  const accuracy = Math.round((totalCorrect / total) * 100);
+  
   const patch = {
     questions_data: questionsData as any,
     total_correct: totalCorrect,
     total_incorrect: questionsData.filter(q => q.userAnswer && !q.isCorrect).length,
     total_unattempted: questionsData.filter(q => !q.userAnswer).length,
     total_time: questionTimes.reduce((sum, v) => sum + (v || 0), 0),
-    // 'updated_at' will auto-update if configured in Supabase
   };
+  
   const { error } = await supabase
     .from("test_sessions")
     .update(patch)
     .eq("id", sessionId);
 
   if (error) throw new Error(error.message);
+
+  // Trigger SM2 update if we have chapter and set info
+  if (chapterId && setId && typeof window !== 'undefined') {
+    // Dispatch custom event with SM2 data for the hook to pick up
+    window.dispatchEvent(new CustomEvent('sm2-update', {
+      detail: { chapterId, setId, accuracy }
+    }));
+  }
+
+  return { accuracy, totalCorrect, total };
 }

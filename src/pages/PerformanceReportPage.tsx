@@ -1,4 +1,3 @@
-
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -7,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AcademicAnalyticsSection from "@/components/Performance/AcademicAnalyticsSection";
 import WellnessAnalyticsSection from "@/components/Performance/WellnessAnalyticsSection";
 import RevisionScheduleSection from "@/components/Performance/RevisionScheduleSection";
+import SM2ResultsCard from "@/components/Performance/SM2ResultsCard";
 
 // Type guard for session data
 function hasQuestionsData(maybe: any): maybe is { questions_data: unknown } {
@@ -111,10 +111,26 @@ const PerformanceReportPage = () => {
     };
   }, [sessionId]);
 
+  // Get accuracy from URL params or location state
+  const accuracy = useQueryParam("accuracy") ? parseInt(useQueryParam("accuracy")!) : location.state?.accuracy;
+  const chapterId = params.chapterId || location.state?.chapterId;
+  const setId = params.setId || location.state?.setId;
+
   if (!sessionId) {
     return <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1] text-lg">No sessionId provided. Please complete a test and click "Analyze" to access your performance report.</div>;
   }
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FEF9F1]">Loading...</div>;
+
+  // Show SM2 Results Card if we have the necessary data
+  {accuracy && chapterId && setId && (
+    <div className="mb-6">
+      <SM2ResultsCard 
+        accuracy={accuracy} 
+        chapterId={chapterId} 
+        setId={setId} 
+      />
+    </div>
+  )}
 
   // Split page into the three requested sections
   return (

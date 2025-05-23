@@ -233,11 +233,10 @@ const TestQuestionPage = () => {
     // eslint-disable-next-line
   }, [questions, isCustom]);
 
-  // --- UPDATED SUBMIT HANDLER ---
+  // --- UPDATED SUBMIT HANDLER WITH SM2 INTEGRATION ---
   const submitTest = async () => {
     setSaving(true);
 
-    // Build latest questions_data as per your schema (with updated user answers, tags, etc)
     const updatedQuestionsData = questions.map((q, i) => {
       const userAnsIdx = selected[i];
       const userAnswer = userAnsIdx !== undefined ? ["A", "B", "C", "D"][userAnsIdx] : null;
@@ -278,15 +277,27 @@ const TestQuestionPage = () => {
 
     if (!isCustom && sessionId) {
       try {
-        await completeTestSession({
+        const { accuracy } = await completeTestSession({
           sessionId,
           questionsData: updatedQuestionsData,
           questionTimes,
+          chapterId,
+          setId
         });
+        
         setSaving(false);
+        
+        // Navigate with additional SM2 context
         navigate(
-          `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze?sessionId=${sessionId}`,
-          { state: { sessionId: sessionId } }
+          `/academics/${subjectId}/classes/${classId}/chapters/${chapterId}/sets/${setId}/analyze?sessionId=${sessionId}&accuracy=${accuracy}`,
+          { 
+            state: { 
+              sessionId: sessionId,
+              accuracy,
+              chapterId,
+              setId
+            } 
+          }
         );
       } catch (error: any) {
         setSaving(false);
