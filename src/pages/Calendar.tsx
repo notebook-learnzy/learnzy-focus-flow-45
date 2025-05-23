@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,10 @@ import {
   MoreHorizontal, 
   Clock, 
   Check,
-  X
+  X,
+  Settings,
+  Grid3X3,
+  List
 } from "lucide-react";
 import { format, addDays, startOfWeek, addWeeks, subWeeks, parseISO, isSameDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -94,9 +98,6 @@ const Calendar = () => {
       setWeekStart(startOfWeek(selectedDate, { weekStartsOn: 1 }));
     }
   }, [selectedDate, viewMode]);
-  
-  // For FAB floating
-  
 
   // Track target day/time for quick add
   const [taskModalDefaults, setTaskModalDefaults] = useState<{date?:string, time?:string}>({});
@@ -123,10 +124,6 @@ const Calendar = () => {
     });
     setShowDialog(true);
   };
-
-  // Add a floating "+" button for quick add
-  // Fix add-task dialog logic to use proper details and clear defaults when closing
-  // Add detailed fields: title (required), type, chapter, description, location
 
   const handleAddTask = () => {
     if (!newTask.title || !newTask.date || !newTask.time) {
@@ -193,6 +190,17 @@ const Calendar = () => {
     });
   };
 
+  // Navigation functions
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      setWeekStart(subWeeks(weekStart, 1));
+      setSelectedDate(subWeeks(selectedDate, 1));
+    } else {
+      setWeekStart(addWeeks(weekStart, 1));
+      setSelectedDate(addWeeks(selectedDate, 1));
+    }
+  };
+
 // For mini task dots in the calendar, include revisionEvents
 const getTasksForDate = (date: Date | undefined): Task[] => {
   if (!date) return [];
@@ -222,169 +230,249 @@ const getTasksForDate = (date: Date | undefined): Task[] => {
 };
 
 return (
-  <div className="flex w-full min-h-[700px] relative bg-[#F8F7FB]">
-    {/* Sidebar (hid on mobile) */}
+  <div className="flex w-full min-h-screen bg-white">
+    {/* Sidebar */}
     <CalendarSidebar
       selectedDate={selectedDate}
       onSelectDate={setSelectedDate}
       onCreate={() => setShowDialog(true)}
     />
-    {/* Floating Add Task button */}
-    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center">
-      <button
-        className="shadow-xl bg-learnzy-purple hover:bg-learnzy-purple/90 transition-colors duration-200 text-white rounded-full p-4 flex items-center justify-center"
-        onClick={() => {
-          setShowDialog(true);
-          setTaskModalDefaults({
-            date: format(selectedDate, "yyyy-MM-dd"),
-            time: undefined
-          });
-        }}
-        aria-label="Add Task"
-        title="Add Task"
-        style={{
-          boxShadow: "0 6px 24px 0 rgba(112,66,220,0.16)" // Nice purple shadow
-        }}
-      >
-        <Plus size={28} />
-      </button>
-      <span className="mt-2 text-xs text-gray-500">Add Task</span>
-    </div>
-    {/* Main area */}
-    <div className="flex-1 flex flex-col rounded-2xl border ml-0 md:ml-[20px] shadow-lg overflow-hidden bg-white">
-      <div className="flex justify-between items-center px-6 pt-4 pb-2 border-b bg-white shadow-sm">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className={viewMode === "day" ? "bg-gray-200 font-semibold shadow" : ""}
-            onClick={() => setViewMode("day")}
-          >
-            Day
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={viewMode === "week" ? "bg-gray-200 font-semibold shadow" : ""}
-            onClick={() => setViewMode("week")}
-          >
-            Week
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={viewMode === "month" ? "bg-gray-200 font-semibold shadow" : ""}
-            onClick={() => setViewMode("month")}
-          >
-            Month
-          </Button>
+
+    {/* Main Content */}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Top Header */}
+      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-xl font-medium text-gray-900">Calendar</h1>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSelectedDate(new Date())}
+            className="text-blue-600 border-blue-200 hover:bg-blue-50"
           >
             Today
           </Button>
+          
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateWeek('prev')}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigateWeek('next')}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <h2 className="text-xl font-normal text-gray-900">
+            {viewMode === "week" 
+              ? format(weekStart, "MMMM yyyy")
+              : format(selectedDate, "MMMM d, yyyy")
+            }
+          </h2>
         </div>
-        <div>
-          <span className="font-semibold text-lg">{format(selectedDate, "MMMM d, yyyy")}</span>
+
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <Button
+              variant={viewMode === "day" ? "default" : "ghost"}
+              size="sm"
+              className={cn(
+                "h-8 px-3 text-sm",
+                viewMode === "day" ? "bg-white shadow-sm" : "hover:bg-gray-200"
+              )}
+              onClick={() => setViewMode("day")}
+            >
+              Day
+            </Button>
+            <Button
+              variant={viewMode === "week" ? "default" : "ghost"}
+              size="sm"
+              className={cn(
+                "h-8 px-3 text-sm",
+                viewMode === "week" ? "bg-white shadow-sm" : "hover:bg-gray-200"
+              )}
+              onClick={() => setViewMode("week")}
+            >
+              Week
+            </Button>
+            <Button
+              variant={viewMode === "month" ? "default" : "ghost"}
+              size="sm"
+              className={cn(
+                "h-8 px-3 text-sm",
+                viewMode === "month" ? "bg-white shadow-sm" : "hover:bg-gray-200"
+              )}
+              onClick={() => setViewMode("month")}
+            >
+              Month
+            </Button>
+          </div>
+
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
+      </header>
+
+      {/* Calendar Content */}
+      <div className="flex-1 overflow-hidden">
+        {(viewMode === "day" || viewMode === "week") && (
+          <CalendarTimeGrid
+            weekStart={weekStart}
+            selectedDate={selectedDate}
+            tasks={[
+              ...allTasks,
+              ...revisionEvents.map(r => ({
+                id: `revision-${r.id ?? ""}`,
+                title: r.set_id
+                  ? `Revise Set ${r.set_id}`
+                  : "Revision Session",
+                type: "practice" as TaskType,
+                date: r.scheduled_date,
+                time: r.scheduled_time || "18:00",
+                duration: 45,
+                completed: false,
+                chapterId: r.chapter_id,
+                description: r.notes || "",
+                color: "#b377fa",
+                location: "",
+              })),
+            ]}
+            onSelectDate={setSelectedDate}
+            viewMode={viewMode}
+            onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
+          />
+        )}
+
+        {viewMode === "month" && (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-10 text-lg">
+            Month view coming soon!
+          </div>
+        )}
       </div>
-      {/* Time grid (main calendar), only render in day/week */}
-      {(viewMode === "day" || viewMode === "week") && (
-        <CalendarTimeGrid
-          weekStart={weekStart}
-          selectedDate={selectedDate}
-          tasks={[
-            // merge both
-            ...allTasks,
-            ...revisionEvents.map(r => ({
-              id: `revision-${r.id ?? ""}`,
-              title: r.set_id
-                ? `Revise Set ${r.set_id}`
-                : "Revision Session",
-              type: "practice" as TaskType,
-              date: r.scheduled_date,
-              time: r.scheduled_time || "18:00",
-              duration: 45,
-              completed: false,
-              chapterId: r.chapter_id,
-              description: r.notes || "",
-              color: "#b377fa",
-              location: "",
-            })),
-          ]}
-          onSelectDate={setSelectedDate}
-          viewMode={viewMode}
-          onAddTaskSlot={(date, time) => openAddTaskDialog(date, time)}
-        />
-      )}
-      {/* Month view placeholder */}
-      {viewMode === "month" && (
-        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-10 text-lg">
-          Month view coming soon! {/* You can implement month grid with a separate component later */}
-        </div>
-      )}
-      {/* Dialog for Add Task */}
+
+      {/* Floating Create Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all"
+          onClick={() => {
+            setShowDialog(true);
+            setTaskModalDefaults({
+              date: format(selectedDate, "yyyy-MM-dd"),
+              time: undefined
+            });
+          }}
+        >
+          <Plus size={24} />
+        </Button>
+      </div>
+
+      {/* Add Task Dialog */}
       <Dialog open={showDialog} onOpenChange={(open) => {
         setShowDialog(open);
         if (!open) setTaskModalDefaults({});
       }}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New Task</DialogTitle>
+            <DialogTitle>Add New Event</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Task Title*</label>
               <Input 
                 value={newTask.title} 
                 onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                placeholder="Enter task title"
+                placeholder="Add title"
+                className="text-lg border-0 border-b border-gray-200 rounded-none px-0 focus-visible:ring-0 focus-visible:border-blue-500"
                 required
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Input 
+                  type="date"
+                  value={newTask.date}
+                  onChange={(e) => setNewTask({...newTask, date: e.target.value})}
+                  className="border border-gray-200"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Input 
+                  type="time"
+                  value={newTask.time}
+                  onChange={(e) => setNewTask({...newTask, time: e.target.value})}
+                  className="border border-gray-200"
+                  required
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
               <Input 
                 value={newTask.description}
                 onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                placeholder="Details (optional)"
+                placeholder="Add description"
+                className="border border-gray-200"
               />
             </div>
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Location</label>
               <Input 
                 value={newTask.location}
                 onChange={(e) => setNewTask({...newTask, location: e.target.value})}
-                placeholder="Where? (optional)"
+                placeholder="Add location"
+                className="border border-gray-200"
               />
             </div>
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Task Type</label>
               <Select
                 value={newTask.type as string}
                 onValueChange={(value) => setNewTask({...newTask, type: value as TaskType})}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select task type" />
+                <SelectTrigger className="border border-gray-200">
+                  <SelectValue placeholder="Select calendar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="practice">Practice</SelectItem>
-                  <SelectItem value="wellness">Wellness</SelectItem>
-                  <SelectItem value="custom">Other</SelectItem>
+                  <SelectItem value="practice">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                      Practice
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="wellness">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded"></div>
+                      Wellness
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="custom">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                      Other
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             {newTask.type === "practice" && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Chapter</label>
                 <Select
                   value={newTask.chapterId}
                   onValueChange={(value) => setNewTask({...newTask, chapterId: value})}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border border-gray-200">
                     <SelectValue placeholder="Select chapter" />
                   </SelectTrigger>
                   <SelectContent>
@@ -395,41 +483,28 @@ return (
                 </Select>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Date*</label>
-                <Input 
-                  type="date"
-                  value={newTask.date}
-                  onChange={(e) => setNewTask({...newTask, date: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Time*</label>
-                <Input 
-                  type="time"
-                  value={newTask.time}
-                  onChange={(e) => setNewTask({...newTask, time: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Duration (minutes)*</label>
               <Input 
                 type="number"
                 value={newTask.duration}
                 onChange={(e) => setNewTask({...newTask, duration: Number(e.target.value)})}
+                placeholder="Duration (minutes)"
                 min={5}
                 max={240}
+                className="border border-gray-200"
                 required
               />
             </div>
-            {/* Future: can add color picker etc */}
-            <Button className="w-full bg-learnzy-purple" onClick={handleAddTask}>
-              Add Task
-            </Button>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleAddTask}>
+                Save
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

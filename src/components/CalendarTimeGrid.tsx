@@ -1,8 +1,9 @@
 
-import { format, isSameDay, addDays, setHours, setMinutes, isToday, isThisHour, differenceInMinutes } from "date-fns";
+import { format, isSameDay, addDays, isToday, parseISO } from "date-fns";
 import React, { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Task } from "@/types";
+import { Clock, MapPin } from "lucide-react";
 
 type CalendarTimeGridProps = {
   weekStart: Date;
@@ -10,15 +11,15 @@ type CalendarTimeGridProps = {
   tasks: Task[];
   onSelectDate: (date: Date) => void;
   viewMode: "week" | "day";
-  onAddTaskSlot?: (date: string, time: string) => void; // 👈 add prop
+  onAddTaskSlot?: (date: string, time: string) => void;
 };
 
-const HOURS = Array.from({ length: 15 }, (_, i) => i + 7); // 7 AM to 21 PM
+const HOURS = Array.from({ length: 15 }, (_, i) => i + 7); // 7 AM to 9 PM
 
-const COLORS: Record<string, string> = {
-  practice: "bg-learnzy-orange",
-  wellness: "bg-learnzy-mint",
-  custom: "bg-learnzy-purple",
+const COLORS: Record<string, { bg: string; border: string; text: string }> = {
+  practice: { bg: "bg-blue-500", border: "border-blue-600", text: "text-white" },
+  wellness: { bg: "bg-green-500", border: "border-green-600", text: "text-white" },
+  custom: { bg: "bg-purple-500", border: "border-purple-600", text: "text-white" },
 };
 
 const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
@@ -38,8 +39,7 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
       const hour = now.getHours();
       const hourIndex = hour - 7;
       if (hourIndex > 0) {
-        // Each hour slot is 48px (as per styles below)
-        gridRef.current.scrollTop = hourIndex * 48;
+        gridRef.current.scrollTop = hourIndex * 60;
       }
     }
   }, [selectedDate]);
@@ -49,46 +49,61 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
     const dayTasks = tasks.filter(t => t.date === dateStr);
 
     return dayTasks.map(task => {
-      // Position by time (in minutes from 7 AM)
       const [h, m] = task.time.split(":").map(Number);
-      const top = ((h - 7) * 60 + m); // px
-      const height = Math.max(task.duration, 30); // at least 30 min visually
+      const top = ((h - 7) * 60 + m);
+      const height = Math.max(task.duration, 30);
+      const colors = COLORS[task.type] || COLORS.custom;
 
       return (
         <div
           key={task.id}
           className={cn(
-            "absolute left-2 right-2 rounded-md text-xs px-2 py-1 text-white shadow",
-            COLORS[task.type] || "bg-gray-300",
-            "cursor-pointer hover:opacity-90 overflow-hidden"
+            "absolute left-1 right-1 rounded-md text-xs px-3 py-2 shadow-sm border cursor-pointer hover:shadow-md transition-all",
+            colors.bg,
+            colors.border,
+            colors.text,
+            "overflow-hidden group"
           )}
           style={{
             top,
-            height,
+            height: Math.max(height, 40),
             zIndex: 10,
           }}
           title={task.title}
         >
-          <div className={cn("truncate font-medium")}>{task.title}</div>
-          <div className="opacity-80">{task.time} • {task.duration} min</div>
+          <div className="font-medium truncate">{task.title}</div>
+          <div className="flex items-center gap-1 mt-1 opacity-90">
+            <Clock className="h-3 w-3" />
+            <span className="text-xs">{task.time}</span>
+            {task.location && (
+              <>
+                <MapPin className="h-3 w-3 ml-1" />
+                <span className="text-xs truncate">{task.location}</span>
+              </>
+            )}
+          </div>
+          {task.description && height > 50 && (
+            <div className="text-xs mt-1 opacity-75 truncate">{task.description}</div>
+          )}
         </div>
       );
     });
   };
 
-  // Corrected "Now" indicator
   const renderNowIndicator = (day: Date) => {
     if (!isToday(day)) return null;
     const minutes = now.getHours() * 60 + now.getMinutes();
     const calendarStartMinutes = 7 * 60;
-    const offset = minutes - calendarStartMinutes; // 7 AM = 0 px
+    const offset = minutes - calendarStartMinutes;
     if (offset < 0 || offset > (HOURS.length * 60)) return null;
+    
     return (
       <div
-        className="absolute left-0 right-0 h-0.5 bg-red-500 z-20"
-        style={{ top: (offset / 60) * 48 }}
+        className="absolute left-0 right-0 z-20 flex items-center"
+        style={{ top: offset }}
       >
-        <div className="absolute left-[-16px] top-[-4px] w-3 h-3 rounded-full bg-red-500 border-2 border-white" />
+        <div className="w-3 h-3 bg-red-500 rounded-full border-2 border-white shadow-sm"></div>
+        <div className="flex-1 h-0.5 bg-red-500"></div>
       </div>
     );
   };
@@ -99,82 +114,103 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
       ? Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i))
       : [selectedDate];
 
-  // To enable "click to add task" for each time-slot, update below:
   return (
-    <div className="flex-1 flex flex-col relative overflow-x-auto">
-      <div className="flex border-b bg-white shadow-sm z-10">
-        <div className="w-14" /> {/* Time gutter */}
+    <div className="flex-1 flex flex-col relative overflow-hidden bg-white">
+      {/* Header with days */}
+      <div className="flex border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
+        <div className="w-16 border-r border-gray-200 bg-gray-50"></div>
         {days.map((day, i) => (
           <div
             key={i}
             className={cn(
-              "flex-1 py-2 px-1 text-center cursor-pointer border-r last:border-r-0 border-gray-100",
+              "flex-1 py-4 px-2 text-center cursor-pointer border-r border-gray-200 last:border-r-0 hover:bg-gray-50 transition-colors",
               isSameDay(day, selectedDate) ? "bg-blue-50" : "bg-white"
             )}
             onClick={() => onSelectDate(day)}
           >
-            <div className="text-xs text-gray-400">{format(day, "EEE")}</div>
+            <div className="text-xs text-gray-500 uppercase font-medium">
+              {format(day, "EEE")}
+            </div>
             <div className={cn(
-              "text-base font-semibold flex items-center justify-center w-8 h-8 mx-auto",
+              "text-2xl font-normal flex items-center justify-center w-10 h-10 mx-auto mt-1 rounded-full",
               isToday(day)
-                ? "bg-learnzy-purple text-white rounded-full"
-                : undefined
+                ? "bg-blue-600 text-white"
+                : isSameDay(day, selectedDate)
+                ? "text-blue-600 bg-blue-100"
+                : "text-gray-900 hover:bg-gray-100"
             )}>
               {format(day, "d")}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Time grid */}
       <div
-        className="flex min-h-[700px] overflow-auto relative"
+        className="flex-1 flex overflow-auto relative"
         ref={gridRef}
-        style={{ background: "#fcfcfd" }}
+        style={{ background: "#fafafa" }}
       >
         {/* Time gutter */}
-        <div className="flex flex-col w-14 border-r border-gray-100 relative z-10 bg-white">
+        <div className="flex flex-col w-16 border-r border-gray-200 bg-white sticky left-0 z-20">
           {HOURS.map(hour => (
             <div
               key={hour}
-              className="h-12 text-xs text-right pr-2 text-gray-400 pt-1"
-              style={{ minHeight: 48 }}
+              className="h-15 text-xs text-right pr-2 text-gray-500 flex items-start pt-1 border-b border-gray-100"
+              style={{ minHeight: 60 }}
             >
               {hour < 12
-                ? `${hour} AM`
+                ? `${hour}:00`
                 : hour === 12
-                  ? "12 PM"
-                  : `${hour - 12} PM`}
+                ? "12:00"
+                : `${hour - 12}:00`}
+              <span className="ml-1 text-xs">{hour < 12 ? 'AM' : 'PM'}</span>
             </div>
           ))}
         </div>
+
         {/* Day columns */}
-        <div className="flex-1 flex relative z-0">
+        <div className="flex-1 flex relative">
           {days.map((day, dayIdx) => (
             <div
               key={dayIdx}
-              className="flex-1 border-r last:border-r-0 border-gray-100 relative"
-              style={{ minWidth: 156, height: HOURS.length * 48 }}
+              className="flex-1 border-r border-gray-200 last:border-r-0 relative bg-white"
+              style={{ minWidth: viewMode === "week" ? 140 : "auto", height: HOURS.length * 60 }}
             >
-              {/* Grid lines */}
+              {/* Hour grid lines */}
               {HOURS.map((_, hIdx) => (
                 <div
                   key={hIdx}
-                  className="border-t border-dashed border-gray-100 absolute left-0 right-0"
-                  style={{ top: hIdx * 48, height: 0 }}
+                  className="border-b border-gray-100 absolute left-0 right-0 hover:bg-blue-25 cursor-pointer group"
+                  style={{ top: hIdx * 60, height: 60 }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    // For slots, map grid click to time slot
                     if (onAddTaskSlot) {
                       const time = `${String(HOURS[hIdx]).padStart(2, "0")}:00`;
                       onAddTaskSlot(format(day, "yyyy-MM-dd"), time);
                     }
                   }}
-                  title="Add a task to this time slot"
+                >
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded m-1">
+                    Click to add event
+                  </div>
+                </div>
+              ))}
+
+              {/* Half-hour lines */}
+              {HOURS.map((_, hIdx) => (
+                <div
+                  key={`half-${hIdx}`}
+                  className="border-b border-dashed border-gray-100 absolute left-0 right-0"
+                  style={{ top: hIdx * 60 + 30, height: 0 }}
                 />
               ))}
+
               {/* Now indicator */}
               {renderNowIndicator(day)}
+
               {/* Tasks */}
-              <div className="absolute left-0 right-0 top-0" style={{ height: HOURS.length * 48 }}>
+              <div className="absolute left-0 right-0 top-0" style={{ height: HOURS.length * 60 }}>
                 {renderTaskBlocks(day)}
               </div>
             </div>
@@ -186,4 +222,3 @@ const CalendarTimeGrid: React.FC<CalendarTimeGridProps> = ({
 };
 
 export default CalendarTimeGrid;
-
