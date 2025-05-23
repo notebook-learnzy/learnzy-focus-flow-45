@@ -669,6 +669,666 @@ export type Database = {
         }
         Relationships: []
       }
+      chapter_11_photosynthesis_in_higher_plants_set_a: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_11_photosynthesis_in_higher_plants_set_b: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_11_photosynthesis_in_higher_plants_set_c: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_11_photosynthesis_in_higher_plants_set_d: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_11_photosynthesis_in_higher_plants_set_e: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_12_respiration_in_plants_set_a: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_12_respiration_in_plants_set_b: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_12_respiration_in_plants_set_c: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_12_respiration_in_plants_set_d: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_12_respiration_in_plants_set_e: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
       chapter_2_biological_classification_set_a: {
         Row: {
           bloom_taxonomy: string | null
@@ -2967,6 +3627,333 @@ export type Database = {
           option_d?: string | null
           priority_level?: string | null
           q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_9_biomolecules_set_a: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_9_biomolecules_set_b: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_9_biomolecules_set_c: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_9_biomolecules_set_d: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          q_no: number
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          q_no?: number
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      chapter_9_biomolecules_set_e: {
+        Row: {
+          bloom_taxonomy: string | null
+          chapter_name: string | null
+          common_pitfalls: string | null
+          correct_answer: string | null
+          difficulty_level: string | null
+          figure: string | null
+          key_concept_tested: string | null
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          priority_level: string | null
+          question_text: string | null
+          question_type: string | null
+          subject: string | null
+          subtopic: string | null
+          time_to_solve: number | null
+          topic: string | null
+        }
+        Insert: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
+          question_text?: string | null
+          question_type?: string | null
+          subject?: string | null
+          subtopic?: string | null
+          time_to_solve?: number | null
+          topic?: string | null
+        }
+        Update: {
+          bloom_taxonomy?: string | null
+          chapter_name?: string | null
+          common_pitfalls?: string | null
+          correct_answer?: string | null
+          difficulty_level?: string | null
+          figure?: string | null
+          key_concept_tested?: string | null
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          priority_level?: string | null
           question_text?: string | null
           question_type?: string | null
           subject?: string | null
