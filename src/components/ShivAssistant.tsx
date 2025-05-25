@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +11,8 @@ import { chapters, subjects } from "@/data/mockData";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Heart } from "lucide-react";
 
 interface Message {
   id: string;
@@ -51,7 +52,47 @@ const capabilities = [
   }
 ];
 
+// Mental Health supportive LLM (Hugging Face: mistralai/Mixtral-8x7B-Instruct-v0.1, known for conversational support)
+// NOTE: Uses a free public Hugging Face Inference Endpoint for demonstration.
+const fetchMentalHealthResponse = async (userMessage: string): Promise<string> => {
+  try {
+    const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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', // demo key
+      },
+      body: JSON.stringify({
+        inputs: `
+        <system>
+        You are a supportive, empathetic, and non-judgmental mental health supportive chatbot for students. Listen, encourage, and provide resources but never diagnose or replace professional help. Always recommend talking to a professional if serious distress or crisis is indicated. Respond with kindness and practical coping ideas.
+        </system>
+        <user>
+        ${userMessage}
+        </user>
+        <assistant>
+        `,
+        parameters: {
+          temperature: 0.7,
+          max_new_tokens: 400,
+        }
+      })
+    });
+    if (!response.ok) throw new Error("API failed");
+    const data = await response.json();
+    return data[0]?.generated_text
+      ? data[0].generated_text.trim()
+      : "I'm here for you. Would you like to talk more about what's on your mind?";
+  } catch (err) {
+    return "Sorry, I couldn't reach the support service right now. Please try again.";
+  }
+};
+
 const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
+  // NEW: Mode selection (default: academic)
+  const [mode, setMode] = useState<'academic' | 'mental-health'>("academic");
+
+  // Existing state for academic
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -60,6 +101,16 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
       timestamp: new Date()
     }
   ]);
+  // NEW: State for mental health chat
+  const [mhMessages, setMhMessages] = useState<Message[]>([
+    {
+      id: "mh-welcome",
+      content: "Hi! I'm Shiv, your friendly support bot. I'm here to listen if you want to talk about stress, motivation, or anything on your mind. How are you feeling today?",
+      sender: "assistant",
+      timestamp: new Date(),
+    }
+  ]);
+
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
@@ -69,10 +120,14 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
   const [showApiKeyDialog, setShowApiKeyDialog] = useState<boolean>(false);
   const [isUsingAI, setIsUsingAI] = useState<boolean>(true); // Always use AI with free model
 
+  const [mhInput, setMhInput] = useState('');
+  const [mhLoading, setMhLoading] = useState(false);
+  const [mhThinking, setMhThinking] = useState(false);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, mhMessages, mode]);
 
   const simulateTyping = async (content: string) => {
     setIsThinking(true);
@@ -317,6 +372,48 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
     }
   };
 
+  // --- MENTAL HEALTH HANDLERS ---
+  const handleMentalHealthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mhInput.trim()) return;
+    // Add user message
+    const userMessage: Message = {
+      id: `user-mh-${Date.now()}`,
+      content: mhInput,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    setMhMessages(prev => [...prev, userMessage]);
+    setMhInput('');
+    setMhLoading(true);
+    setMhThinking(true);
+    try {
+      const responseContent = await fetchMentalHealthResponse(userMessage.content);
+      setMhMessages(prev => [
+        ...prev,
+        {
+          id: `assistant-mh-${Date.now()}`,
+          content: responseContent,
+          sender: 'assistant',
+          timestamp: new Date()
+        }
+      ]);
+    } catch (err) {
+      setMhMessages(prev => [
+        ...prev,
+        {
+          id: `assistant-mh-${Date.now()}`,
+          content: "Sorry, I couldn't process your message right now. Please try again later.",
+          sender: 'assistant',
+          timestamp: new Date()
+        }
+      ]);
+    } finally {
+      setMhLoading(false);
+      setMhThinking(false);
+    }
+  };
+
   // Helper to render specialized message content based on type
   const renderMessageContent = (message: Message) => {
     if (message.sender === 'user' || !message.type || message.type === 'text') {
@@ -419,137 +516,171 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
     }
   };
 
+  // --- UI RENDER ---
   return (
-    <>
-      <Card className={`flex flex-col h-[500px] ${className}`}>
-        <CardHeader className="py-3">
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Avatar className="h-8 w-8 mr-2">
-                <AvatarImage src="/shiv-avatar.png" alt="Shiv" />
-                <AvatarFallback className="bg-learnzy-purple text-white">
-                  <GraduationCap className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <span>Shiv - NEET Assistant</span>
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full flex items-center ml-2">
-                <Sparkles className="h-3 w-3 mr-1" />
-                Free AI
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setShowApiKeyDialog(true)}
-                className="mr-2"
-                title="Add OpenAI API key for enhanced capabilities (optional)"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-              {onClose && (
-                <Button variant="ghost" size="sm" onClick={onClose}>
-                  ×
-                </Button>
-              )}
-            </div>
-          </CardTitle>
-        </CardHeader>
-        
-        <ScrollArea className="flex-1 px-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
+    <Card className={`flex flex-col h-[540px] ${className}`}>
+      <CardHeader className="py-3">
+        <div className="flex items-center gap-3 mb-2">
+          <GraduationCap className="h-6 w-6 text-learnzy-purple" />
+          <span className="font-semibold text-lg">Shiv Assistant</span>
+          <Tabs
+            defaultValue={mode}
+            onValueChange={v => setMode(v as 'academic' | 'mental-health')}
+            className="ml-4"
+          >
+            <TabsList>
+              <TabsTrigger value="academic">Academic</TabsTrigger>
+              <TabsTrigger value="mental-health"><Heart className="h-4 w-4 mr-1" />Mental Health</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full flex items-center ml-2">
+            <Sparkles className="h-3 w-3 mr-1" />
+            Free AI
+          </span>
+          {onClose && <Button variant="ghost" size="sm" onClick={onClose} className="ml-auto">×</Button>}
+        </div>
+      </CardHeader>
+      <Tabs defaultValue={mode} value={mode} className="flex-1 flex flex-col">
+        {/* Academic Mode */}
+        <TabsContent value="academic" className="p-0 flex-1 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1 px-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    message.sender === 'user'
-                      ? 'bg-learnzy-purple text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
+                  key={message.id}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  {renderMessageContent(message)}
-                  <p className="text-xs mt-1 opacity-70">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {isThinking && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-900 max-w-[80%] rounded-lg p-3">
-                  <div className="flex space-x-1 items-center">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-300"></div>
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 ${
+                      message.sender === 'user'
+                        ? 'bg-learnzy-purple text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    {renderMessageContent(message)}
+                    <p className="text-xs mt-1 opacity-70">
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-        
-        <CardFooter className="p-4 border-t">
-          <form onSubmit={handleSubmit} className="flex w-full gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Shiv about your NEET preparation..."
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Popover open={capabilityOpen} onOpenChange={setCapabilityOpen}>
-              <PopoverTrigger asChild>
-                <Button size="icon" variant="ghost" className="flex-shrink-0">
-                  <BookOpen size={16} />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent side="top" className="w-80 p-0" align="end">
-                <div className="p-4 border-b">
-                  <h4 className="font-medium">Assistant Capabilities</h4>
-                  <p className="text-sm text-gray-500">Try asking about these topics</p>
+              ))}
+              {isThinking && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 text-gray-900 max-w-[80%] rounded-lg p-3">
+                    <div className="flex space-x-1 items-center">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-150"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse delay-300"></div>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-2">
-                  {capabilities.map((capability, index) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      className="w-full justify-start h-auto py-2 px-3"
-                      onClick={() => {
-                        setInput(`Tell me about my ${capability.name.toLowerCase()}`);
-                        setCapabilityOpen(false);
-                      }}
-                    >
-                      <div className="flex items-start">
-                        <div className="bg-learnzy-purple/10 p-1 rounded mr-2">
-                          <capability.icon className="h-4 w-4 text-learnzy-purple" />
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+          <CardFooter className="p-4 border-t">
+            <form onSubmit={handleSubmit} className="flex w-full gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask Shiv about your NEET preparation..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Popover open={capabilityOpen} onOpenChange={setCapabilityOpen}>
+                <PopoverTrigger asChild>
+                  <Button size="icon" variant="ghost" className="flex-shrink-0">
+                    <BookOpen size={16} />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent side="top" className="w-80 p-0" align="end">
+                  <div className="p-4 border-b">
+                    <h4 className="font-medium">Assistant Capabilities</h4>
+                    <p className="text-sm text-gray-500">Try asking about these topics</p>
+                  </div>
+                  <div className="p-2">
+                    {capabilities.map((capability, index) => (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        className="w-full justify-start h-auto py-2 px-3"
+                        onClick={() => {
+                          setInput(`Tell me about my ${capability.name.toLowerCase()}`);
+                          setCapabilityOpen(false);
+                        }}
+                      >
+                        <div className="flex items-start">
+                          <div className="bg-learnzy-purple/10 p-1 rounded mr-2">
+                            <capability.icon className="h-4 w-4 text-learnzy-purple" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-medium text-sm">{capability.name}</p>
+                            <p className="text-xs text-gray-500">{capability.description}</p>
+                          </div>
                         </div>
-                        <div className="text-left">
-                          <p className="font-medium text-sm">{capability.name}</p>
-                          <p className="text-xs text-gray-500">{capability.description}</p>
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <Button type="submit" disabled={isLoading} className="flex-shrink-0">
+                {isLoading ? "..." : <ArrowRight size={16} />}
+              </Button>
+            </form>
+          </CardFooter>
+        </TabsContent>
+        {/* Mental Health Mode */}
+        <TabsContent value="mental-health" className="p-0 flex-1 flex flex-col">
+          <ScrollArea className="flex-1 px-4">
+            <div className="space-y-4">
+              {mhMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 shadow ${
+                      msg.sender === 'user'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-800 text-teal-100'
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-xs mt-1 opacity-60">
+                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
                 </div>
-              </PopoverContent>
-            </Popover>
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="flex-shrink-0"
-            >
-              {isLoading ? "..." : <ArrowRight size={16} />}
-            </Button>
-          </form>
-        </CardFooter>
-      </Card>
-
+              ))}
+              {mhThinking && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-800 text-teal-100 max-w-[80%] rounded-lg p-3">
+                    <div className="flex space-x-1 items-center">
+                      <div className="w-2 h-2 bg-teal-200 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-teal-200 rounded-full animate-pulse delay-150"></div>
+                      <div className="w-2 h-2 bg-teal-200 rounded-full animate-pulse delay-300"></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+          <CardFooter className="p-4 border-t">
+            <form onSubmit={handleMentalHealthSubmit} className="flex w-full gap-2">
+              <Input
+                value={mhInput}
+                onChange={e => setMhInput(e.target.value)}
+                placeholder="Share how you're feeling or ask for support..."
+                disabled={mhLoading}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={mhLoading} className="flex-shrink-0 bg-blue-600">
+                {mhLoading ? "..." : <Heart size={16} />}
+              </Button>
+            </form>
+          </CardFooter>
+        </TabsContent>
+      </Tabs>
       <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
         <DialogContent>
           <DialogHeader>

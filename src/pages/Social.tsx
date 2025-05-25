@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, Trophy, UserRound } from "lucide-react";
+import { Users, Trophy, UserRound, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Mock data for demonstration
@@ -78,6 +77,15 @@ const mockStudyBuddies = [
   }
 ];
 
+const CommunityFeed = () => {
+  return (
+    <div>
+      <h2>Community Feed</h2>
+      {/* Add community feed content here */}
+    </div>
+  );
+};
+
 const Social = () => {
   const [activeTab, setActiveTab] = useState("peers");
   const [compareWithClass, setCompareWithClass] = useState(true);
@@ -86,7 +94,6 @@ const Social = () => {
   return (
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-2xl font-bold mb-6">Social Learning</h1>
-      
       <Tabs defaultValue="peers" onValueChange={setActiveTab}>
         <div className="flex justify-between items-center mb-4">
           <TabsList>
@@ -102,9 +109,12 @@ const Social = () => {
               <UserRound className="h-4 w-4 mr-2" />
               Study Buddies
             </TabsTrigger>
+            <TabsTrigger value="community">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Community
+            </TabsTrigger>
           </TabsList>
         </div>
-        
         <TabsContent value="peers">
           <Card>
             <CardHeader>
@@ -158,7 +168,6 @@ const Social = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
         <TabsContent value="challenges">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
@@ -221,7 +230,6 @@ const Social = () => {
             </Card>
           </div>
         </TabsContent>
-        
         <TabsContent value="buddies">
           <Card>
             <CardHeader>
@@ -282,6 +290,9 @@ const Social = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="community">
+          <CommunityFeed />
         </TabsContent>
       </Tabs>
     </div>
