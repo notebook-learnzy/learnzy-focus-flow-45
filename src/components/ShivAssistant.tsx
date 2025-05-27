@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -419,6 +418,7 @@ const ShivAssistant = ({ className, onClose }: ShivAssistantProps) => {
     }
   };
 
+  // --- UI RENDER ---
   return (
     <>
       <Card className={`flex flex-col h-[500px] ${className}`}>
