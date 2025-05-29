@@ -65,9 +65,11 @@ export async function createTestSession({
   set_id: string;
   questionsData: QuestionDataBlock[];
 }) {
-  // Initialize timing events for each question
+  // Initialize timing events for each question - THIS WAS MISSING!
   const questionsWithTiming = questionsData.map(q => ({
     ...q,
+    questionViewedAt: undefined,
+    questionLeftAt: undefined,
     detailedTimingEvents: []
   }));
 
@@ -131,12 +133,14 @@ export async function updateQuestionTiming({
     }
     question.detailedTimingEvents.push(timingEvent);
 
-    // Update specific timestamp fields
+    // Update specific timestamp fields - THIS IS THE KEY PART!
     if (eventType === 'questionViewed') {
       question.questionViewedAt = formattedTime;
     } else if (eventType === 'questionLeft') {
       question.questionLeftAt = formattedTime;
     }
+
+    console.log(`Recording ${eventType} for question ${questionIndex + 1} at ${formattedTime}`);
 
     // Update the session - cast back to unknown then to any for database storage
     const { error: updateError } = await supabase

@@ -103,6 +103,10 @@ const TestQuestionPage = () => {
         Option_C: q.option_c,
         Option_D: q.option_d,
         options,
+        // Initialize timing fields
+        questionViewedAt: undefined,
+        questionLeftAt: undefined,
+        detailedTimingEvents: [],
       };
     });
   }
@@ -155,7 +159,7 @@ const TestQuestionPage = () => {
       setQuestions(data || []);
       setSelected(new Array((data || []).length).fill(undefined));
       setQuestionTimes(new Array((data || []).length).fill(0));
-      setHRVs(new Array((data || []).length).fill(70)); // HRV baseline
+      setHRVs(new Array((data || []).length).fill(70));
       setStartTime(Date.now());
       setIsLoading(false);
     }
@@ -178,6 +182,7 @@ const TestQuestionPage = () => {
 
     // Record question viewed timing
     if (sessionId && questions.length > 0) {
+      console.log(`Recording questionViewed for question ${currQ + 1}`);
       updateQuestionTiming({
         sessionId,
         questionIndex: currQ,
@@ -207,7 +212,7 @@ const TestQuestionPage = () => {
     });
     setHRVs(h => {
       const hn = [...h];
-      hn[currQ] = 60 + Math.floor(Math.random() * 30); // Simulate metric
+      hn[currQ] = 60 + Math.floor(Math.random() * 30);
       return hn;
     });
   };
@@ -215,6 +220,7 @@ const TestQuestionPage = () => {
   const nextQ = () => {
     // Record leaving current question
     if (sessionId) {
+      console.log(`Recording questionLeft for question ${currQ + 1}`);
       updateQuestionTiming({
         sessionId,
         questionIndex: currQ,
@@ -229,6 +235,7 @@ const TestQuestionPage = () => {
   const prevQ = () => {
     // Record leaving current question
     if (sessionId) {
+      console.log(`Recording questionLeft for question ${currQ + 1}`);
       updateQuestionTiming({
         sessionId,
         questionIndex: currQ,
@@ -250,6 +257,7 @@ const TestQuestionPage = () => {
     async function doCreateSession() {
       try {
         const questionsData = buildQuestionsData(questions);
+        console.log('Creating session with timing-enabled questions:', questionsData[0]);
         const id = await createTestSession({
           user_id: testUserId,
           subject: subjectId ?? "",
@@ -259,6 +267,7 @@ const TestQuestionPage = () => {
           questionsData,
         });
         setSessionId(id);
+        console.log('Session created with ID:', id);
       } catch (error: any) {
         setError("Failed to save initial session. Please try again. " + error.message);
       }
