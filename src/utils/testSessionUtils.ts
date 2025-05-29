@@ -109,8 +109,9 @@ export async function updateQuestionTiming({
 
   if (fetchError) throw new Error(fetchError.message);
 
+  // Cast the Json type to our QuestionDataBlock array
   const questionsData = Array.isArray(session.questions_data) 
-    ? session.questions_data 
+    ? (session.questions_data as QuestionDataBlock[])
     : [];
 
   if (questionIndex >= 0 && questionIndex < questionsData.length) {
@@ -123,17 +124,18 @@ export async function updateQuestionTiming({
       formattedTime
     };
 
-    // Add timing event to the question
-    if (!questionsData[questionIndex].detailedTimingEvents) {
-      questionsData[questionIndex].detailedTimingEvents = [];
+    // Add timing event to the question with proper type handling
+    const question = questionsData[questionIndex];
+    if (!question.detailedTimingEvents) {
+      question.detailedTimingEvents = [];
     }
-    questionsData[questionIndex].detailedTimingEvents.push(timingEvent);
+    question.detailedTimingEvents.push(timingEvent);
 
     // Update specific timestamp fields
     if (eventType === 'questionViewed') {
-      questionsData[questionIndex].questionViewedAt = formattedTime;
+      question.questionViewedAt = formattedTime;
     } else if (eventType === 'questionLeft') {
-      questionsData[questionIndex].questionLeftAt = formattedTime;
+      question.questionLeftAt = formattedTime;
     }
 
     // Update the session
