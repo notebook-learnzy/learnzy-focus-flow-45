@@ -109,9 +109,9 @@ export async function updateQuestionTiming({
 
   if (fetchError) throw new Error(fetchError.message);
 
-  // Cast the Json type to our QuestionDataBlock array
+  // Cast the Json type to our QuestionDataBlock array using unknown as intermediate
   const questionsData = Array.isArray(session.questions_data) 
-    ? (session.questions_data as QuestionDataBlock[])
+    ? (session.questions_data as unknown as QuestionDataBlock[])
     : [];
 
   if (questionIndex >= 0 && questionIndex < questionsData.length) {
@@ -138,10 +138,10 @@ export async function updateQuestionTiming({
       question.questionLeftAt = formattedTime;
     }
 
-    // Update the session
+    // Update the session - cast back to unknown then to any for database storage
     const { error: updateError } = await supabase
       .from("test_sessions")
-      .update({ questions_data: questionsData })
+      .update({ questions_data: questionsData as unknown as any })
       .eq("id", sessionId);
 
     if (updateError) throw new Error(updateError.message);
