@@ -37,8 +37,9 @@ export function useTestSubmission() {
   }) => {
     setSaving(true);
 
-    // Record leaving the final question
+    // Record leaving the final question BEFORE starting submission
     if (sessionId) {
+      console.log(`Recording questionLeft for final question ${currQ + 1} before submission`);
       await updateQuestionTiming({
         sessionId,
         questionIndex: currQ,
