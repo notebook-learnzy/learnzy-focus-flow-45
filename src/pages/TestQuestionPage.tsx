@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import RelaxStatusIndicator from "@/components/RelaxStatusIndicator";
 import { useCustomPracticeTest } from "@/contexts/CustomPracticeTestContext";
-import { createTestSession, completeTestSession } from "@/utils/testSessionUtils";
+import { createTestSession, completeTestSession, updateQuestionTiming } from "@/utils/testSessionUtils";
 
 // Utility to convert a human/route chapter key to a Supabase table name.
 // Handles all Botany & Zoology class 11 chapters and sets (A/B/C...).
@@ -175,11 +175,20 @@ const TestQuestionPage = () => {
       newH[currQ] = 60 + Math.floor(Math.random() * 30);
       return newH;
     });
-    // eslint-disable-next-line
-  }, [currQ]);
+
+    // Record question viewed timing
+    if (sessionId && questions.length > 0) {
+      updateQuestionTiming({
+        sessionId,
+        questionIndex: currQ,
+        eventType: 'questionViewed'
+      }).catch(error => {
+        console.error('Failed to record question viewed timing:', error);
+      });
+    }
+  }, [currQ, sessionId, questions.length]);
 
   useEffect(() => {
-    if (isLoading) return;
     const interval = setInterval(() => {
       setQuestionTimes(times => {
         const newTimes = [...times];
@@ -203,8 +212,33 @@ const TestQuestionPage = () => {
     });
   };
 
-  const nextQ = () => setCurrQ((c) => Math.min(questions.length - 1, c + 1));
-  const prevQ = () => setCurrQ((c) => Math.max(0, c - 1));
+  const nextQ = () => {
+    // Record leaving current question
+    if (sessionId) {
+      updateQuestionTiming({
+        sessionId,
+        questionIndex: currQ,
+        eventType: 'questionLeft'
+      }).catch(error => {
+        console.error('Failed to record question left timing:', error);
+      });
+    }
+    setCurrQ((c) => Math.min(questions.length - 1, c + 1));
+  };
+
+  const prevQ = () => {
+    // Record leaving current question
+    if (sessionId) {
+      updateQuestionTiming({
+        sessionId,
+        questionIndex: currQ,
+        eventType: 'questionLeft'
+      }).catch(error => {
+        console.error('Failed to record question left timing:', error);
+      });
+    }
+    setCurrQ((c) => Math.max(0, c - 1));
+  };
 
   const [saving, setSaving] = useState(false);
 
@@ -236,6 +270,17 @@ const TestQuestionPage = () => {
   // --- UPDATED SUBMIT HANDLER WITH SM2 INTEGRATION ---
   const submitTest = async () => {
     setSaving(true);
+
+    // Record leaving the final question
+    if (sessionId) {
+      await updateQuestionTiming({
+        sessionId,
+        questionIndex: currQ,
+        eventType: 'questionLeft'
+      }).catch(error => {
+        console.error('Failed to record final question left timing:', error);
+      });
+    }
 
     const updatedQuestionsData = questions.map((q, i) => {
       const userAnsIdx = selected[i];

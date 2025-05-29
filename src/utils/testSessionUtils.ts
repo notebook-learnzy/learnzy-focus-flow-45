@@ -25,6 +25,28 @@ export interface QuestionDataBlock {
   Option_C: string;
   Option_D: string;
   options: { id: string; text: string }[];
+  // New timing fields
+  questionViewedAt?: string;
+  questionLeftAt?: string;
+  detailedTimingEvents?: Array<{
+    eventType: 'questionViewed' | 'questionLeft';
+    timestamp: string;
+    formattedTime: string;
+  }>;
+}
+
+// Helper to format timestamp in your preferred format
+function formatTimestamp(isoString: string): string {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+  
+  return `${year}-${month}-${day}, ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 // Create new test session
@@ -43,6 +65,12 @@ export async function createTestSession({
   set_id: string;
   questionsData: QuestionDataBlock[];
 }) {
+  // Initialize timing events for each question
+  const questionsWithTiming = questionsData.map(q => ({
+    ...q,
+    detailedTimingEvents: []
+  }));
+
   const row = {
     user_id,
     subject,
@@ -50,8 +78,9 @@ export async function createTestSession({
     chapter_id,
     set_id,
     total_questions: questionsData.length,
-    questions_data: questionsData as any,
+    questions_data: questionsWithTiming as any,
   };
+  
   const { data, error } = await supabase
     .from("test_sessions")
     .insert([row])
@@ -59,6 +88,62 @@ export async function createTestSession({
     .single();
   if (error) throw new Error(error.message);
   return data.id as string;
+}
+
+// Update question timing in session
+export async function updateQuestionTiming({
+  sessionId,
+  questionIndex,
+  eventType,
+}: {
+  sessionId: string;
+  questionIndex: number;
+  eventType: 'questionViewed' | 'questionLeft';
+}) {
+  // Get current session
+  const { data: session, error: fetchError } = await supabase
+    .from("test_sessions")
+    .select("questions_data")
+    .eq("id", sessionId)
+    .single();
+
+  if (fetchError) throw new Error(fetchError.message);
+
+  const questionsData = Array.isArray(session.questions_data) 
+    ? session.questions_data 
+    : [];
+
+  if (questionIndex >= 0 && questionIndex < questionsData.length) {
+    const timestamp = new Date().toISOString();
+    const formattedTime = formatTimestamp(timestamp);
+    
+    const timingEvent = {
+      eventType,
+      timestamp,
+      formattedTime
+    };
+
+    // Add timing event to the question
+    if (!questionsData[questionIndex].detailedTimingEvents) {
+      questionsData[questionIndex].detailedTimingEvents = [];
+    }
+    questionsData[questionIndex].detailedTimingEvents.push(timingEvent);
+
+    // Update specific timestamp fields
+    if (eventType === 'questionViewed') {
+      questionsData[questionIndex].questionViewedAt = formattedTime;
+    } else if (eventType === 'questionLeft') {
+      questionsData[questionIndex].questionLeftAt = formattedTime;
+    }
+
+    // Update the session
+    const { error: updateError } = await supabase
+      .from("test_sessions")
+      .update({ questions_data: questionsData })
+      .eq("id", sessionId);
+
+    if (updateError) throw new Error(updateError.message);
+  }
 }
 
 // Finalize test session with SM2 integration
