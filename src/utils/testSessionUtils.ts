@@ -25,7 +25,7 @@ export interface QuestionDataBlock {
   Option_C: string;
   Option_D: string;
   options: { id: string; text: string }[];
-  // New timing fields
+  // Timing fields
   questionViewedAt?: string;
   questionLeftAt?: string;
   detailedTimingEvents?: Array<{
@@ -65,7 +65,7 @@ export async function createTestSession({
   set_id: string;
   questionsData: QuestionDataBlock[];
 }) {
-  // Initialize timing events for each question - THIS WAS MISSING!
+  // Initialize timing events for each question
   const questionsWithTiming = questionsData.map(q => ({
     ...q,
     questionViewedAt: undefined,
@@ -133,7 +133,7 @@ export async function updateQuestionTiming({
     }
     question.detailedTimingEvents.push(timingEvent);
 
-    // Update specific timestamp fields - THIS IS THE KEY PART!
+    // Update specific timestamp fields
     if (eventType === 'questionViewed') {
       question.questionViewedAt = formattedTime;
     } else if (eventType === 'questionLeft') {
@@ -152,7 +152,7 @@ export async function updateQuestionTiming({
   }
 }
 
-// Finalize test session with SM2 integration
+// Finalize test session with SM2 integration - PRESERVE ALL TIMING DATA
 export async function completeTestSession({
   sessionId,
   questionsData,
@@ -170,6 +170,7 @@ export async function completeTestSession({
   const total = questionsData.length;
   const accuracy = Math.round((totalCorrect / total) * 100);
   
+  // Use the questionsData exactly as passed - it already has timing information preserved
   const patch = {
     questions_data: questionsData as any,
     total_correct: totalCorrect,
