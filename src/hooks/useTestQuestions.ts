@@ -119,8 +119,11 @@ export function useTestQuestions(
     fetchQuestions();
   }, [chapterId, setId]);
 
-  // Handle question timing and HRV updates
+  // Handle question timing and HRV updates when question changes
   useEffect(() => {
+    if (questions.length === 0) return;
+
+    // Reset timing for current question
     setQuestionTimes(times => {
       const newTimes = [...times];
       newTimes[currQ] = 0;
@@ -134,7 +137,7 @@ export function useTestQuestions(
     });
 
     // Record question viewed timing
-    if (sessionId && questions.length > 0) {
+    if (sessionId) {
       console.log(`Recording questionViewed for question ${currQ + 1}`);
       updateQuestionTiming({
         sessionId,
@@ -146,8 +149,10 @@ export function useTestQuestions(
     }
   }, [currQ, sessionId, questions.length]);
 
-  // Update question times
+  // Update question times every second
   useEffect(() => {
+    if (isLoading || questions.length === 0) return;
+    
     const interval = setInterval(() => {
       setQuestionTimes(times => {
         const newTimes = [...times];
@@ -156,7 +161,7 @@ export function useTestQuestions(
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [currQ, startTime, isLoading]);
+  }, [currQ, startTime, isLoading, questions.length]);
 
   // Create test session
   useEffect(() => {
@@ -196,10 +201,10 @@ export function useTestQuestions(
     });
   };
 
-  const nextQ = () => {
+  const nextQ = async () => {
     if (sessionId) {
       console.log(`Recording questionLeft for question ${currQ + 1}`);
-      updateQuestionTiming({
+      await updateQuestionTiming({
         sessionId,
         questionIndex: currQ,
         eventType: 'questionLeft'
@@ -210,10 +215,10 @@ export function useTestQuestions(
     setCurrQ((c) => Math.min(questions.length - 1, c + 1));
   };
 
-  const prevQ = () => {
+  const prevQ = async () => {
     if (sessionId) {
       console.log(`Recording questionLeft for question ${currQ + 1}`);
-      updateQuestionTiming({
+      await updateQuestionTiming({
         sessionId,
         questionIndex: currQ,
         eventType: 'questionLeft'
